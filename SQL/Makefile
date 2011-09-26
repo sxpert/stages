@@ -1,2 +1,13 @@
+PSQL = `which psql`
+
+default:
+	@echo "select all or upgrade"
+
+upgrade:
+	@echo "upgrade not implemented yet"
+	upgrade_one.sh
+
 all:
-	psql template1 < 000-base.sql
+	$(PSQL) template1 < 000-base.sql
+
+
