@@ -1,5 +1,9 @@
+html {
+    font-family: deja-vu sans, sans;
+    font-size: 10pt;
+}
 div {
-    border: 1px solid red;
+    #border: 1px solid red;
 }
 
 #top {
@@ -8,9 +12,50 @@ div {
 #menu {
     float: left;
     width: 200pt;
+    font-size: 9pt;
+}
+#menu > div {
+    font-weight: bold;
+    clear: both;
+}
+#menu > a {
+    clear: both;
+    padding-left: 10pt;
+    display: block;
+}
+#menu > hr {
+    clear: both;
+    border: none;
+    border-bottom: 1px solid #CCCCCC;
+}
+#menu > form > div {
+    clear: both;
+}
+#menu > form > div > label {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 18pt;
+}
+#menu > form > div > input {
+    float: right;
+    font-family: inherit;
+    font-size: 9pt;
+}
+#menu > form > div > button {
+    float: right;
+    font-family: inherit;
+    font-size: 9pt;
+}
+#menusepbar {
+    float: left;
+    width: 5pt;
+    margin-right: 5pt;
+    height: 100%;
+    min-height: 300pt;
+    border-right: 1px solid #CCCCCC;
 }
 #content {
-    padding-left:201pt;
+    padding-left:210pt;
     witdh: 100%;
     min-height: 300pt;
 }
