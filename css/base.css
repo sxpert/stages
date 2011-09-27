@@ -1,0 +1,19 @@
+div {
+    border: 1px solid red;
+}
+
+#top {
+    height: 100pt;
+}
+#menu {
+    float: left;
+    width: 200pt;
+}
+#content {
+    padding-left:201pt;
+    witdh: 100%;
+    min-height: 300pt;
+}
+#footer {
+    height: 100pt;
+}
