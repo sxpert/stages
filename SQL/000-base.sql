@@ -1,4 +1,11 @@
 --
+-- script de base de données pour l'appli de gestion des stages / thèses.
+-- nécessite l'extension pgcrypto, disponible dans le package postgresql-contrib
+--
+
+-- premiere partie executée en tant que super-utilisateur du serveur de bdd
+
+--
 -- nettoyage
 --
 drop database if exists stcoll;
@@ -11,6 +18,10 @@ drop role if exists stcollweb;
 create role stcolladm with login encrypted password 'testadm';
 create role stcollweb with login noinherit encrypted password 'test';
 create database stcoll with owner stcolladm;
+
+\c stcoll 
+
+create extension pgcrypto;
 
 \c stcoll stcolladm
 
@@ -39,9 +50,10 @@ insert into formation (description) values ('École Doctorale de Physique');
 create sequence seq__type_offre__id;
 create table type_offre (
        id    	       bigint not null,
-       description     text,
-       denom_dir       text,
-       has_year       boolean
+       code	       char(2) not null,
+       description     text not null,
+       denom_dir       text not null,
+       has_year        boolean
 
 );
 alter sequence seq__type_offre__id owned by type_offre.id;
@@ -51,16 +63,21 @@ alter table type_offre add primary key using index pk__type_offre__id;
 create unique index idx__type_offre__desc on type_offre ( description );
 alter table type_offre add unique using index idx__type_offre__desc;
 
-insert into type_offre (description, denom_dir, has_year) values ('Thèse', 'Directeur de Thèse', false);
-insert into type_offre (description, denom_dir, has_year) values ('Master Recherche', 'Directeur de Stage', true);
+insert into type_offre (code, description, denom_dir, has_year) values ('TH', 'Thèse', 'Directeur de Thèse', false);
+insert into type_offre (code, description, denom_dir, has_year) values ('MR', 'Master Recherche', 'Directeur de Stage', true);
 
 --
 -- table des laboratoires
 --
+-- description : nom long du laboratoire
+-- from_value  : clé permettant de connaitre la provenance de l'utilisateur ( sha1sum(description)[1:8] )
+--
 create sequence seq__laboratoires__id;
 create table laboratoires (
        id    		  bigint not null,
-       description	  text
+       sigle		  text not null,
+       description	  text not null,
+       from_value	  char (8) not null
 );
 alter sequence seq__laboratoires__id owned by laboratoires.id;
 alter table laboratoires alter column id set default nextval('seq__laboratoires__id');
@@ -69,10 +86,23 @@ alter table laboratoires add primary key using index pk__laboratoires__id;
 create unique index idx__laboratoires__desc on laboratoires ( description );
 alter table laboratoires add unique using index idx__laboratoires__desc;
 
+grant select on laboratoires to stcollweb;
 
 --
--- Année de master ?? (ca n'a pas l'air utilisé)
--- 
+-- trigger pour créer la from_value automatiquement
+-- note: la valeur n'est calculée automatiquement qu'a l'insertion initiale. elle est conservée en cas de modifications
+--
+
+create function laboratoires_set_from_value() returns trigger as $$
+       begin
+		  NEW.from_value = substr(encode(digest(NEW.description, 'sha1'), 'hex'), 1, 8);
+		  return NEW;
+       end;
+$$ language plpgsql;
+
+create trigger trig_laboratoires_set_from_value before insert on laboratoires for each row execute procedure laboratoires_set_from_value ();
+
+insert into laboratoires (sigle, description) values ('IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble');
 
 --
 -- table des catégories

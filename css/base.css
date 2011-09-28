@@ -30,6 +30,7 @@ div {
 }
 #menu > form > div {
     clear: both;
+    padding-left: 10pt;
 }
 #menu > form > div > label {
     display: inline-block;
