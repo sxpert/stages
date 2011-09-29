@@ -129,18 +129,20 @@ Accès par <?php
 <?php
 }
 
-function stc_default_menu () {
+function stc_default_menu ($options=array()) {
   $menu = stc_menu_init();
   
   $logged = stc_is_logged();
+  if (array_key_exists('register', $options)) $opt_register=$options['register'];
+  else $opt_register = True;
   
   stc_menu_add_section ($menu, 'Propositions de Thèses');
-  stc_menu_add_item($menu, 'rechercher', 'test-1.php');
-  if ($logged) stc_menu_add_item($menu, 'proposer', 'test-2.php');
+  stc_menu_add_item($menu, 'rechercher', 'search.php?type=TH');
+  if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type=TH');
   stc_menu_add_separator($menu);
   stc_menu_add_section ($menu, 'Propositions de Stages');
-  stc_menu_add_item($menu, 'rechercher', 'test-1.php');
-  if ($logged) stc_menu_add_item($menu, 'proposer', 'test-2.php');
+  stc_menu_add_item($menu, 'rechercher', 'search.php?type=MR');
+  if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type=MR');
   stc_menu_add_separator($menu);
   if ($logged) {
     stc_menu_add_section ($menu, '');
@@ -152,7 +154,7 @@ function stc_default_menu () {
     stc_menu_form_add_password($menu,"Mot de Passe","password");
     stc_menu_form_add_button($menu,"se connecter");
     stc_menu_form_end($menu);
-    stc_menu_add_item($menu, "s'enregistrer", "register.php");
+    if ($opt_register) stc_menu_add_item($menu, "s'enregistrer", "register.php");
   }
   return $menu;
 }
