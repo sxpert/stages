@@ -42,6 +42,8 @@ alter table formation add primary key using index pk__formation__id;
 create unique index idx__formation__desc on formation(description);
 alter table formation add unique using index idx__formation__desc;
 
+grant usage on sequence seq__formation__id to stcollweb;
+
 insert into formation (description) values ('École Doctorale de Physique');
 
 --
@@ -62,6 +64,8 @@ create unique index pk__type_offre__id on type_offre ( id );
 alter table type_offre add primary key using index pk__type_offre__id;
 create unique index idx__type_offre__desc on type_offre ( description );
 alter table type_offre add unique using index idx__type_offre__desc;
+
+grant usage on sequence seq__type_offre__id to stcollweb;
 
 insert into type_offre (code, description, denom_dir, has_year) values ('TH', 'Thèse', 'Directeur de Thèse', false);
 insert into type_offre (code, description, denom_dir, has_year) values ('MR', 'Master Recherche', 'Directeur de Stage', true);
@@ -86,6 +90,7 @@ alter table laboratoires add primary key using index pk__laboratoires__id;
 create unique index idx__laboratoires__desc on laboratoires ( description );
 alter table laboratoires add unique using index idx__laboratoires__desc;
 
+grant usage on sequence seq__laboratoires__id to stcollweb;
 grant select on laboratoires to stcollweb;
 
 --
@@ -120,6 +125,8 @@ alter table categories add primary key using index pk__categories__id;
 create unique index idx__categories__desc on categories ( description );
 alter table categories add unique using index idx__categories__desc;
 
+grant usage on sequence seq__categories__id to stcollweb;
+
 --
 -- Manager de projet
 --
@@ -143,6 +150,9 @@ alter table managers add primary key using index pk__managers__id;
 create unique index idx__managers__login on managers ( login );
 alter table managers add unique using index idx__managers__login;
 
+grant usage on sequence seq__managers__id to stcollweb;
+grant select, insert, update on table managers to stcollweb;
+
 -- 
 -- financeurs
 --
@@ -157,6 +167,8 @@ create unique index pk__financeurs__id on financeurs ( id );
 alter table financeurs add primary key using index pk__financeurs__id;
 create unique index idx__financeurs__desc on financeurs ( description );
 alter table financeurs add unique using index idx__financeurs__desc;
+
+grant usage on sequence seq__financeurs__id to stcollweb;
 
 --
 -- table des offres
@@ -189,6 +201,8 @@ alter table offres add foreign key ( id_type_offre ) references type_offre ( id 
 alter table offres add foreign key ( id_laboratoire ) references laboratoires ( id );
 alter table offres add foreign key ( id_project_mgr ) references managers ( id );
 alter table offres add foreign key ( id_financeur ) references financeurs ( id );
+
+grant usage on sequence seq__offres__id to stcollweb;
  
 --
 -- table de liaison offres <-> categories (n to n)

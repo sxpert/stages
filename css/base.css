@@ -60,6 +60,23 @@ div {
     witdh: 100%;
     min-height: 300pt;
 }
+#content > form > div.error {
+    color: red;
+    background-color: #FFFFC0;
+    border: 1px solid red;
+    width: 400pt;
+}
+#content > form > div > label {
+    display: inline-block;
+    width: 100pt;
+    vertical-align: text-top;
+}
+#content > form > div > textarea {
+    vertical-align: top;
+}
+#content > form > div > button {
+    margin-left: 100pt;
+}
 #footer {
     height: 100pt;
 }

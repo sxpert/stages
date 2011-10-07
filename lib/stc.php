@@ -4,11 +4,25 @@ require_once('xhtml.php');
 
 /******************************************************************************
  *
+ * Fonctions de gestion et nettoyages des entrées
+ *
+ */
+
+function stc_get_variable ($array, $varname) {
+  if (array_key_exists ($varname, $array)) {
+    return $array[$varname];
+  } else {
+    return "";
+  }
+}
+
+/******************************************************************************
+ *
  * Fonctions html (entete, menu, ...)
  * 
  */
 
-function stc_top() {
+function stc_top () {
   xhtml_header();
   ?><head>
 <title>Stages et Thèses</title>
@@ -18,6 +32,12 @@ function stc_top() {
 <div id="top">logos et autres</div>
 <?php
 }
+
+/******************************************************************************
+ *
+ * menu
+ *
+ */
 
 define ('STC_MENU_SECTION', 0);
 define ('STC_MENU_ITEM', 1);
@@ -112,6 +132,136 @@ function stc_menu($menu) {
 <?php
 }
 
+/******************************************************************************
+ *
+ * Formulaires
+ *
+ */
+
+function stc_form_escape_value ($value) {
+  /*
+   * nettoies les chaines de caracteres entrées des caracteres spéciaux
+   * pour limiter les possibilités de XSS
+   */
+  return htmlentities($value,ENT_COMPAT,'UTF-8',false);
+}
+
+/****
+ * Fonctions de gestions et d'affichage des erreurs dans les formulaires
+ */
+
+function stc_form_add_error(&$errors, $variable, $message) {
+  if (array_key_exists($variable, $errors)) $ve = $errors[$variable];
+  else $ve = array();
+  array_push($ve, $message);
+  $errors[$variable] = $ve;
+}
+
+function stc_form_check_errors($form, $variable) {
+  if (array_key_exists($variable, $form)) {
+    echo "<div class=\"error\">";
+    $first = True;
+    foreach ($form[$variable] as $error) {
+      if ($first) $first=False;
+      else echo "<br/>\n";
+      echo "$error";
+    }
+    echo "</div>\n";
+  }
+}
+
+/****
+ * Fonctions de vérification et de nettoyage
+ */
+
+/* telephone */
+
+function stc_form_check_phone($phone) {
+  $expr = '/^\ *(\+[0-9]+)\ ?(\(\ *[0-9]+\ *\))?[0-9\ ]*$/';
+  $v = preg_match($expr,$phone);
+  return $v==1;
+}
+
+function stc_form_clean_phone($phone) {
+  // remove all extraneous space chars
+  $phone = trim($phone);
+  // should remove all occurences of multiple spaces between number blocks
+
+  // all done
+  return $phone;
+}
+
+/* code postal */
+
+function stc_form_check_post_code_fr ($codepostal) {
+  $expr = '/^\ *[0-9]{5}\ *$/';
+  $v = preg_match($expr,$codepostal);
+  return $v == 1;
+}
+
+function stc_form_check_post_code ($codepostal) {
+  return stc_form_check_post_code_fr ($codepostal);
+}
+
+function stc_form_clean_post_code ($codepostal) {
+  return trim($codepostal);
+}
+
+/****
+ * Fonction de génération du HTML pour les formulaires
+ */
+
+function stc_form ($method, $action, $errors) {
+  echo "<form method=\"".$method. "\" action=\"".$action."\">\n";
+  return $errors;
+}
+
+function stc_form_text ($form, $label, $variable, $value="") {
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<input type=\"text\" name=\"".$variable."\"";
+  if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
+  echo "></div>\n";
+}
+
+function stc_form_password ($form, $label, $variable, $value="") {
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<input type=\"password\" name=\"".$variable."\"";
+  if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
+  echo "></div>\n";
+}
+
+function stc_form_textarea ($form, $label, $variable, $value="", $width=0, $height=0) {
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<textarea name=\"".$variable."\">";
+  if (strlen($value)>0) echo stc_form_escape_value($value);
+  echo "</textarea></div>\n";
+}
+
+function stc_form_button ($form, $text, $action="") {
+  echo stc_form_check_errors ($form, 'action');
+  echo "<div>";
+  echo "<button";
+  if (strlen($action)>0) echo " name=\"action\" value=\"".$action."\"";
+  echo ">".$text."</button>";
+  echo "</div>\n";
+}
+
+function stc_form_end () {
+  echo "</form>\n";
+}
+
+/******************************************************************************
+ *
+ * pied de page
+ *
+ */
+
 function stc_footer() {
   ?></div></div>
 <div id="footer">footer<br/>
@@ -129,6 +279,12 @@ Accès par <?php
 <?php
 }
 
+/******************************************************************************
+ *
+ * menu standard
+ *
+ */
+
 function stc_default_menu ($options=array()) {
   $menu = stc_menu_init();
   
@@ -145,8 +301,8 @@ function stc_default_menu ($options=array()) {
   if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type=MR');
   stc_menu_add_separator($menu);
   if ($logged) {
-    stc_menu_add_section ($menu, '');
-    stc_menu_add_item ($menu, '');
+    //stc_menu_add_section ($menu, '');
+    //stc_menu_add_item ($menu, '');
   } else {
     stc_menu_add_section ($menu, 'Connexion');
     stc_menu_add_form($menu,"post", "login.php");
@@ -170,6 +326,25 @@ function stc_connect_db () {
   return db_connect ();
 }
 
+function stc_dump_sql_error ($res) {
+  $a = array('PGSQL_DIAG_SEVERITY', 
+	     'PGSQL_DIAG_SQLSTATE', 
+	     'PGSQL_DIAG_MESSAGE_PRIMARY', 
+	     'PGSQL_DIAG_MESSAGE_DETAIL', 
+	     'PGSQL_DIAG_MESSAGE_HINT', 
+	     'PGSQL_DIAG_STATEMENT_POSITION', 
+	     'PGSQL_DIAG_INTERNAL_POSITION', 
+	     'PGSQL_DIAG_INTERNAL_QUERY', 
+	     'PGSQL_DIAG_CONTEXT', 
+	     'PGSQL_DIAG_SOURCE_FILE', 
+	     'PGSQL_DIAG_SOURCE_LINE',
+	     'PGSQL_DIAG_SOURCE_FUNCTION');
+  echo "<div><pre>";
+  foreach ($a as $key)
+    echo $key." : ".pg_result_error_field($res,constant($key))."\n";
+  echo "</pre></div>\n";
+}
+
 function stc_get_laboratoire ($labo_id) {
   GLOBAL $db;
 
@@ -177,6 +352,22 @@ function stc_get_laboratoire ($labo_id) {
   $r = pg_query_params($db, $sql, array($labo_id));
   $row = pg_fetch_assoc($r);
   return $row;
+}
+
+function stc_user_account_create ($f_name, $l_name, $email, 
+				  $phone, $post_addr, $post_code, 
+				  $city, $login, $pass1) {
+  GLOBAL $db;
+  
+  $sql = "insert into managers (f_name, l_name, email, phone, post_addr, ".
+    "post_code, city, login, passwd) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) ".
+    "returning id;";
+  $arr = array($f_name, $l_name, $email, 
+	       $phone, $post_addr, $post_code, 
+	       $city, $login, $pass1);
+  pg_send_query_params($db,$sql,$arr);
+  $r = pg_get_result($db);
+  return $r;
 }
 
 /******************************************************************************

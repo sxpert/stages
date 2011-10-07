@@ -2,6 +2,77 @@
 
 require_once('lib/stc.php');
 
+/******************************************************************************
+ *
+ * test des entrées (si on en a)
+ *
+ */
+$f_name    = stc_get_variable ($_POST, 'f_name');
+$l_name    = stc_get_variable ($_POST, 'l_name');
+$email     = stc_get_variable ($_POST, 'email');
+$phone     = stc_get_variable ($_POST, 'phone');
+$post_addr = stc_get_variable ($_POST, 'post_addr');
+$post_code = stc_get_variable ($_POST, 'post_code');
+$city      = stc_get_variable ($_POST, 'city');
+$login     = stc_get_variable ($_POST, 'login');
+$pass1     = stc_get_variable ($_POST, 'pass1');
+$pass2     = stc_get_variable ($_POST, 'pass2');
+
+$errors = array();
+
+if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
+  error_log ("handling post method, checking request");
+  if (array_key_exists('action', $_POST)) {
+    if (strcmp($_POST['action'],'create_account')==0) {
+      error_log ("handle account creation");
+      /* vérifie la cohérence des données entrées */
+      if (!stc_form_check_phone($phone))
+	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
+      if (!stc_form_check_post_code($post_code))
+	stc_form_add_error($errors, 'post_code', "Le code postal est invalide");
+      if (strcmp($pass1,$pass2)!=0)
+	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
+
+      if (count($errors)==0) {
+	$t_phone = stc_form_clean_phone ($phone);
+	$t_post_code = stc_form_clean_post_code ($post_code);
+	// no errors detected, attempt account creation 
+	// what can happen here is the login name is not available...
+	$res = stc_user_account_create ($f_name, $l_name, $email, $t_phone, $post_addr, $t_post_code, $city, $login, $pass1);
+	error_log("[".pg_result_status($res)."] ".pg_result_status($res,PGSQL_STATUS_STRING)." logging user in");
+	if (pg_result_status($res)==PGSQL_TUPLES_OK) {
+	  // logger l'utilisateur
+	  $row = pg_fetch_assoc($res);
+	  $id = $row['id'];
+	  $_SESSION['userid'] = $id;
+	  error_log("user '".$login."' with userid ".$id." logged in");
+	  // page comme quoi tout va bien
+	  stc_top();
+	  $options = array();
+	  $options['register']=False;
+	  $menu = stc_default_menu($options);
+	  stc_menu($menu);
+	  echo "Le compte a été créé avec succès";
+	  stc_footer();
+	  exit();
+	}
+	if (strcmp(pg_result_error_field($res,PGSQL_DIAG_SQLSTATE),'23505')==0 &&
+	    strpos(pg_result_error_field($res,PGSQL_DIAG_MESSAGE_PRIMARY),'idx__managers__login'))
+	  stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
+      }
+    } else
+      error_log ("'action' should be 'create_account'"); 
+  } else
+    error_log ("no 'action' field...");
+}
+
+
+/******************************************************************************
+ *
+ * Formulaire
+ *
+ */
+
 stc_top();
 
 $options = array();
@@ -11,9 +82,21 @@ $menu = stc_default_menu($options);
 stc_menu($menu);
 
 // formulaire d'enregistrement
-?>
 
-<?php
+$form = stc_form ("post", "register.php", $errors);
+stc_form_text ($form, "Prénom", "f_name", $f_name);
+stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
+stc_form_text ($form, "Adresse email", "email", $email);
+stc_form_text ($form, "Téléphone", "phone", $phone);
+stc_form_textarea ($form, "Adresse Postale", "post_addr", $post_addr);
+stc_form_text ($form, "Code Postal", "post_code", $post_code);
+stc_form_text ($form, "Ville", "city", $city);
+echo "<br/>\n";
+stc_form_text ($form, "Nom d'utilisateur", "login", $login);
+stc_form_password ($form, "Mot de passe", "pass1", $pass1);
+stc_form_password ($form, "Mot de passe", "pass2", $pass2);
+stc_form_button ($form, "Créer mon compte", "create_account");
+stc_form_end ();
 
 stc_footer();
 
