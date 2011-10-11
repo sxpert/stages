@@ -67,7 +67,7 @@ alter table type_offre add unique using index idx__type_offre__desc;
 
 grant usage on sequence seq__type_offre__id to stcollweb;
 
-insert into type_offre (code, description, denom_dir, has_year) values ('TH', 'Thèse', 'Directeur de Thèse', false);
+--insert into type_offre (code, description, denom_dir, has_year) values ('TH', 'Thèse', 'Directeur de Thèse', false);
 insert into type_offre (code, description, denom_dir, has_year) values ('MR', 'Master Recherche', 'Directeur de Stage', true);
 
 --
@@ -81,7 +81,10 @@ create table laboratoires (
        id    		  bigint not null,
        sigle		  text not null,
        description	  text not null,
-       from_value	  char (8) not null
+       from_value	  char (8) not null,
+       post_addr      	  text,
+       post_code      	  text,
+       city	      	  text
 );
 alter sequence seq__laboratoires__id owned by laboratoires.id;
 alter table laboratoires alter column id set default nextval('seq__laboratoires__id');
@@ -89,6 +92,7 @@ create unique index pk__laboratoires__id on laboratoires ( id );
 alter table laboratoires add primary key using index pk__laboratoires__id;
 create unique index idx__laboratoires__desc on laboratoires ( description );
 alter table laboratoires add unique using index idx__laboratoires__desc;
+create index idx__laboratoires__from_value on laboratoires ( from_value );
 
 grant usage on sequence seq__laboratoires__id to stcollweb;
 grant select on laboratoires to stcollweb;
@@ -107,7 +111,52 @@ $$ language plpgsql;
 
 create trigger trig_laboratoires_set_from_value before insert on laboratoires for each row execute procedure laboratoires_set_from_value ();
 
-insert into laboratoires (sigle, description) values ('IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble');
+--
+-- vue pour la liste des labos
+--
+
+create view liste_labos as select id as key, sigle || ' - ' || description as value from laboratoires;
+grant select on liste_labos to stcollweb;
+
+insert into laboratoires (sigle, description, post_addr, post_code, city) values 
+       ('IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble', '414, rue de la Piscine', '38400', 'Saint Martin d''Hères');
+
+--
+-- table des M2
+--
+
+create sequence seq__m2__id;
+create table m2 (
+       id		bigint not null,
+       description	text not null,
+       from_value	char (8) not null
+);
+alter sequence seq__m2__id owned by m2.id;
+alter table m2 alter column id set default nextval('seq__m2__id');
+create unique index pk__m2__id on m2 ( id );
+alter table m2 add primary key using index pk__m2__id;
+create unique index idx__m2__desc on m2 ( description );
+alter table m2 add unique using index idx__m2__desc;
+create index idx__m2__from_value on m2 ( from_value );
+
+grant usage on sequence seq__m2__id to stcollweb;
+grant select on m2 to stcollweb;
+ 
+--
+-- trigger pour créer la from_value automatiquement
+-- note: la valeur n'est calculée automatiquement qu'a l'insertion initiale. elle est conservée en cas de modifications
+--
+
+create function m2_set_from_value() returns trigger as $$
+       begin
+		  NEW.from_value = substr(encode(digest(NEW.description, 'sha1'), 'hex'), 1, 8);
+		  return NEW;
+       end;
+$$ language plpgsql;
+
+create trigger trig_m2_set_from_value before insert on m2 for each row execute procedure m2_set_from_value ();
+
+insert into m2 (description) values ('M2 Université Joseph Fourrier');
 
 --
 -- table des catégories
@@ -137,9 +186,7 @@ create table managers (
        l_name	      text,
        email	      text,
        phone	      text,
-       post_addr      text,
-       post_code      text,
-       city	      text,
+       id_laboratoire bigint not null,
        login	      text,
        passwd	      text
 );
@@ -149,6 +196,7 @@ create unique index pk__managers__id on managers ( id );
 alter table managers add primary key using index pk__managers__id;
 create unique index idx__managers__login on managers ( login );
 alter table managers add unique using index idx__managers__login;
+alter table managers add foreign key ( id_laboratoire ) references laboratoires ( id );
 
 grant usage on sequence seq__managers__id to stcollweb;
 grant select, insert, update on table managers to stcollweb;
@@ -178,7 +226,7 @@ create table offres (
        id		bigint not null,
        id_formation	bigint not null,
        id_type_offre	bigint not null,
-       id_laboratoire	bigint not null,
+       id_m2		bigint not null,
        year_value	integer,		
        sujet		text,
        short_desc	text,
@@ -198,7 +246,7 @@ create unique index pk__offres__id on offres ( id );
 alter table offres add primary key using index pk__offres__id;
 alter table offres add foreign key ( id_formation ) references formation ( id );
 alter table offres add foreign key ( id_type_offre ) references type_offre ( id );
-alter table offres add foreign key ( id_laboratoire ) references laboratoires ( id );
+alter table offres add foreign key ( id_m2 ) references m2 ( id );
 alter table offres add foreign key ( id_project_mgr ) references managers ( id );
 alter table offres add foreign key ( id_financeur ) references financeurs ( id );
 

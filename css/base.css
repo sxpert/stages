@@ -69,7 +69,10 @@ div {
 #content > form > div > label {
     display: inline-block;
     width: 100pt;
-    vertical-align: text-top;
+    vertical-align: top;
+}
+#content > form > div > .wrapper {
+    display: inline-block;
 }
 #content > form > div > textarea {
     vertical-align: top;

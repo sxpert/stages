@@ -22,12 +22,16 @@ function stc_get_variable ($array, $varname) {
  * 
  */
 
-function stc_top () {
+function stc_top ($styles=null) {
   xhtml_header();
   ?><head>
 <title>Stages et Thèses</title>
-<link rel="stylesheet" href="css/base.css"/>
-</head>
+<link rel="stylesheet" href="/css/base.css"/>
+<?php
+   if (!is_null($styles) and is_array($styles))
+     foreach ($styles as $style)
+       echo "<link rel=\"stylesheet\" href=\"".$style."\"/>\n";
+?></head>
 <body>
 <div id="top">logos et autres</div>
 <?php
@@ -243,6 +247,43 @@ function stc_form_textarea ($form, $label, $variable, $value="", $width=0, $heig
   echo "</textarea></div>\n";
 }
 
+function stc_form_select ($form, $label, $variable, $value="", $values=null, $options=null) {
+  GLOBAL $db;
+
+  $onchange = null;
+  if (!is_null($options) and is_array($options)) {
+    if (array_key_exists('onchange',$options)) $onchange = $options['onchange'];
+  }
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<select name=\"".$variable."\"";
+  if (!is_null($onchange)) echo " onchange=\"".stc_form_escape_value($onchange)."\"";
+  echo ">\n";
+  if (!is_null($values)) {
+    if (is_string($values)) {
+      // option de base - vide
+      echo "<option value=\"\"></option>\n";
+      // nom de la vue dans la base de données
+      $sql = "select key, value from ".$values.";";
+      pg_send_query($db,$sql);
+      $r = pg_get_result($db);
+      while ($row = pg_fetch_assoc($r)) {
+	echo "<option value=\"".stc_form_escape_value($row['key'])."\"";
+	if (strcmp($row['key'],$value)==0) echo " selected=\"1\"";
+	echo ">".$row['value']."</option>\n";
+      }
+    } else if (is_array($values)) {
+      // associative array de valeurs
+      
+    } else {
+      // unknown type
+      error_log("stc_form_select : type ".gettype($values)." not supported for values");
+    }
+  }
+  echo "</select></div>\n";
+}
+
 function stc_form_button ($form, $text, $action="") {
   echo stc_form_check_errors ($form, 'action');
   echo "<div>";
@@ -262,19 +303,26 @@ function stc_form_end () {
  *
  */
 
-function stc_footer() {
+function stc_footer($scripts=null) {
   ?></div></div>
 <div id="footer">footer<br/>
 Accès par <?php
     if (array_key_exists('from', $_SESSION)) {
-      $labo = stc_get_laboratoire($_SESSION['from']);
-      echo $labo['sigle'].' ('.$labo['description'].') '.$labo['from_value'];
+      $m2 = stc_get_m2($_SESSION['from']);
+      echo $m2['description'].' - '.$m2['from_value'];
     } else {
       echo "unknown entity";
     }
 ?>
 </div>
-</body>
+<?php
+    // jquery
+    echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
+    // les scripts
+    if (!is_null($scripts)) 
+      foreach ($scripts as $script)
+	echo "<script type=\"text/javascript\" src=\"".$script."\"></script>";
+?></body>
 </html>
 <?php
 }
@@ -354,6 +402,15 @@ function stc_get_laboratoire ($labo_id) {
   return $row;
 }
 
+function stc_get_m2 ($m2_id) {
+  GLOBAL $db;
+
+  $sql = "select * from m2 where id = $1";
+  $r = pg_query_params($db, $sql, array($m2_id));
+  $row = pg_fetch_assoc($r);
+  return $row;
+}
+
 function stc_user_account_create ($f_name, $l_name, $email, 
 				  $phone, $post_addr, $post_code, 
 				  $city, $login, $pass1) {
@@ -370,7 +427,7 @@ function stc_user_account_create ($f_name, $l_name, $email,
   return $r;
 }
 
-/******************************************************************************
+/****
  *
  * Gestion des utilisateurs
  * 
@@ -380,27 +437,27 @@ function stc_is_logged () {
   return array_key_exists('userid',$_SESSION);
 }
 
-function stc_set_labo_provenance ($from) {
+function stc_set_m2_provenance ($from) {
   GLOBAL $db;
 
-  $sql = 'select id from laboratoires where from_value = $1';
+  $sql = 'select id from m2 where from_value = $1';
   $r = pg_query_params ($db, $sql, array($from));
   $n = pg_num_rows($r);
   switch ($n) {
   case False:
     // error during request
-    error_log ('stc_set_labo_provenance: sql request failure');
+    error_log ('stc_set_m2_provenance: sql request failure');
     break;
   case 0:
     // not found.
-    error_log ('unable to find lab for from = \''.$from.'\'');
+    error_log ('unable to find m2 for from = \''.$from.'\'');
     break;
   case 1:
     // all ok
     $row = pg_fetch_row ($r);
-    $lab_id = $row[0];
-    error_log('found lab_id = '.$lab_id.' for from=\''.$from.'\'');
-    $_SESSION['from']=$lab_id;
+    $m2_id = $row[0];
+    error_log('found m2_id = '.$m2_id.' for from=\''.$from.'\'');
+    $_SESSION['from']=$m2_id;
     break;
   default:
     // can't happen ;-)

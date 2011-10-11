@@ -11,9 +11,7 @@ $f_name    = stc_get_variable ($_POST, 'f_name');
 $l_name    = stc_get_variable ($_POST, 'l_name');
 $email     = stc_get_variable ($_POST, 'email');
 $phone     = stc_get_variable ($_POST, 'phone');
-$post_addr = stc_get_variable ($_POST, 'post_addr');
-$post_code = stc_get_variable ($_POST, 'post_code');
-$city      = stc_get_variable ($_POST, 'city');
+$labo      = stc_get_variable ($_POST, 'labo');
 $login     = stc_get_variable ($_POST, 'login');
 $pass1     = stc_get_variable ($_POST, 'pass1');
 $pass2     = stc_get_variable ($_POST, 'pass2');
@@ -73,7 +71,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
  *
  */
 
-stc_top();
+stc_top(array("/css/register.css"));
 
 $options = array();
 $options['register']=False;
@@ -88,9 +86,8 @@ stc_form_text ($form, "Prénom", "f_name", $f_name);
 stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
 stc_form_text ($form, "Adresse email", "email", $email);
 stc_form_text ($form, "Téléphone", "phone", $phone);
-stc_form_textarea ($form, "Adresse Postale", "post_addr", $post_addr);
-stc_form_text ($form, "Code Postal", "post_code", $post_code);
-stc_form_text ($form, "Ville", "city", $city);
+stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", 
+		 array("onchange"=>"javascript:update_adresse_labo('labo')"));
 echo "<br/>\n";
 stc_form_text ($form, "Nom d'utilisateur", "login", $login);
 stc_form_password ($form, "Mot de passe", "pass1", $pass1);
@@ -98,6 +95,6 @@ stc_form_password ($form, "Mot de passe", "pass2", $pass2);
 stc_form_button ($form, "Créer mon compte", "create_account");
 stc_form_end ();
 
-stc_footer();
+stc_footer(array('/js/register.js'));
 
 ?>
