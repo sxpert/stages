@@ -194,7 +194,7 @@ create table users (
        login	      text,
        passwd	      text,
        salt	      bytea,
-       login_fails    smallint default 0;
+       login_fails    smallint default 0
 );
 alter sequence seq__users__id owned by users.id;
 alter table users alter column id set default nextval('seq__users__id');
@@ -204,7 +204,10 @@ create unique index idx__users__login on users ( login );
 alter table users add unique using index idx__users__login;
 alter table users add foreign key ( id_laboratoire ) references laboratoires ( id );
 
-create function add_user(t_fname text, t_lname text, 
+--
+-- creates a user account 
+-- 
+create function user_add(t_fname text, t_lname text, 
        	                 t_email text, t_phone text,
 			 t_id_labo bigint, 
 			 t_login text, t_password text) returns bigint as $$
@@ -216,7 +219,7 @@ create function add_user(t_fname text, t_lname text,
 		t_epass text;
         begin
 		n_id := 0;
-		-- cherche si on a déjà un compte avec ce login
+		-- check if we already have an account with this login
 		perform id from users where login=t_login;
 		if not found then
 			-- encrypt the password
@@ -225,7 +228,6 @@ create function add_user(t_fname text, t_lname text,
 			for i in 0..15 loop
 			        t_salt := t_salt || set_byte('\x00', 0, cast(floor(random() * 256) as smallint));
 			end loop;
-			raise notice 'salt %', t_salt;
 			t_temp := cast(t_password as bytea) || t_salt;
 			t_temp := digest(t_temp, 'SHA512') || t_salt;
 			t_epass := '{SSHA512}'|| encode(t_temp, 'base64');
@@ -239,11 +241,40 @@ create function add_user(t_fname text, t_lname text,
         end;
 $$ language plpgsql security definer;
 
-create function login_user(t_login text, t_password text) returns bigint as $$
+--
+-- check if login/password can log onto the system. returns
+-- -1  is account is disabled
+--  0  if login or password wrong
+-- uid if login successful
+-- account is locked out after 3 failures
+--
+create function user_login(t_login text, t_password text) returns bigint as $$
         declare
-		t_temp  bytea;
+		t_account	record;
+		t_temp  	bytea;
+		t_passwd	text;
+		t_lf		smallint;
         begin
-		
+		-- grab the account info for the login
+		select * into t_account from users where login=t_login;
+		if found then
+		   	if (t_account.login_fails >= 3) then
+			        return -1;
+			end if;
+		        t_temp := cast(t_password as bytea) || t_account.salt;
+			t_temp := digest(t_temp, 'SHA512') ||  t_account.salt;
+			t_passwd := '{SSHA512}' || encode(t_temp, 'base64'); 
+			if (t_passwd = t_account.passwd) then
+			   	update users set login_fails = 0 where id=t_account.id;
+			        return t_account.id;
+			else
+				t_lf := t_account.login_fails + 1;
+				update users set login_fails = t_lf where id=t_account.id;
+				return 0;
+			end if;
+		else
+			return 0;
+		end if;
 	end;
 $$ language plpgsql security definer;
 

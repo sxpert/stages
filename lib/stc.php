@@ -47,10 +47,11 @@ define ('STC_MENU_SECTION', 0);
 define ('STC_MENU_ITEM', 1);
 define ('STC_MENU_SEPARATOR', 2);
 define ('STC_MENU_FORM', 10);
-define ('STC_MENU_FORM_TEXT', 11);
-define ('STC_MENU_FORM_PASS', 12);
-define ('STC_MENU_FORM_BUTTON', 13);
-define ('STC_MENU_FORM_END', 14);
+define ('STC_MENU_FORM_ERROR', 11);
+define ('STC_MENU_FORM_TEXT', 12);
+define ('STC_MENU_FORM_PASS', 13);
+define ('STC_MENU_FORM_BUTTON', 14);
+define ('STC_MENU_FORM_END', 15);
 
 function stc_menu_init () {
   $menu = array();
@@ -83,6 +84,13 @@ function stc_menu_add_form (&$menu, $method, $action) {
   $menuitem['type']=STC_MENU_FORM;
   $menuitem['method']=$method;
   $menuitem['action']=$action;
+  array_push($menu, $menuitem);
+}
+
+function stc_menu_form_add_error (&$menu, $message) {
+  $menuitem = array();
+  $menuitem['type']=STC_MENU_FORM_ERROR;
+  $menuitem['message']=$message;
   array_push($menu, $menuitem);
 }
 
@@ -125,6 +133,7 @@ function stc_menu($menu) {
     case STC_MENU_ITEM: echo "<a href=\"".$menuitem['url']."\">".$menuitem['item']."</a>\n"; break;
     case STC_MENU_SEPARATOR: echo "<hr/>\n";break;
     case STC_MENU_FORM: echo "<form method=\"".$menuitem['method']."\" action=\"".$menuitem['action']."\">\n"; break;
+    case STC_MENU_FORM_ERROR: echo "<div class=\"error\">".$menuitem['message']."</div>\n"; break;
     case STC_MENU_FORM_TEXT: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"text\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
     case STC_MENU_FORM_PASS: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"password\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
     case STC_MENU_FORM_BUTTON: echo "<div><button>".$menuitem['text']."</button></div>\n"; break;
@@ -334,14 +343,18 @@ Accès par <?php
  *
  */
 
-function stc_default_menu ($options=array()) {
+function stc_default_menu ($options=null) {
   GLOBAL $db;
 
   $menu = stc_menu_init();
   
   $logged = stc_is_logged();
-  if (array_key_exists('register', $options)) $opt_register=$options['register'];
-  else $opt_register = True;
+  $opt_register = True;
+  $loginerr = False;
+  if (is_array($options)) {
+    if (array_key_exists('register', $options)) $opt_register=$options['register'];
+    if (array_key_exists('loginerr', $options)) $loginerr = $options['loginerr'];
+  }
   
   // listage des types de propositions
   $sql = "select code, denom_prop from type_offre order by code";
@@ -357,10 +370,11 @@ function stc_default_menu ($options=array()) {
   
   if ($logged) {
     //stc_menu_add_section ($menu, '');
-    //stc_menu_add_item ($menu, '');
+    stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
   } else {
     stc_menu_add_section ($menu, 'Connexion');
     stc_menu_add_form($menu,"post", "login.php");
+    if ($loginerr!=False) stc_menu_form_add_error($menu,$loginerr);
     stc_menu_form_add_text($menu,"Utilisateur","user");
     stc_menu_form_add_password($menu,"Mot de Passe","password");
     stc_menu_form_add_button($menu,"se connecter");
@@ -424,7 +438,7 @@ function stc_user_account_create ($f_name, $l_name, $email,
 				  $phone, $labo, $login, $pass1) {
   GLOBAL $db;
   
-  $sql = "select add_user($1,$2,$3,$4,$5,$6,$7) as id;";
+  $sql = "select user_add($1,$2,$3,$4,$5,$6,$7) as id;";
   $arr = array($f_name, $l_name, $email, 
 	       $phone, $labo, $login, $pass1);
   pg_send_query_params($db,$sql,$arr);
@@ -435,7 +449,13 @@ function stc_user_account_create ($f_name, $l_name, $email,
 function stc_user_login($login, $password) {
   GLOBAL $db;
   
-  
+  $sql = "select user_login($1, $2) as id;";
+  $arr = array($login, $password);
+  pg_send_query_params($db,$sql,$arr);
+  $r = pg_get_result($db);
+  $row = pg_fetch_assoc($r);
+  pg_free_result($r);
+  return intval($row['id']);
 }
 
 /****

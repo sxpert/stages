@@ -32,6 +32,11 @@ div {
     clear: both;
     padding-left: 10pt;
 }
+#menu > form > div.error {
+    color: red;
+    background-color: #FFFFC0;
+    border: 1px solid red;
+}
 #menu > form > div > label {
     display: inline-block;
     vertical-align: middle;
