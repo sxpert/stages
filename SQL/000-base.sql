@@ -54,6 +54,7 @@ create table type_offre (
        id    	       bigint not null,
        code	       char(2) not null,
        description     text not null,
+       denom_prop      text not null,
        denom_dir       text not null,
        has_year        boolean
 
@@ -66,9 +67,12 @@ create unique index idx__type_offre__desc on type_offre ( description );
 alter table type_offre add unique using index idx__type_offre__desc;
 
 grant usage on sequence seq__type_offre__id to stcollweb;
+grant select on type_offre to stcollweb;
 
---insert into type_offre (code, description, denom_dir, has_year) values ('TH', 'Thèse', 'Directeur de Thèse', false);
-insert into type_offre (code, description, denom_dir, has_year) values ('MR', 'Master Recherche', 'Directeur de Stage', true);
+--insert into type_offre (code, description, denom_prop, denom_dir, has_year) values 
+--       ('TH', 'Thèse', 'Thèses', 'Directeur de Thèse', false);
+insert into type_offre (code, description, denom_prop, denom_dir, has_year) values 
+       ('MR', 'Master Recherche', 'Stages', 'Directeur de Stage', true);
 
 --
 -- table des laboratoires
@@ -179,8 +183,8 @@ grant usage on sequence seq__categories__id to stcollweb;
 --
 -- Manager de projet
 --
-create sequence seq__managers__id;
-create table managers (
+create sequence seq__users__id;
+create table users (
        id    	      bigint not null,
        f_name	      text,
        l_name	      text,
@@ -188,18 +192,60 @@ create table managers (
        phone	      text,
        id_laboratoire bigint not null,
        login	      text,
-       passwd	      text
+       passwd	      text,
+       salt	      bytea,
+       login_fails    smallint default 0;
 );
-alter sequence seq__managers__id owned by managers.id;
-alter table managers alter column id set default nextval('seq__managers__id');
-create unique index pk__managers__id on managers ( id );
-alter table managers add primary key using index pk__managers__id;
-create unique index idx__managers__login on managers ( login );
-alter table managers add unique using index idx__managers__login;
-alter table managers add foreign key ( id_laboratoire ) references laboratoires ( id );
+alter sequence seq__users__id owned by users.id;
+alter table users alter column id set default nextval('seq__users__id');
+create unique index pk__users__id on users ( id );
+alter table users add primary key using index pk__users__id;
+create unique index idx__users__login on users ( login );
+alter table users add unique using index idx__users__login;
+alter table users add foreign key ( id_laboratoire ) references laboratoires ( id );
 
-grant usage on sequence seq__managers__id to stcollweb;
-grant select, insert, update on table managers to stcollweb;
+create function add_user(t_fname text, t_lname text, 
+       	                 t_email text, t_phone text,
+			 t_id_labo bigint, 
+			 t_login text, t_password text) returns bigint as $$
+        declare
+		i	integer;
+		t_salt	bytea;
+		n_id	bigint;
+		t_temp  bytea;
+		t_epass text;
+        begin
+		n_id := 0;
+		-- cherche si on a déjà un compte avec ce login
+		perform id from users where login=t_login;
+		if not found then
+			-- encrypt the password
+			-- step 1, generate some random info for the salt (16 bytes)
+			t_salt := '';
+			for i in 0..15 loop
+			        t_salt := t_salt || set_byte('\x00', 0, cast(floor(random() * 256) as smallint));
+			end loop;
+			raise notice 'salt %', t_salt;
+			t_temp := cast(t_password as bytea) || t_salt;
+			t_temp := digest(t_temp, 'SHA512') || t_salt;
+			t_epass := '{SSHA512}'|| encode(t_temp, 'base64');
+			-- insert the new account
+		        insert into users (f_name, l_name, email, phone, id_laboratoire, login, passwd, salt)
+			       values (t_fname, t_lname, t_email, t_phone, t_id_labo, t_login, t_epass, t_salt)
+			       returning id into n_id;
+			
+		end if;
+		return n_id;
+        end;
+$$ language plpgsql security definer;
+
+create function login_user(t_login text, t_password text) returns bigint as $$
+        declare
+		t_temp  bytea;
+        begin
+		
+	end;
+$$ language plpgsql security definer;
 
 -- 
 -- financeurs
@@ -247,7 +293,7 @@ alter table offres add primary key using index pk__offres__id;
 alter table offres add foreign key ( id_formation ) references formation ( id );
 alter table offres add foreign key ( id_type_offre ) references type_offre ( id );
 alter table offres add foreign key ( id_m2 ) references m2 ( id );
-alter table offres add foreign key ( id_project_mgr ) references managers ( id );
+alter table offres add foreign key ( id_project_mgr ) references users ( id );
 alter table offres add foreign key ( id_financeur ) references financeurs ( id );
 
 grant usage on sequence seq__offres__id to stcollweb;

@@ -273,6 +273,7 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
 	if (strcmp($row['key'],$value)==0) echo " selected=\"1\"";
 	echo ">".$row['value']."</option>\n";
       }
+      pg_free_result($r);
     } else if (is_array($values)) {
       // associative array de valeurs
       
@@ -281,7 +282,7 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
       error_log("stc_form_select : type ".gettype($values)." not supported for values");
     }
   }
-  echo "</select></div>\n";
+  echo "</select></div>";
 }
 
 function stc_form_button ($form, $text, $action="") {
@@ -334,20 +335,26 @@ Accès par <?php
  */
 
 function stc_default_menu ($options=array()) {
+  GLOBAL $db;
+
   $menu = stc_menu_init();
   
   $logged = stc_is_logged();
   if (array_key_exists('register', $options)) $opt_register=$options['register'];
   else $opt_register = True;
   
-  stc_menu_add_section ($menu, 'Propositions de Thèses');
-  stc_menu_add_item($menu, 'rechercher', 'search.php?type=TH');
-  if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type=TH');
-  stc_menu_add_separator($menu);
-  stc_menu_add_section ($menu, 'Propositions de Stages');
-  stc_menu_add_item($menu, 'rechercher', 'search.php?type=MR');
-  if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type=MR');
-  stc_menu_add_separator($menu);
+  // listage des types de propositions
+  $sql = "select code, denom_prop from type_offre order by code";
+  pg_send_query($db, $sql);
+  $r = pg_get_result($db);
+  while ($row = pg_fetch_assoc($r)) {
+    stc_menu_add_section ($menu, 'Propositions de '.$row['denom_prop']);
+    stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
+    if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
+    stc_menu_add_separator($menu);
+  }
+  pg_free_result ($r);
+  
   if ($logged) {
     //stc_menu_add_section ($menu, '');
     //stc_menu_add_item ($menu, '');
@@ -399,6 +406,7 @@ function stc_get_laboratoire ($labo_id) {
   $sql = "select * from laboratoires where id = $1";
   $r = pg_query_params($db, $sql, array($labo_id));
   $row = pg_fetch_assoc($r);
+  pg_free_result ($r);
   return $row;
 }
 
@@ -408,23 +416,26 @@ function stc_get_m2 ($m2_id) {
   $sql = "select * from m2 where id = $1";
   $r = pg_query_params($db, $sql, array($m2_id));
   $row = pg_fetch_assoc($r);
+  pg_free_result ($r);
   return $row;
 }
 
 function stc_user_account_create ($f_name, $l_name, $email, 
-				  $phone, $post_addr, $post_code, 
-				  $city, $login, $pass1) {
+				  $phone, $labo, $login, $pass1) {
   GLOBAL $db;
   
-  $sql = "insert into managers (f_name, l_name, email, phone, post_addr, ".
-    "post_code, city, login, passwd) values ($1,$2,$3,$4,$5,$6,$7,$8,$9) ".
-    "returning id;";
+  $sql = "select add_user($1,$2,$3,$4,$5,$6,$7) as id;";
   $arr = array($f_name, $l_name, $email, 
-	       $phone, $post_addr, $post_code, 
-	       $city, $login, $pass1);
+	       $phone, $labo, $login, $pass1);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   return $r;
+}
+
+function stc_user_login($login, $password) {
+  GLOBAL $db;
+  
+  
 }
 
 /****
@@ -455,6 +466,7 @@ function stc_set_m2_provenance ($from) {
   case 1:
     // all ok
     $row = pg_fetch_row ($r);
+    pg_free_result($r);
     $m2_id = $row[0];
     error_log('found m2_id = '.$m2_id.' for from=\''.$from.'\'');
     $_SESSION['from']=$m2_id;

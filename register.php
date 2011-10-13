@@ -26,21 +26,19 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
       /* vérifie la cohérence des données entrées */
       if (!stc_form_check_phone($phone))
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
-      if (!stc_form_check_post_code($post_code))
-	stc_form_add_error($errors, 'post_code', "Le code postal est invalide");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
 
       if (count($errors)==0) {
 	$t_phone = stc_form_clean_phone ($phone);
-	$t_post_code = stc_form_clean_post_code ($post_code);
 	// no errors detected, attempt account creation 
 	// what can happen here is the login name is not available...
-	$res = stc_user_account_create ($f_name, $l_name, $email, $t_phone, $post_addr, $t_post_code, $city, $login, $pass1);
+	$res = stc_user_account_create ($f_name, $l_name, $email, $t_phone, $labo, $login, $pass1);
 	error_log("[".pg_result_status($res)."] ".pg_result_status($res,PGSQL_STATUS_STRING)." logging user in");
 	if (pg_result_status($res)==PGSQL_TUPLES_OK) {
 	  // logger l'utilisateur
 	  $row = pg_fetch_assoc($res);
+	  pg_free_result($res);
 	  $id = $row['id'];
 	  $_SESSION['userid'] = $id;
 	  error_log("user '".$login."' with userid ".$id." logged in");
@@ -57,6 +55,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	if (strcmp(pg_result_error_field($res,PGSQL_DIAG_SQLSTATE),'23505')==0 &&
 	    strpos(pg_result_error_field($res,PGSQL_DIAG_MESSAGE_PRIMARY),'idx__managers__login'))
 	  stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
+	pg_free_result ($res);
       }
     } else
       error_log ("'action' should be 'create_account'"); 
