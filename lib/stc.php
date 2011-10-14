@@ -33,7 +33,7 @@ function stc_top ($styles=null) {
        echo "<link rel=\"stylesheet\" href=\"".$style."\"/>\n";
 ?></head>
 <body>
-<div id="top">logos et autres</div>
+   <div id="top"><a href="/">logos et autres</a></div>
 <?php
 }
 
