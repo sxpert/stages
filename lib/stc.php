@@ -190,7 +190,7 @@ function stc_form_check_errors($form, $variable) {
 /* telephone */
 
 function stc_form_check_phone($phone) {
-  $expr = '/^\ *(\+[0-9]+)\ ?(\(\ *[0-9]+\ *\))?[0-9\ ]*$/';
+  $expr = '/^\ *(\+[0-9]+)?\ ?(\(\ *[0-9]+\ *\))?[0-9\ ]*$/';
   $v = preg_match($expr,$phone);
   return $v==1;
 }
@@ -349,11 +349,16 @@ function stc_default_menu ($options=null) {
   $menu = stc_menu_init();
   
   $logged = stc_is_logged();
+  $opt_login = True;
   $opt_register = True;
   $loginerr = False;
   if (is_array($options)) {
+    if (array_key_exists('login', $options)) $opt_login=$options['login'];
     if (array_key_exists('register', $options)) $opt_register=$options['register'];
-    if (array_key_exists('loginerr', $options)) $loginerr = $options['loginerr'];
+  }
+  if (array_key_exists('loginerr', $_SESSION)) {
+    $loginerr = $_SESSION['loginerr'];
+    unset($_SESSION['loginerr']);
   }
   
   // listage des types de propositions
@@ -372,13 +377,15 @@ function stc_default_menu ($options=null) {
     //stc_menu_add_section ($menu, '');
     stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
   } else {
-    stc_menu_add_section ($menu, 'Connexion');
-    stc_menu_add_form($menu,"post", "login.php");
-    if ($loginerr!=False) stc_menu_form_add_error($menu,$loginerr);
-    stc_menu_form_add_text($menu,"Utilisateur","user");
-    stc_menu_form_add_password($menu,"Mot de Passe","password");
-    stc_menu_form_add_button($menu,"se connecter");
-    stc_menu_form_end($menu);
+    if ($opt_login) {
+      stc_menu_add_section ($menu, 'Connexion');
+      stc_menu_add_form($menu,"post", "login.php");
+      if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
+      stc_menu_form_add_text($menu,"Utilisateur","user");
+      stc_menu_form_add_password($menu,"Mot de Passe","password");
+      stc_menu_form_add_button($menu,"se connecter");
+      stc_menu_form_end($menu);
+    }
     if ($opt_register) stc_menu_add_item($menu, "s'enregistrer", "register.php");
   }
   return $menu;

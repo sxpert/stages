@@ -2,6 +2,8 @@
 
 require_once('lib/stc.php');
 
+unset($_SESSION['userid']);
+
 /******************************************************************************
  *
  * test des entrées (si on en a)
@@ -40,22 +42,20 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	  $row = pg_fetch_assoc($res);
 	  pg_free_result($res);
 	  $id = $row['id'];
-	  $_SESSION['userid'] = $id;
-	  error_log("user '".$login."' with userid ".$id." logged in");
-	  // page comme quoi tout va bien
-	  stc_top();
-	  $options = array();
-	  $options['register']=False;
-	  $menu = stc_default_menu($options);
-	  stc_menu($menu);
-	  echo "Le compte a été créé avec succès";
-	  stc_footer();
-	  exit();
+	  if ($id>0) {
+	    $_SESSION['userid'] = $id;
+	    error_log("user '".$login."' with userid ".$id." logged in");
+	    // page comme quoi tout va bien
+	    stc_top();
+	    $options = array();
+	    $options['register']=False;
+	    $menu = stc_default_menu($options);
+	    stc_menu($menu);
+	    echo "Le compte a été créé avec succès";
+	    stc_footer();
+	    exit();
+	  } else stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
 	}
-	if (strcmp(pg_result_error_field($res,PGSQL_DIAG_SQLSTATE),'23505')==0 &&
-	    strpos(pg_result_error_field($res,PGSQL_DIAG_MESSAGE_PRIMARY),'idx__managers__login'))
-	  stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
-	pg_free_result ($res);
       }
     } else
       error_log ("'action' should be 'create_account'"); 
@@ -73,7 +73,8 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 stc_top(array("/css/register.css"));
 
 $options = array();
-$options['register']=False;
+$options['login']=false;
+$options['register']=false;
 $menu = stc_default_menu($options);
 
 stc_menu($menu);
