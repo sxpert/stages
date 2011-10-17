@@ -21,10 +21,12 @@ $pass2     = stc_get_variable ($_POST, 'pass2');
 $errors = array();
 
 if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
-  error_log ("handling post method, checking request");
+  $referer = stc_check_referer();
+  if ($referer == False) stc_reject();
+  if (strcmp($referer, $_SERVER['PHP_SELF'])!=0) stc_reject();
+
   if (array_key_exists('action', $_POST)) {
     if (strcmp($_POST['action'],'create_account')==0) {
-      error_log ("handle account creation");
       /* vérifie la cohérence des données entrées */
       if (!stc_form_check_phone($phone))
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
@@ -43,15 +45,15 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	  pg_free_result($res);
 	  $id = $row['id'];
 	  if ($id>0) {
-	    $_SESSION['userid'] = $id;
-	    error_log("user '".$login."' with userid ".$id." logged in");
-	    // page comme quoi tout va bien
+	    // send verification email
+
+	    // do not log the user, show page that tells to go check his email
 	    stc_top();
 	    $options = array();
 	    $options['register']=False;
 	    $menu = stc_default_menu($options);
 	    stc_menu($menu);
-	    echo "Le compte a été créé avec succès";
+	    echo "Le compte a été créé avec succès [".$row['hash']."]";
 	    stc_footer();
 	    exit();
 	  } else stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
@@ -75,6 +77,7 @@ stc_top(array("/css/register.css"));
 $options = array();
 $options['login']=false;
 $options['register']=false;
+$options['home']=true;
 $menu = stc_default_menu($options);
 
 stc_menu($menu);

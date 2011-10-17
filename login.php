@@ -4,15 +4,13 @@ require_once('lib/stc.php');
 
 /* nettoyage du referer */
 
-$referer = $_SERVER['HTTP_REFERER'];
+$referer = stc_check_referer();
+if ($referer == False) stc_reject();
 
 /* test des entrées */
 
 $login = stc_get_variable ($_POST, 'user');
 $passwd = stc_get_variable ($_POST, 'password');
-
-// TODO: mettre loginerr dans la session instead ;-)
-
 
 if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
   $result = stc_user_login($login, $passwd);

@@ -16,6 +16,52 @@ function stc_get_variable ($array, $varname) {
   }
 }
 
+/*
+ * retourne le chemin d'ou on vient si le host == le host de la machine sur 
+ * laquelle on tourne. False sinon
+ */
+function stc_check_referer () {
+  $ref = '';
+  if (array_key_exists('HTTP_REFERER',$_SERVER)) $ref = $_SERVER['HTTP_REFERER'];
+  $srv = $_SERVER['SERVER_NAME'];
+  $port = $_SERVER['SERVER_PORT'];
+  
+  if (strlen(trim($ref))==0) return False;
+
+  $url = parse_url($ref);  
+  if (array_key_exists('scheme', $url) and strcmp($url['scheme'],'http')!=0) return False;
+  if (array_key_exists('host', $url) and strcmp($url['host'],$srv)!=0) return False;
+  return $url['path'];
+}
+
+/****
+ * force la fermeture de session
+ */
+function stc_close_session() {
+  session_unset();
+  session_destroy();
+}
+
+/*
+ * renvoie une page d'erreur si on a un referer moisi
+ */
+function stc_reject () {
+  header($_SERVER['SERVER_PROTOCOL']." 403 Forbidden");
+  stc_close_session();
+  
+
+  stc_top();
+  $menu = stc_menu_init();
+  stc_menu_add_item ($menu, 'Accueil', '/');
+  stc_menu($menu);
+  
+  // contenu
+  echo "Vous provenez d'un serveur non reconnu, Connexion refusée";
+
+  stc_footer();
+  exit(1);
+}
+
 /******************************************************************************
  *
  * Fonctions html (entete, menu, ...)
@@ -351,10 +397,12 @@ function stc_default_menu ($options=null) {
   $logged = stc_is_logged();
   $opt_login = True;
   $opt_register = True;
+  $opt_home = False;
   $loginerr = False;
   if (is_array($options)) {
     if (array_key_exists('login', $options)) $opt_login=$options['login'];
     if (array_key_exists('register', $options)) $opt_register=$options['register'];
+    if (array_key_exists('home', $options)) $opt_home=$options['home'];
   }
   if (array_key_exists('loginerr', $_SESSION)) {
     $loginerr = $_SESSION['loginerr'];
@@ -387,6 +435,7 @@ function stc_default_menu ($options=null) {
       stc_menu_form_end($menu);
     }
     if ($opt_register) stc_menu_add_item($menu, "s'enregistrer", "register.php");
+    if ($opt_home) stc_menu_add_item($menu, "accueil", "index.php");
   }
   return $menu;
 }
@@ -445,7 +494,7 @@ function stc_user_account_create ($f_name, $l_name, $email,
 				  $phone, $labo, $login, $pass1) {
   GLOBAL $db;
   
-  $sql = "select user_add($1,$2,$3,$4,$5,$6,$7) as id;";
+  $sql = "select * from user_add($1,$2,$3,$4,$5,$6,$7) as (id bigint, hash text);";
   $arr = array($f_name, $l_name, $email, 
 	       $phone, $labo, $login, $pass1);
   pg_send_query_params($db,$sql,$arr);

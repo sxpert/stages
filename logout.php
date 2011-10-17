@@ -1,7 +1,7 @@
 <?php
+require_once('lib/stc.php');
 
-session_start();
-session_unset();
-session_destroy();
+stc_close_session();
+
 header("Location: /");
 ?>

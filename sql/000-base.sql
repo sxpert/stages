@@ -194,7 +194,8 @@ create table users (
        login	      text,
        passwd	      text,
        salt	      bytea,
-       login_fails    smallint default 0
+       login_fails    smallint default 0,
+       account_valid  boolean default false
 );
 alter sequence seq__users__id owned by users.id;
 alter table users alter column id set default nextval('seq__users__id');
@@ -205,40 +206,79 @@ alter table users add unique using index idx__users__login;
 alter table users add foreign key ( id_laboratoire ) references laboratoires ( id );
 
 --
+-- generates some salt for the password encryption functions
+--
+create function generate_salt() returns bytea as $$
+        declare
+		i      integer;
+	        t_salt bytea;
+	begin
+       		t_salt := '';
+		for i in 0..15 loop
+		        t_salt := t_salt || set_byte('\x00', 0, cast(floor(random() * 256) as smallint));
+		end loop;
+		return t_salt;
+        end;
+$$ language plpgsql security definer;
+
+--
+-- hashes the given password with the given salt
+--
+create function hash_password(t_password text, t_salt bytea) returns text as $$
+        declare
+		t_temp  bytea;
+	begin
+		t_temp := cast(t_password as bytea) || t_salt;
+		t_temp := digest(t_temp, 'SHA512') || t_salt;
+		return '{SSHA512}' || encode(t_temp, 'base64');
+	end;
+$$ language plpgsql security definer;
+
+--
+-- hashes the email with the given salt
+-- 
+create or replace function hash_email(t_email text, t_salt bytea) returns text as $$
+        declare
+		t_emailh text;
+        begin
+		t_emailh := encode ( digest(cast(t_email as bytea) || t_salt, 'SHA512'), 'hex' );
+		return substring (t_emailh from 1 for 16 );
+	end;
+$$ language plpgsql security definer;
+
+--
 -- creates a user account 
 -- 
 create function user_add(t_fname text, t_lname text, 
        	                 t_email text, t_phone text,
 			 t_id_labo bigint, 
-			 t_login text, t_password text) returns bigint as $$
+			 t_login text, t_password text) 
+			 returns record as $$
         declare
-		i	integer;
-		t_salt	bytea;
-		n_id	bigint;
-		t_temp  bytea;
-		t_epass text;
+		t_salt	  bytea;
+		t_passwd  text;
+		t_userid    bigint;
+		t_emailhash text;
+		t_rec	    record;
         begin
-		n_id := 0;
+		t_userid := 0;
 		-- check if we already have an account with this login
 		perform id from users where login=t_login;
 		if not found then
-			-- encrypt the password
-			-- step 1, generate some random info for the salt (16 bytes)
-			t_salt := '';
-			for i in 0..15 loop
-			        t_salt := t_salt || set_byte('\x00', 0, cast(floor(random() * 256) as smallint));
-			end loop;
-			t_temp := cast(t_password as bytea) || t_salt;
-			t_temp := digest(t_temp, 'SHA512') || t_salt;
-			t_epass := '{SSHA512}'|| encode(t_temp, 'base64');
+			t_salt := generate_salt();
+			t_passwd := hash_password ( t_password, t_salt);
+			t_emailhash := hash_email ( t_email, t_salt);
 			-- insert the new account
-		        insert into users (f_name, l_name, email, phone, id_laboratoire, login, passwd, salt)
-			       values (t_fname, t_lname, t_email, t_phone, t_id_labo, t_login, t_epass, t_salt)
-			       returning id into n_id;
+		        insert into users (f_name, l_name, email, phone, id_laboratoire, 
+			       login, passwd, salt)
+			       values (t_fname, t_lname, t_email, t_phone, t_id_labo, 
+			       t_login, t_passwd, t_salt)
+			       returning id into t_userid;
 			
 		end if;
-		return n_id;
-        end;
+		t_rec := (t_userid, t_emailhash); 
+		return t_rec;
+	end;
 $$ language plpgsql security definer;
 
 --
@@ -261,9 +301,7 @@ create function user_login(t_login text, t_password text) returns bigint as $$
 		   	if (t_account.login_fails >= 3) then
 			        return -1;
 			end if;
-		        t_temp := cast(t_password as bytea) || t_account.salt;
-			t_temp := digest(t_temp, 'SHA512') ||  t_account.salt;
-			t_passwd := '{SSHA512}' || encode(t_temp, 'base64'); 
+			t_passwd := hash_password ( t_password, t_account.salt ); 
 			if (t_passwd = t_account.passwd) then
 			   	update users set login_fails = 0 where id=t_account.id;
 			        return t_account.id;
@@ -276,6 +314,26 @@ create function user_login(t_login text, t_password text) returns bigint as $$
 			return 0;
 		end if;
 	end;
+$$ language plpgsql security definer;
+
+--
+-- validate account
+-- 
+--
+create function user_validate_account(t_login text, t_password text, t_hash text) returns bigint as $$
+       declare
+               t_account       record;
+	       t_passwd	       text;
+	       t_emailh	       text;
+       begin
+               -- grab the account info
+	       select * into t_account from users where login=t_login;
+	       if found then
+		       t_passwd := hash_password ( t_password, t_account.salt );
+	       else
+	               return 0;
+	       end if;  
+       end;
 $$ language plpgsql security definer;
 
 -- 
