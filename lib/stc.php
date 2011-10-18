@@ -275,6 +275,12 @@ function stc_form ($method, $action, $errors) {
   return $errors;
 }
 
+function stc_form_hidden($form, $variable, $value="") {
+  echo "<input type=\"hidden\" name=\"".$variable."\"";
+  if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
+  echo "/>";
+}
+
 function stc_form_text ($form, $label, $variable, $value="") {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
@@ -500,6 +506,18 @@ function stc_user_account_create ($f_name, $l_name, $email,
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   return $r;
+}
+
+function stc_user_validate_account($login, $password, $hash) {
+  GLOBAL $db;
+  
+  $sql = "select user_validate_account ($1, $2, $3) as id;";
+  $arr = array($login,$password,$hash);
+  pg_send_query_params($db,$sql,$arr);
+  $r = pg_get_result($db);
+  $row = pg_fetch_assoc($r);
+  pg_free_result($r);
+  return intval($row['id']);
 }
 
 function stc_user_login($login, $password) {

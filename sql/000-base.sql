@@ -301,6 +301,9 @@ create function user_login(t_login text, t_password text) returns bigint as $$
 		   	if (t_account.login_fails >= 3) then
 			        return -1;
 			end if;
+			if (t_account.account_valid = false) then
+			        return -2;
+			end if;
 			t_passwd := hash_password ( t_password, t_account.salt ); 
 			if (t_passwd = t_account.passwd) then
 			   	update users set login_fails = 0 where id=t_account.id;
@@ -308,11 +311,9 @@ create function user_login(t_login text, t_password text) returns bigint as $$
 			else
 				t_lf := t_account.login_fails + 1;
 				update users set login_fails = t_lf where id=t_account.id;
-				return 0;
 			end if;
-		else
-			return 0;
 		end if;
+		return 0;
 	end;
 $$ language plpgsql security definer;
 
@@ -329,10 +330,22 @@ create function user_validate_account(t_login text, t_password text, t_hash text
                -- grab the account info
 	       select * into t_account from users where login=t_login;
 	       if found then
+	       	       if (t_account.login_fails >= 3) then
+		              return -1;
+		       end if;
 		       t_passwd := hash_password ( t_password, t_account.salt );
-	       else
-	               return 0;
+		       if (t_passwd = t_account.passwd) then
+		               -- check if t_hash est ok
+			       t_emailh := hash_email(t_account.email, t_account.salt);
+			       if (t_emailh = t_hash) then
+			       	       update users set login_fails=0, account_valid=true where id = t_account.id;
+			               return t_account.id;
+			       end if;
+		       end if;
+		       -- fail
+		       update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;
 	       end if;  
+	       return 0;
        end;
 $$ language plpgsql security definer;
 
