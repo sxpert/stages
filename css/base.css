@@ -1,5 +1,5 @@
-html {
-    font-family: deja-vu sans, sans;
+html, input, select, button {
+    font-family: "Ubuntu", deja-vu sans, sans-serif;
     font-size: 10pt;
 }
 div {
@@ -62,7 +62,6 @@ div {
 }
 #content {
     padding-left:210pt;
-    witdh: 100%;
     min-height: 300pt;
 }
 #content > form > div.error {

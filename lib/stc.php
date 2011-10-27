@@ -68,11 +68,14 @@ function stc_reject () {
  * 
  */
 
+$_stc_scripts = array();
+
 function stc_top ($styles=null) {
   xhtml_header();
   ?><head>
 <title>Stages et Thèses</title>
-<link rel="stylesheet" href="/css/base.css"/>
+<link href="//fonts.googleapis.com/css?family=Ubuntu:regular,bold" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="/css/base.css" type="text/css"/>
 <?php
    if (!is_null($styles) and is_array($styles))
      foreach ($styles as $style)
@@ -312,38 +315,65 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
   GLOBAL $db;
 
   $onchange = null;
+  $multi=false;
   if (!is_null($options) and is_array($options)) {
     if (array_key_exists('onchange',$options)) $onchange = $options['onchange'];
+    if (array_key_exists('multi',$options)) $multi=$options['multi'];
   }
   echo stc_form_check_errors ($form, $variable);
-  echo "<div>";
-  echo "<label for=\"".$variable."\">".$label."</label>";
-  echo "<select name=\"".$variable."\"";
-  if (!is_null($onchange)) echo " onchange=\"".stc_form_escape_value($onchange)."\"";
-  echo ">\n";
-  if (!is_null($values)) {
-    if (is_string($values)) {
-      // option de base - vide
-      echo "<option value=\"\"></option>\n";
-      // nom de la vue dans la base de données
-      $sql = "select key, value from ".$values.";";
-      pg_send_query($db,$sql);
-      $r = pg_get_result($db);
-      while ($row = pg_fetch_assoc($r)) {
-	echo "<option value=\"".stc_form_escape_value($row['key'])."\"";
-	if (strcmp($row['key'],$value)==0) echo " selected=\"1\"";
-	echo ">".$row['value']."</option>\n";
-      }
-      pg_free_result($r);
-    } else if (is_array($values)) {
-      // associative array de valeurs
-      
-    } else {
-      // unknown type
-      error_log("stc_form_select : type ".gettype($values)." not supported for values");
+  if ($multi) {
+    GLOBAL $_stc_scripts;
+    array_push($_stc_scripts, '/lib/js/multiselect.js');
+    echo "<div>";
+    echo "<label for=\"".$variable."[]\">".$label."</label>";
+    echo "<div id=\"".$variable."\" class=\"wrapper\">";
+    echo "</div></div>\n";
+    $values = "liste_labos";
+    $sql = "select key, value from ".$values.";";
+    pg_send_query ($db, $sql);
+    $r = pg_get_result ($db);
+    echo "<script type=\"text/javascript\">\n";
+    echo "var ".$variable."_values = [\n";
+    $firstline = true;
+    while ($row = pg_fetch_assoc ($r)) {
+      if ($firstline) $firstline=false;
+      else echo ",\n";
+      echo "['".$row['key']."' , \"".stc_form_escape_value($row['value'])."\"]";
     }
+    echo "\n];\n";
+    echo "</script>\n";
+    pg_free_result ($r);
+    array_push($_stc_scripts, array("script" => "window.onload = function() {\nms_append_select('".$variable."')};\n"));
+  } else {
+    echo "<div>";
+    echo "<label for=\"".$variable."\">".$label."</label>";
+    echo "<select name=\"".$variable."\"";
+    if (!is_null($onchange)) echo " onchange=\"".stc_form_escape_value($onchange)."\"";
+    echo ">\n";
+    if (!is_null($values)) {
+      if (is_string($values)) {
+	// option de base - vide
+	echo "<option value=\"\"></option>\n";
+	// nom de la vue dans la base de données
+	$sql = "select key, value from ".$values.";";
+	pg_send_query($db,$sql);
+	$r = pg_get_result($db);
+	while ($row = pg_fetch_assoc($r)) {
+	  echo "<option value=\"".stc_form_escape_value($row['key'])."\"";
+	  if (strcmp($row['key'],$value)==0) echo " selected=\"1\"";
+	  echo ">".$row['value']."</option>\n";
+	}
+	pg_free_result($r);
+      } else if (is_array($values)) {
+	// associative array de valeurs
+	
+      } else {
+	// unknown type
+	error_log("stc_form_select : type ".gettype($values)." not supported for values");
+      }
+    }
+    echo "</select></div>";
   }
-  echo "</select></div>";
 }
 
 function stc_form_button ($form, $text, $action="") {
@@ -365,7 +395,15 @@ function stc_form_end () {
  *
  */
 
+function _append_script($script) {
+  if (is_array($script) and array_key_exists('script', $script)) 
+    echo "<script type=\"text/javascript\">".$script['script']."</script>\n";
+  else
+    echo "<script type=\"text/javascript\" src=\"".$script."\"></script>\n";
+}
+
 function stc_footer($scripts=null) {
+  GLOBAL $_stc_scripts;
   ?></div></div>
 <div id="footer">footer<br/>
 Accès par <?php
@@ -383,7 +421,9 @@ Accès par <?php
     // les scripts
     if (!is_null($scripts)) 
       foreach ($scripts as $script)
-	echo "<script type=\"text/javascript\" src=\"".$script."\"></script>";
+	_append_script($script);
+    foreach ($_stc_scripts as $script) 
+      _append_script($script);
 ?></body>
 </html>
 <?php
@@ -422,7 +462,10 @@ function stc_default_menu ($options=null) {
   while ($row = pg_fetch_assoc($r)) {
     stc_menu_add_section ($menu, 'Propositions de '.$row['denom_prop']);
     stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
-    if ($logged) stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
+    if ($logged) {
+      stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
+      stc_menu_add_item($menu, 'gérer ses propositions', 'manage.php?type='.$row['code']);
+    }
     stc_menu_add_separator($menu);
   }
   pg_free_result ($r);

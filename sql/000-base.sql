@@ -76,11 +76,10 @@ insert into type_offre (code, description, denom_prop, denom_dir, has_year) valu
 
 --
 -- table des laboratoires
---
+-- id          : numéro d'UMR
 -- description : nom long du laboratoire
 -- from_value  : clé permettant de connaitre la provenance de l'utilisateur ( sha1sum(description)[1:8] )
 --
-create sequence seq__laboratoires__id;
 create table laboratoires (
        id    		  bigint not null,
        sigle		  text not null,
@@ -90,8 +89,6 @@ create table laboratoires (
        post_code      	  text,
        city	      	  text
 );
-alter sequence seq__laboratoires__id owned by laboratoires.id;
-alter table laboratoires alter column id set default nextval('seq__laboratoires__id');
 create unique index pk__laboratoires__id on laboratoires ( id );
 alter table laboratoires add primary key using index pk__laboratoires__id;
 create unique index idx__laboratoires__desc on laboratoires ( description );
@@ -122,8 +119,8 @@ create trigger trig_laboratoires_set_from_value before insert on laboratoires fo
 create view liste_labos as select id as key, sigle || ' - ' || description as value from laboratoires;
 grant select on liste_labos to stcollweb;
 
-insert into laboratoires (sigle, description, post_addr, post_code, city) values 
-       ('IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble', '414, rue de la Piscine', '38400', 'Saint Martin d''Hères');
+insert into laboratoires (id, sigle, description, post_addr, post_code, city) values 
+       (5274,'IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble', '414, rue de la Piscine', '38400', 'Saint Martin d''Hères');
 
 --
 -- table des M2
