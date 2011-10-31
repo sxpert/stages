@@ -30,21 +30,24 @@ create sequence seq_version minvalue 0;
 --
 -- table des types de formations
 --
-create sequence seq__formation__id;
-create table formation (
+create sequence seq__formations__id;
+create table formations (
        id    	       bigint not null,
        description     text
 );
-alter sequence seq__formation__id owned by formation.id;
-alter table formation alter column id set default nextval('seq__formation__id');
-create unique index pk__formation__id on formation ( id );
-alter table formation add primary key using index pk__formation__id;
-create unique index idx__formation__desc on formation(description);
-alter table formation add unique using index idx__formation__desc;
+alter sequence seq__formations__id owned by formations.id;
+alter table formations alter column id set default nextval('seq__formations__id');
+create unique index pk__formations__id on formations ( id );
+alter table formations add primary key using index pk__formations__id;
+create unique index idx__formations__desc on formations(description);
+alter table formations add unique using index idx__formations__desc;
 
-grant usage on sequence seq__formation__id to stcollweb;
+grant usage on sequence seq__formations__id to stcollweb;
 
-insert into formation (description) values ('École Doctorale de Physique');
+create view liste_formations as select id as key, description as value from formations;
+grant select on liste_formations to stcollweb;
+
+insert into formations (description) values ('École Doctorale de Physique');
 
 --
 -- table des types d'offres
@@ -95,7 +98,6 @@ create unique index idx__laboratoires__desc on laboratoires ( description );
 alter table laboratoires add unique using index idx__laboratoires__desc;
 create index idx__laboratoires__from_value on laboratoires ( from_value );
 
-grant usage on sequence seq__laboratoires__id to stcollweb;
 grant select on laboratoires to stcollweb;
 
 --
@@ -176,6 +178,38 @@ create unique index idx__categories__desc on categories ( description );
 alter table categories add unique using index idx__categories__desc;
 
 grant usage on sequence seq__categories__id to stcollweb;
+grant select on categories to stcollweb;
+
+create view liste_categories as select id as key, description as value from categories;
+grant select on liste_categories to stcollweb;
+
+insert into categories(description) values 
+       ('Cosmologie, Univers primordial, origine et évolution des grandes structures de l''Univers et des galaxies, cosmochimie'),
+       ('Astrophysique des hautes énergies, objets compacts, astroparticules, ondes gravitationnelles'),
+       ('Physique et chimie des milieux interstellaires et circumstellaires'),
+       ('Formation, structure et évolution des étoiles'),
+       ('Exoplanetes: origine, structure et évolution des systèmes planétaires, planétologie comparée'),
+       ('Système solaire: origine, évolution, dynamique et structure physico-chimique de ses objets et de leurs enveloppes, astromateriaux'),
+       ('Physique du soleil et de l''héliosphere, relations Soleil-Terre'),
+       ('Geophysique: Terre, atmosphere, ionosphere, magnetosphere, geodesie'),
+       ('Processus physiques en astrophysique'),
+       ('Systèmes de référence spatio-temporels'),
+       ('Instrumentation pour les grands observatoires au sol et dans l''espace'),
+       ('Geophysique: Terre, atmosphere, ionosphere, magnetosphere'),
+       ('Soleil et vent solaire'),
+       ('Le milieu interstellaire'),
+       ('Etoiles et environnement stellaire'),
+       ('Exoplanetes et planetologie comparee'),
+       ('Objets compacts'),
+       ('La Galaxie'),
+       ('Galaxies, quasars'),
+       ('Astrophysique des hautes energies, astroparticules, ondes gravitationnelles'),
+       ('Cosmologie'),
+       ('Instrumentation'),
+       ('Astrochimie'),
+       ('Geodesie et geodesie spatiale'),
+       ('Astrometrie et mecanique celeste, systemes dynamiques'),
+       ('Sciences planetaires');
 
 --
 -- Manager de projet
@@ -389,7 +423,7 @@ alter sequence seq__offres__id owned by offres.id;
 alter table offres alter column id set default nextval('seq__offres__id');
 create unique index pk__offres__id on offres ( id );
 alter table offres add primary key using index pk__offres__id;
-alter table offres add foreign key ( id_formation ) references formation ( id );
+alter table offres add foreign key ( id_formation ) references formations ( id );
 alter table offres add foreign key ( id_type_offre ) references type_offre ( id );
 alter table offres add foreign key ( id_m2 ) references m2 ( id );
 alter table offres add foreign key ( id_project_mgr ) references users ( id );

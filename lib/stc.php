@@ -70,6 +70,23 @@ function stc_reject () {
 
 $_stc_scripts = array();
 
+function stc_script_add($statement, $script_id=null) {
+  GLOBAL $_stc_scripts;
+  
+  // implementer $script_id = -1 et numérique
+  if (is_int($script_id)) {
+    if ($script_id==-1) array_push($_stc_scripts,$statement);
+    else $_stc_scripts[$script_id] = $statement;
+  } else { 
+    if (is_null($script_id)) $script_id='_default';
+    else if ($script_id[0]=='_') $script_id='_'.$script_id;
+    if (array_key_exists($script_id, $_stc_scripts)) $s = $_stc_scripts[$script_id];
+    else $s = array();
+    array_push($s, $statement);
+    $_stc_scripts[$script_id] = $s;
+  }
+}
+
 function stc_top ($styles=null) {
   xhtml_header();
   ?><head>
@@ -323,27 +340,27 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
   echo stc_form_check_errors ($form, $variable);
   if ($multi) {
     GLOBAL $_stc_scripts;
-    array_push($_stc_scripts, '/lib/js/multiselect.js');
+    stc_script_add('/lib/js/multiselect.js', -1);
     echo "<div>";
     echo "<label for=\"".$variable."[]\">".$label."</label>";
     echo "<div id=\"".$variable."\" class=\"wrapper\">";
     echo "</div></div>\n";
-    $values = "liste_labos";
     $sql = "select key, value from ".$values.";";
     pg_send_query ($db, $sql);
     $r = pg_get_result ($db);
     echo "<script type=\"text/javascript\">\n";
-    echo "var ".$variable."_values = [\n";
-    $firstline = true;
-    while ($row = pg_fetch_assoc ($r)) {
-      if ($firstline) $firstline=false;
-      else echo ",\n";
-      echo "['".$row['key']."' , \"".stc_form_escape_value($row['value'])."\"]";
-    }
-    echo "\n];\n";
+    $_val = array();
+    while ($row = pg_fetch_assoc ($r)) array_push($_val, array($row['key'],$row['value']));
+    echo "var ".$variable." = new Array();\n";
+    echo $variable."['name']= \"".$variable."\";\n";
+    echo $variable."['init']= ";
+    if (is_null($value)) echo "null";
+    else echo json_encode($value);
+    echo ";\n";
+    echo $variable."['values'] = ".json_encode($_val).";\n";
     echo "</script>\n";
     pg_free_result ($r);
-    array_push($_stc_scripts, array("script" => "window.onload = function() {\nms_append_select('".$variable."')};\n"));
+    stc_script_add( "ms_init(".$variable.");",'window.onload');
   } else {
     echo "<div>";
     echo "<label for=\"".$variable."\">".$label."</label>";
@@ -395,11 +412,37 @@ function stc_form_end () {
  *
  */
 
-function _append_script($script) {
-  if (is_array($script) and array_key_exists('script', $script)) 
-    echo "<script type=\"text/javascript\">".$script['script']."</script>\n";
-  else
-    echo "<script type=\"text/javascript\" src=\"".$script."\"></script>\n";
+function _append_scripts($scripts=null) {
+  GLOBAL $_stc_scripts;
+  
+  if (is_null($scripts)) $scripts=$_stc_scripts;
+
+  echo "<!--\n".print_r($scripts,1)."\n-->\n";
+  
+  // d'abord les scripts a l'index numérique (aka les fichiers
+  $nbts = 0;
+  foreach($scripts as $key => $values) {
+    if (!is_int($key)) {
+      $nbts++;
+      continue;
+    }
+    echo "<script type=\"text/javascript\" src=\"".$values."\"></script>\n";
+  }
+
+  // puis les scripts a index texte (les statements)
+  if ($nbts==0) return;
+  echo "<script type=\"text/javascript\">\n";
+  foreach($scripts as $key => $values) {
+    if (is_int($key)) continue;
+    if (strcmp($key, "_default")==0) {
+      foreach($values as $statement) echo $statement."\n";
+    } else {
+      echo $key." = function () {\n";
+      foreach($values as $statement) echo "    ".$statement."\n";
+      echo "};\n";
+    }
+  }
+  echo "</script>\n";
 }
 
 function stc_footer($scripts=null) {
@@ -420,10 +463,8 @@ Accès par <?php
     echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
     // les scripts
     if (!is_null($scripts)) 
-      foreach ($scripts as $script)
-	_append_script($script);
-    foreach ($_stc_scripts as $script) 
-      _append_script($script);
+	_append_scripts($scripts);
+    _append_scripts();
 ?></body>
 </html>
 <?php
@@ -583,6 +624,14 @@ function stc_user_login($login, $password) {
 
 function stc_is_logged () {
   return array_key_exists('userid',$_SESSION);
+}
+
+function stc_must_be_logged() {
+  if (stc_is_logged()) return;
+  
+  stc_close_session();
+  header ('Location: /');
+  exit();
 }
 
 function stc_set_m2_provenance ($from) {

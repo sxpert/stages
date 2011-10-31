@@ -66,7 +66,8 @@ L'administrateur du site
 	    $options['register']=False;
 	    $menu = stc_default_menu($options);
 	    stc_menu($menu);
-	    echo "Le compte a été créé avec succès [".$row['hash']."]";
+	    echo "Le compte a été créé avec succès.<br/>";
+	    echo "Un courrier a été envoyé a l'adresse que vous avez indiqué, veuillez cliquer sur le lien pour activer le compte.";
 	    stc_footer();
 	    exit();
 	  } else stc_form_add_error($errors, 'login', "Le nom d'utilisateur n'est pas disponible");
