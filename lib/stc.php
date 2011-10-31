@@ -79,7 +79,15 @@ function stc_script_add($statement, $script_id=null) {
     else $_stc_scripts[$script_id] = $statement;
   } else { 
     if (is_null($script_id)) $script_id='_default';
-    else if ($script_id[0]=='_') $script_id='_'.$script_id;
+    else if ($script_id[0]=='_') {
+      switch($script_id) {
+      case "_default":
+      case "_begin":
+	break;
+      default :
+	$script_id='_'.$script_id;
+      }
+    }
     if (array_key_exists($script_id, $_stc_scripts)) $s = $_stc_scripts[$script_id];
     else $s = array();
     array_push($s, $statement);
@@ -348,17 +356,12 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     $sql = "select key, value from ".$values.";";
     pg_send_query ($db, $sql);
     $r = pg_get_result ($db);
-    echo "<script type=\"text/javascript\">\n";
     $_val = array();
     while ($row = pg_fetch_assoc ($r)) array_push($_val, array($row['key'],$row['value']));
-    echo "var ".$variable." = new Array();\n";
-    echo $variable."['name']= \"".$variable."\";\n";
-    echo $variable."['init']= ";
-    if (is_null($value)) echo "null";
-    else echo json_encode($value);
-    echo ";\n";
-    echo $variable."['values'] = ".json_encode($_val).";\n";
-    echo "</script>\n";
+    stc_script_add("var ".$variable." = new Array();","_begin");
+    stc_script_add($variable."['name']= \"".$variable."\";","_begin");
+    stc_script_add($variable."['init']= ".(is_null($value)?"null":json_encode($value)).";","_begin");
+    stc_script_add($variable."['values'] = ".json_encode($_val).";","_begin");
     pg_free_result ($r);
     stc_script_add( "ms_init(".$variable.");",'window.onload');
   } else {
@@ -417,7 +420,7 @@ function _append_scripts($scripts=null) {
   
   if (is_null($scripts)) $scripts=$_stc_scripts;
 
-  echo "<!--\n".print_r($scripts,1)."\n-->\n";
+  //  echo "<!--\n".print_r($scripts,1)."\n-->\n";
   
   // d'abord les scripts a l'index numérique (aka les fichiers
   $nbts = 0;
@@ -432,8 +435,13 @@ function _append_scripts($scripts=null) {
   // puis les scripts a index texte (les statements)
   if ($nbts==0) return;
   echo "<script type=\"text/javascript\">\n";
+  if (array_key_exists("_begin",$scripts)) {
+    foreach($scripts["_begin"] as $statement) echo $statement."\n";
+  }
+  echo "\n";
   foreach($scripts as $key => $values) {
     if (is_int($key)) continue;
+    if (strcmp($key, "_begin")==0) continue;
     if (strcmp($key, "_default")==0) {
       foreach($values as $statement) echo $statement."\n";
     } else {
