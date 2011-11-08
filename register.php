@@ -1,4 +1,11 @@
 <?php
+/*******************************************************************************
+ *
+ * Gestion des offres de stage de M2 en Astro
+ * (c) Raphaël Jacquot 2011
+ * Fichier sous licence GPL-3
+ *
+ ******************************************************************************/
 
 require_once('lib/stc.php');
 
@@ -13,6 +20,8 @@ $f_name    = stc_get_variable ($_POST, 'f_name');
 $l_name    = stc_get_variable ($_POST, 'l_name');
 $email     = stc_get_variable ($_POST, 'email');
 $phone     = stc_get_variable ($_POST, 'phone');
+$status    = stc_get_variable ($_POST, 'status');
+$umr       = stc_get_variable ($_POST, 'umr');
 $labo      = stc_get_variable ($_POST, 'labo');
 $login     = stc_get_variable ($_POST, 'login');
 $pass1     = stc_get_variable ($_POST, 'pass1');
@@ -30,6 +39,8 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
       /* vérifie la cohérence des données entrées */
       if (!stc_form_check_phone($phone))
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
+      if (intval($umr)!=intval($labo))
+	stc_form_add_error($errors, 'labo', "Incohérence entre numéro d'UMR et laboratoire");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
 
@@ -37,7 +48,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	$t_phone = stc_form_clean_phone ($phone);
 	// no errors detected, attempt account creation 
 	// what can happen here is the login name is not available...
-	$res = stc_user_account_create ($f_name, $l_name, $email, $t_phone, $labo, $login, $pass1);
+	$res = stc_user_account_create ($f_name, $l_name, $email, $t_phone, $status, $labo, $login, $pass1);
 	error_log("[".pg_result_status($res)."] ".pg_result_status($res,PGSQL_STATUS_STRING)." logging user in");
 	if (pg_result_status($res)==PGSQL_TUPLES_OK) {
 	  // logger l'utilisateur
@@ -103,6 +114,8 @@ stc_form_text ($form, "Prénom", "f_name", $f_name);
 stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
 stc_form_text ($form, "Adresse email", "email", $email);
 stc_form_text ($form, "Téléphone", "phone", $phone);
+stc_form_select ($form, "Statut", "status", $status, "liste_statuts");
+stc_form_text ($form, "Numéro d'unité", "umr", $umr);
 stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", 
 		 array("onchange"=>"javascript:update_adresse_labo('labo')"));
 echo "<br/>\n";

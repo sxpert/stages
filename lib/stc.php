@@ -309,13 +309,25 @@ function stc_form_hidden($form, $variable, $value="") {
   echo "/>";
 }
 
-function stc_form_text ($form, $label, $variable, $value="") {
+function stc_form_text ($form, $label, $variable, $value="", $width=null, $length=null) {
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<input type=\"text\" name=\"".$variable."\"";
+  if (!is_null($width)) echo " style=\"width:".$width."\"";
+  if (!is_null($length)) echo " maxlength=\"".$length."\"";
+  if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
+  echo "/></div>\n";
+}
+
+// TODO: mettre un sélecteur de date
+function stc_form_date ($form, $label, $variable, $value="") {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
   echo "<input type=\"text\" name=\"".$variable."\"";
   if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
-  echo "></div>\n";
+  echo "/></div>\n";
 }
 
 function stc_form_password ($form, $label, $variable, $value="") {
@@ -327,11 +339,16 @@ function stc_form_password ($form, $label, $variable, $value="") {
   echo "></div>\n";
 }
 
-function stc_form_textarea ($form, $label, $variable, $value="", $width=0, $height=0) {
+function stc_form_textarea ($form, $label, $variable, $value="", $width=null, $height=null) {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
-  echo "<textarea name=\"".$variable."\">";
+  echo "<textarea name=\"".$variable."\"";
+  $s='';
+  if (!is_null($width)) $s.="width:".$width.";";
+  if (!is_null($height)) $s.="height:".$height.";";
+  if (strlen($s)>0) $s=" style=\"".$s."\"";
+  echo $s.">";
   if (strlen($value)>0) echo stc_form_escape_value($value);
   echo "</textarea></div>\n";
 }
@@ -341,9 +358,11 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
 
   $onchange = null;
   $multi=false;
+  $width=null;
   if (!is_null($options) and is_array($options)) {
     if (array_key_exists('onchange',$options)) $onchange = $options['onchange'];
     if (array_key_exists('multi',$options)) $multi=$options['multi'];
+    if (array_key_exists('width',$options)) $width=$options['width'];
   }
   echo stc_form_check_errors ($form, $variable);
   if ($multi) {
@@ -360,7 +379,8 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     while ($row = pg_fetch_assoc ($r)) array_push($_val, array($row['key'],$row['value']));
     stc_script_add("var ".$variable." = new Array();","_begin");
     stc_script_add($variable."['name']= \"".$variable."\";","_begin");
-    stc_script_add($variable."['init']= ".(is_null($value)?"null":json_encode($value)).";","_begin");
+    stc_script_add($variable."['init']= ".((is_null($value)||(strlen($value)==0))?"null":json_encode($value)).";","_begin");
+    stc_script_add($variable."['width']= ".(is_null($width)?"null":"'".$width."'").";","_begin");
     stc_script_add($variable."['values'] = ".json_encode($_val).";","_begin");
     pg_free_result ($r);
     stc_script_add( "ms_init(".$variable.");",'window.onload');
@@ -369,6 +389,7 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     echo "<label for=\"".$variable."\">".$label."</label>";
     echo "<select name=\"".$variable."\"";
     if (!is_null($onchange)) echo " onchange=\"".stc_form_escape_value($onchange)."\"";
+    if (!is_null($width)) echo " style=\"width:".$width.";\"";
     echo ">\n";
     if (!is_null($values)) {
       if (is_string($values)) {
@@ -386,7 +407,11 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
 	pg_free_result($r);
       } else if (is_array($values)) {
 	// associative array de valeurs
-	
+	foreach($values as $key => $val) {
+	  $s = "";
+	  if ($key==$value) $s = " selected";
+	  echo "<option value=\"".$key."\"".$s.">".$val."</option>\n";
+	}
       } else {
 	// unknown type
 	error_log("stc_form_select : type ".gettype($values)." not supported for values");
@@ -394,6 +419,15 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     }
     echo "</select></div>";
   }
+}
+
+function stc_form_checkbox ($form, $label, $variable, $value="", $group=null) {
+  echo stc_form_check_errors ($form, $variable);
+  echo "<div>";
+  echo "<label for=\"".$variable."\">".$label."</label>";
+  echo "<input type=\"checkbox\" name=\"".$variable."\"";
+  if (!strcmp($value,'on')) echo " checked";
+  echo "/></div>\n";
 }
 
 function stc_form_button ($form, $text, $action="") {
@@ -420,8 +454,6 @@ function _append_scripts($scripts=null) {
   
   if (is_null($scripts)) $scripts=$_stc_scripts;
 
-  //  echo "<!--\n".print_r($scripts,1)."\n-->\n";
-  
   // d'abord les scripts a l'index numérique (aka les fichiers
   $nbts = 0;
   foreach($scripts as $key => $values) {
@@ -588,13 +620,11 @@ function stc_get_m2 ($m2_id) {
   return $row;
 }
 
-function stc_user_account_create ($f_name, $l_name, $email, 
-				  $phone, $labo, $login, $pass1) {
+function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $labo, $login, $pass1) {
   GLOBAL $db;
   
-  $sql = "select * from user_add($1,$2,$3,$4,$5,$6,$7) as (id bigint, hash text);";
-  $arr = array($f_name, $l_name, $email, 
-	       $phone, $labo, $login, $pass1);
+  $sql = "select * from user_add($1,$2,$3,$4,$5,$6,$7,$8) as (id bigint, hash text);";
+  $arr = array($f_name, $l_name, $email, $phone, $status, $labo, $login, $pass1);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   return $r;

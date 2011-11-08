@@ -9,5 +9,6 @@ upgrade:
 
 all:
 	$(PSQL) template1 < 000-base.sql
+	./gen-labs.php	
 
 

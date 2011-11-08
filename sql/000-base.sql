@@ -1,3 +1,11 @@
+--******************************************************************************
+--
+-- Gestion des offres de stage de M2 en Astro
+-- (c) Raphaël Jacquot 2011
+-- Fichier sous licence GPL-3
+--
+--*****************************************************************************/
+
 --
 -- script de base de données pour l'appli de gestion des stages / thèses.
 -- nécessite l'extension pgcrypto, disponible dans le package postgresql-contrib
@@ -28,28 +36,6 @@ create extension pgcrypto;
 create sequence seq_version minvalue 0;
 
 --
--- table des types de formations
---
-create sequence seq__formations__id;
-create table formations (
-       id    	       bigint not null,
-       description     text
-);
-alter sequence seq__formations__id owned by formations.id;
-alter table formations alter column id set default nextval('seq__formations__id');
-create unique index pk__formations__id on formations ( id );
-alter table formations add primary key using index pk__formations__id;
-create unique index idx__formations__desc on formations(description);
-alter table formations add unique using index idx__formations__desc;
-
-grant usage on sequence seq__formations__id to stcollweb;
-
-create view liste_formations as select id as key, description as value from formations;
-grant select on liste_formations to stcollweb;
-
-insert into formations (description) values ('École Doctorale de Physique');
-
---
 -- table des types d'offres
 --
 create sequence seq__type_offre__id;
@@ -78,13 +64,24 @@ insert into type_offre (code, description, denom_prop, denom_dir, has_year) valu
        ('MR', 'Master Recherche', 'Stages', 'Directeur de Stage', true);
 
 --
+-- sections cnrs
+-- 
+create table sections_cnrs (
+       id    		   bigint not null,
+       description	   text,
+       primary key (id)     
+);
+
+--
 -- table des laboratoires
 -- id          : numéro d'UMR
 -- description : nom long du laboratoire
 -- from_value  : clé permettant de connaitre la provenance de l'utilisateur ( sha1sum(description)[1:8] )
 --
 create table laboratoires (
+       type_unite	  text not null,
        id    		  bigint not null,
+       id_section	  bigint references sections_cnrs(id),
        sigle		  text not null,
        description	  text not null,
        from_value	  char (8) not null,
@@ -118,11 +115,10 @@ create trigger trig_laboratoires_set_from_value before insert on laboratoires fo
 -- vue pour la liste des labos
 --
 
-create view liste_labos as select id as key, sigle || ' - ' || description as value from laboratoires;
+create view liste_labos as select id as key, 
+       case when ((sigle is not null) and (char_length(sigle)>0)) then sigle || ' - ' else '' end || description as value from laboratoires
+       order by value;
 grant select on liste_labos to stcollweb;
-
-insert into laboratoires (id, sigle, description, post_addr, post_code, city) values 
-       (5274,'IPAG', 'Institut de Planétologie et d''Astrophysique de Grenoble', '414, rue de la Piscine', '38400', 'Saint Martin d''Hères');
 
 --
 -- table des M2
@@ -184,57 +180,54 @@ create view liste_categories as select id as key, description as value from cate
 grant select on liste_categories to stcollweb;
 
 insert into categories(description) values 
-       ('Cosmologie, Univers primordial, origine et évolution des grandes structures de l''Univers et des galaxies, cosmochimie'),
+       ('Cosmologie, Univers primordial, origine et évolution des grandes structures de l''Univers et des galaxies'),
        ('Astrophysique des hautes énergies, objets compacts, astroparticules, ondes gravitationnelles'),
        ('Physique et chimie des milieux interstellaires et circumstellaires'),
        ('Formation, structure et évolution des étoiles'),
        ('Exoplanetes: origine, structure et évolution des systèmes planétaires, planétologie comparée'),
-       ('Système solaire: origine, évolution, dynamique et structure physico-chimique de ses objets et de leurs enveloppes, astromateriaux'),
+       ('Système solaire: origine, composition, évolution, structure physico-chimique et dynamique de ses objets et des astromateriaux; cosmochimie'),
        ('Physique du soleil et de l''héliosphere, relations Soleil-Terre'),
-       ('Geophysique: Terre, atmosphere, ionosphere, magnetosphere, geodesie'),
+       ('Planétologie : physique, dynamique et chimie des atmosphères planétaires'),
        ('Processus physiques en astrophysique'),
        ('Systèmes de référence spatio-temporels'),
-       ('Instrumentation pour les grands observatoires au sol et dans l''espace'),
-       ('Geophysique: Terre, atmosphere, ionosphere, magnetosphere'),
-       ('Soleil et vent solaire'),
-       ('Le milieu interstellaire'),
-       ('Etoiles et environnement stellaire'),
-       ('Exoplanetes et planetologie comparee'),
-       ('Objets compacts'),
-       ('La Galaxie'),
-       ('Galaxies, quasars'),
-       ('Astrophysique des hautes energies, astroparticules, ondes gravitationnelles'),
-       ('Cosmologie'),
-       ('Instrumentation'),
-       ('Astrochimie'),
-       ('Geodesie et geodesie spatiale'),
-       ('Astrometrie et mecanique celeste, systemes dynamiques'),
-       ('Sciences planetaires');
+       ('Instrumentation pour les grands observatoires au sol et dans l''espace');
+
+--
+-- Statuts des utilisateurs
+--
+
+create table statuts (
+       id    	     bigserial,
+       description   text,
+       primary key (id)
+);
+
+create view liste_statuts as select id as key, description as value from statuts;
+grant select on liste_statuts to stcollweb;
+
+insert into statuts (description) values
+       ('Chercheur ou enseignant-chercheur en poste'),
+       ('Ingénieur de recherche'),
+       ('Chercheur en contrat post-doctoral');
 
 --
 -- Manager de projet
 --
-create sequence seq__users__id;
 create table users (
-       id    	      bigint not null,
+       id    	      bigserial,
        f_name	      text,
        l_name	      text,
        email	      text,
        phone	      text,
-       id_laboratoire bigint not null,
-       login	      text,
+       statut	      bigint not null references statuts (id),
+       id_laboratoire bigint not null references laboratoires (id),
+       login	      text not null unique,
        passwd	      text,
        salt	      bytea,
        login_fails    smallint default 0,
-       account_valid  boolean default false
+       account_valid  boolean default false,
+       primary key (id)
 );
-alter sequence seq__users__id owned by users.id;
-alter table users alter column id set default nextval('seq__users__id');
-create unique index pk__users__id on users ( id );
-alter table users add primary key using index pk__users__id;
-create unique index idx__users__login on users ( login );
-alter table users add unique using index idx__users__login;
-alter table users add foreign key ( id_laboratoire ) references laboratoires ( id );
 
 --
 -- generates some salt for the password encryption functions
@@ -282,7 +275,7 @@ $$ language plpgsql security definer;
 -- 
 create function user_add(t_fname text, t_lname text, 
        	                 t_email text, t_phone text,
-			 t_id_labo bigint, 
+			 t_statut bigint, t_id_labo bigint, 
 			 t_login text, t_password text) 
 			 returns record as $$
         declare
@@ -300,9 +293,9 @@ create function user_add(t_fname text, t_lname text,
 			t_passwd := hash_password ( t_password, t_salt);
 			t_emailhash := hash_email ( t_email, t_salt);
 			-- insert the new account
-		        insert into users (f_name, l_name, email, phone, id_laboratoire, 
+		        insert into users (f_name, l_name, email, phone, statut, id_laboratoire, 
 			       login, passwd, salt)
-			       values (t_fname, t_lname, t_email, t_phone, t_id_labo, 
+			       values (t_fname, t_lname, t_email, t_phone, t_statut, t_id_labo, 
 			       t_login, t_passwd, t_salt)
 			       returning id into t_userid;
 			
@@ -380,65 +373,91 @@ create function user_validate_account(t_login text, t_password text, t_hash text
        end;
 $$ language plpgsql security definer;
 
--- 
--- financeurs
---
-create sequence seq__financeurs__id;
-create table financeurs (
-       id    		bigint not null,
-       description	text
-);
-alter sequence seq__financeurs__id owned by financeurs.id;
-alter table financeurs alter column id set default nextval('seq__financeurs__id');
-create unique index pk__financeurs__id on financeurs ( id );
-alter table financeurs add primary key using index pk__financeurs__id;
-create unique index idx__financeurs__desc on financeurs ( description );
-alter table financeurs add unique using index idx__financeurs__desc;
 
-grant usage on sequence seq__financeurs__id to stcollweb;
+-- 
+-- Nature des travaux a accomplir dans le stage
+-- 
+create table nature_stage (
+       id    		  bigint primary key,
+       description	  text unique
+);
+
+create view liste_nature_stage as select id as key, description as value from nature_stage;
+grant select on liste_nature_stage to stcollweb;
+
+--
+-- État de la demande de rémunération
+--
+create table pay_states (
+       id    		bigint primary key,
+       description      text unique
+);
+
+create view liste_pay_states as select id as key, description as value from pay_states;
+grant select on liste_pay_states to stcollweb;
+
+insert into pay_states values
+       ( 1, 'Acquise'),
+       ( 2, 'En cours de négociation');
 
 --
 -- table des offres
 --
 create sequence seq__offres__id;
 create table offres (
-       id		bigint not null,
-       id_formation	bigint not null,
-       id_type_offre	bigint not null,
-       id_m2		bigint not null,
-       year_value	integer,		
+       id		bigint not null primary key,
+       id_type_offre	bigint not null references type_offre ( id ),
+       id_project_mgr	bigint not null references users ( id ),
+       year_value	integer,	
+	
        sujet		text,
        short_desc	text,
        description	text,
        project_url	text,
-       id_project_mgr	bigint not null,
-       is_financed	boolean not null,
-       id_financeur	bigint,
-       commentaire	text,
+       prerequis	text,
+       lieu		text,
+       infoscmpl	text,
        start_date	date not null,
+       duree		text,
+       co_encadrant	text,
+       co_enc_email	text,
+       pay_state	bigint not null references pay_states (id),
+       thesis		boolean,       
+
        create_date	timestamp,
        last_update	timestamp
 );
 alter sequence seq__offres__id owned by offres.id;
 alter table offres alter column id set default nextval('seq__offres__id');
-create unique index pk__offres__id on offres ( id );
-alter table offres add primary key using index pk__offres__id;
-alter table offres add foreign key ( id_formation ) references formations ( id );
-alter table offres add foreign key ( id_type_offre ) references type_offre ( id );
-alter table offres add foreign key ( id_m2 ) references m2 ( id );
-alter table offres add foreign key ( id_project_mgr ) references users ( id );
-alter table offres add foreign key ( id_financeur ) references financeurs ( id );
 
+grant select, insert, update on offres to stcollweb;
 grant usage on sequence seq__offres__id to stcollweb;
  
 --
 -- table de liaison offres <-> categories (n to n)
 --
 create table offres_categories (
-       id_offre		       bigint not null,
-       id_categorie	       bigint not null
+       id_offre		       bigint not null references offres ( id ),
+       id_categorie	       bigint not null references categories ( id ),
+       primary key (id_offre, id_categorie)
 );
-create unique index pk__offres_categories on offres_categories ( id_offre, id_categorie );
-alter table offres_categories add primary key using index pk__offres_categories;
-alter table offres_categories add foreign key ( id_offre ) references offres ( id );
-alter table offres_categories add foreign key ( id_categorie ) references categories ( id );
+
+--
+-- table de liaison offres <-> nature_stage (n to n)
+--
+
+create table offres_nature_stage (
+       id_offre			 bigint not null references offres(id),
+       id_nature_stage		 bigint not null references nature_stage(id),
+       primary key (id_offre, id_nature_stage)
+);
+
+--
+-- table des validations par les M2
+--
+create table offres_m2 (
+       id_offre		    bigint not null references offres (id),
+       id_m2 		    bigint not null references m2 (id),
+       primary key (id_offre, id_m2)
+);
+    
