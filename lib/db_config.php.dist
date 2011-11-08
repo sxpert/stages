@@ -1,7 +1,17 @@
 <?php
+/*******************************************************************************
+ *
+ * Gestion des offres de stage de M2 en Astro
+ * (c) Raphaël Jacquot 2011
+ * Fichier sous licence GPL-3
+ *
+ ******************************************************************************/
+
 $DB_HOST="localhost";
 $DB_PORT="5432";
 $DB_NAME="stcoll";
 $DB_USER="stcollweb";
 $DB_PASS="test";
+$DB_ADMIN_USER="stcolladm";
+$DB_ADMIN_PASS="testadm";
 ?>
