@@ -16,8 +16,7 @@ function _db_connect($user, $pass) {
   $db = pg_connect($connstr);
 
   if (!$db) error_log("connecting to database '".$connstr."'");
-  else error_log("Connection to database '".$DB_NAME."' successful");
-      
+     
   return $db;
 }
 

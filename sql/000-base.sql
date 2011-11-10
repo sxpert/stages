@@ -385,6 +385,14 @@ create table nature_stage (
 create view liste_nature_stage as select id as key, description as value from nature_stage;
 grant select on liste_nature_stage to stcollweb;
 
+insert into nature_stage values 
+       (1, 'Instrumentation'),
+       (2, 'Observations'),
+       (3, 'Simulations numériques'),
+       (4, 'Traitement de données'),
+       (5, 'Modélisation'),
+       (6, 'Expérimentation en laboratoire');
+
 --
 -- État de la demande de rémunération
 --
@@ -415,7 +423,6 @@ create table offres (
        description	text,
        project_url	text,
        prerequis	text,
-       lieu		text,
        infoscmpl	text,
        start_date	date not null,
        duree		text,

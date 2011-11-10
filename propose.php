@@ -19,9 +19,9 @@ $sujet        = stc_get_variable($_POST, 'sujet');
 $description  = stc_get_variable($_POST, 'description'); 
 $url          = stc_get_variable($_POST, 'url');
 $nature_stage = stc_get_variable($_POST, 'nature_stage');
+if (!is_array($nature_stage)) $nature_stage = null;
 $prerequis    = stc_get_variable($_POST, 'prerequis');
 
-$lieu         = stc_get_variable($_POST, 'lieu');
 $infoscmpl    = stc_get_variable($_POST, 'infoscmpl');
 
 $start_date   = stc_get_variable($_POST, 'start_date');
@@ -34,16 +34,43 @@ $pay_state    = stc_get_variable($_POST, 'pay_state');
 $thesis       = stc_get_variable($_POST, 'thesis');
 
 // vérification de la validité du formulaire
+$errors = array();
+if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
+  /****
+   * vérifications
+   */
+  
+  /* category */
+  $category = stc_form_clean_multi($category);
+  if (count($category)==0) 
+    stc_form_add_error($errors, 'category', 'Il faut au moins une catégorie');
+  elseif (!stc_form_check_multi($category, 'liste_categories'))
+    stc_form_add_error($errors, 'category', 'Problème de cohérence dans les catégories');
+  
+  /* url */
+  
 
+  /* nature_stage */
+  $nature_stage = stc_form_clean_multi($nature_stage);
+  if (count($nature_stage)==0)
+    stc_form_add_error($errors, 'nature_stage', 'Il faut au moins une nature pour le stage');
+  elseif (!stc_form_check_multi($nature_stage, 'liste_nature_stage'))
+    stc_form_add_error($errors, 'nature_stage', 'Problème de cohérence dans la nature du stage');
 
+  /* start_date */
+  if (!stc_form_clean_date($start_date))
+    stc_form_add_error($errors, 'start_date', 'Format de date invalide, \'yyyy-mm-dd\' attendu');
+  elseif (!stc_form_check_date($start_date)) 
+    stc_form_add_error($errors, 'start_date', 'Date invalide');
 
-// génération du formulaire
+  
+}
+
+/* génération du formulaire */
 
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
-
-//echo "<pre>".print_r($_POST,1)."</pre>";
 
 $width="400pt";
 
@@ -63,9 +90,6 @@ stc_form_select ($form, "Nature du travail", "nature_stage", $nature_stage, "lis
 echo "<br/>\n";
 
 stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width);
-echo "<br/>\n";
-
-stc_form_text ($form, "Lieu du stage", "lieu", $lieu, $width);
 stc_form_text ($form, "Informations complémentaires", "infoscmpl", $infoscmpl, $width);
 echo "<br/>\n";
 

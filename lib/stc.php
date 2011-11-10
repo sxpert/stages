@@ -302,6 +302,47 @@ function stc_form_clean_post_code ($codepostal) {
   return trim($codepostal);
 }
 
+/* date */ 
+
+function stc_form_clean_date(&$date) {
+  $date = trim($date);
+  $expr = '/^\d{4}-\d{2}-\d{2}$/';
+  $v = preg_match($expr,$date);
+  return $v==1;  
+}
+
+function stc_form_check_date ($date) {
+  $y = intval(substr($date,0,4));
+  $m = intval(substr($date,5,2));
+  $d = intval(substr($date,8,2));
+  return checkdate($m,$d,$y);
+}
+
+/* multi select */
+
+function stc_form_clean_multi ($values) {
+  $val = array();
+  sort($values, SORT_NUMERIC);
+  foreach($values as $v) {
+    $v = intval($v);
+    if ($v==0) continue;
+    if (!in_array($v, $val)) array_push($val, $v);
+  }
+  return $val;
+}
+
+function stc_form_check_multi ($values, $table) {
+  GLOBAL $db;
+  $sql="select key, value from ".$table." where key=$1;";
+  $ok = true;
+  foreach($values as $v) {
+    $r = pg_query_params($db, $sql, array($v));
+    if (pg_num_rows($r)==0) $ok=false;
+    pg_free_result($r);
+  }
+  return $ok;
+}
+
 /****
  * Fonction de génération du HTML pour les formulaires
  */
@@ -387,7 +428,7 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     while ($row = pg_fetch_assoc ($r)) array_push($_val, array($row['key'],$row['value']));
     stc_script_add("var ".$variable." = new Array();","_begin");
     stc_script_add($variable."['name']= \"".$variable."\";","_begin");
-    stc_script_add($variable."['init']= ".((is_null($value)||(strlen($value)==0))?"null":json_encode($value)).";","_begin");
+    stc_script_add($variable."['init']= ".((!is_array($value))?"null":json_encode($value)).";","_begin");
     stc_script_add($variable."['width']= ".(is_null($width)?"null":"'".$width."'").";","_begin");
     stc_script_add($variable."['values'] = ".json_encode($_val).";","_begin");
     pg_free_result ($r);
