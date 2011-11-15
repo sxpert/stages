@@ -13,8 +13,10 @@ stc_must_be_logged();
 
 $errors = array();
 
-$category     = stc_get_variable($_POST, 'category');
-if (!is_array($category)) $category = null;
+$type         = stc_get_variable($_REQUEST, 'type');
+
+$categories     = stc_get_variable($_POST, 'categories');
+if (!is_array($categories)) $categories = null;
 $sujet        = stc_get_variable($_POST, 'sujet');
 $description  = stc_get_variable($_POST, 'description'); 
 $url          = stc_get_variable($_POST, 'url');
@@ -39,16 +41,21 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
   /****
    * vérifications
    */
-  
+  /* TODO: à changer si on inclue autre chose que des stages de M2 */
+  if ($type!='MR')
+    stc_form_add_error($errors, 'type', 'Mauvais type d\'offre');
+
   /* category */
-  $category = stc_form_clean_multi($category);
-  if (count($category)==0) 
-    stc_form_add_error($errors, 'category', 'Il faut au moins une catégorie');
-  elseif (!stc_form_check_multi($category, 'liste_categories'))
-    stc_form_add_error($errors, 'category', 'Problème de cohérence dans les catégories');
+  $categories = stc_form_clean_multi($categories);
+  if (count($categories)==0) 
+    stc_form_add_error($errors, 'categories', 'Il faut au moins une catégorie');
+  elseif (!stc_form_check_multi($categories, 'liste_categories'))
+    stc_form_add_error($errors, 'categories', 'Problème de cohérence dans les catégories');
   
   /* url */
-  
+  $url = stc_form_clean_url($url);
+  if ((strlen($url)>0)&&(!stc_form_check_url($url, $e)))
+    stc_form_add_error($errors, 'url', 'Adresse de document invalide.<br/>'.$e);
 
   /* nature_stage */
   $nature_stage = stc_form_clean_multi($nature_stage);
@@ -63,7 +70,25 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
   elseif (!stc_form_check_date($start_date)) 
     stc_form_add_error($errors, 'start_date', 'Date invalide');
 
+  /* pay_state */
+  if (!stc_form_check_select($pay_state, 'liste_pay_states'))
+    stc_form_add_error($errors, 'pay_state', 'Option de gratification invalide');  
+
+  /* thesis */
+  $thesis = stc_form_clean_checkbox($thesis);
   
+  /****
+   * Si on arrive la et que $errors est vide c'est que tout va bien
+   */
+  if (count($errors)==0) {
+    /* insertion dans la base de données */
+    $offre = stc_offre_add($type, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
+			   $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state, $thesis);
+    if (is_bool($offre)&&(!$offre))
+      stc_form_add_error($errors, 'type', 'Erreur lors de l\'ajout de l\'offre');
+    else 
+      stc_redirect("/affiche.php?offreid=".$offre);
+  }
 }
 
 /* génération du formulaire */
@@ -75,7 +100,9 @@ stc_menu($menu);
 $width="400pt";
 
 $form = stc_form('post', 'propose.php', $errors);
-stc_form_select ($form, "Catégories", "category", $category, "liste_categories",
+stc_form_hidden ($form, "type", $type);
+
+stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
 		 array("multi" => true, "width" => $width));		 
 echo "<br/>\n";
 

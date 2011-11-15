@@ -1,0 +1,9 @@
+Modules nécessaire :
+
+il faut installer le paquet http, mais celui-ci n'est disponible que fait maison 
+
+php5-http
+pecl install pecl_http
+Create file /etc/php5/conf.d/http.ini with the following content:
+extension=http.so
+sudo /etc/init.d/apache2 restart

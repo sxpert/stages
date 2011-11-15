@@ -39,7 +39,12 @@ function stc_check_referer () {
   $url = parse_url($ref);  
   if (array_key_exists('scheme', $url) and strcmp($url['scheme'],'http')!=0) return False;
   if (array_key_exists('host', $url) and strcmp($url['host'],$srv)!=0) return False;
-  return $url['path'];
+  error_log(print_r($url,1));
+  $u='';
+  if (array_key_exists('path',$url)) $u.=$url['path'];
+  if (array_key_exists('query',$url)) $u.='?'.$url['query'];
+  if (array_key_exists('fragment',$url)) $u.='#'.$url['fragment'];
+  return $u;
 }
 
 /****
@@ -49,6 +54,14 @@ function stc_close_session() {
   session_unset();
   session_destroy();
 }
+
+/*
+ * redirige vers une autre page
+ */
+function stc_redirect($url) {
+  header('Location: '.$url);
+  exit(0);
+} 
 
 /*
  * renvoie une page d'erreur si on a un referer moisi
@@ -130,10 +143,11 @@ define ('STC_MENU_ITEM', 1);
 define ('STC_MENU_SEPARATOR', 2);
 define ('STC_MENU_FORM', 10);
 define ('STC_MENU_FORM_ERROR', 11);
-define ('STC_MENU_FORM_TEXT', 12);
-define ('STC_MENU_FORM_PASS', 13);
-define ('STC_MENU_FORM_BUTTON', 14);
-define ('STC_MENU_FORM_END', 15);
+define ('STC_MENU_FORM_HIDDEN', 12);
+define ('STC_MENU_FORM_TEXT', 13);
+define ('STC_MENU_FORM_PASS', 14);
+define ('STC_MENU_FORM_BUTTON', 15);
+define ('STC_MENU_FORM_END', 16);
 
 function stc_menu_init () {
   $menu = array();
@@ -173,6 +187,14 @@ function stc_menu_form_add_error (&$menu, $message) {
   $menuitem = array();
   $menuitem['type']=STC_MENU_FORM_ERROR;
   $menuitem['message']=$message;
+  array_push($menu, $menuitem);
+}
+
+function stc_menu_form_add_hidden (&$menu, $variable, $value) {
+  $menuitem = array();
+  $menuitem['type']=STC_MENU_FORM_HIDDEN;
+  $menuitem['variable']=$variable;
+  $menuitem['value']=$value;
   array_push($menu, $menuitem);
 }
 
@@ -216,6 +238,7 @@ function stc_menu($menu) {
     case STC_MENU_SEPARATOR: echo "<hr/>\n";break;
     case STC_MENU_FORM: echo "<form method=\"".$menuitem['method']."\" action=\"".$menuitem['action']."\">\n"; break;
     case STC_MENU_FORM_ERROR: echo "<div class=\"error\">".$menuitem['message']."</div>\n"; break;
+    case STC_MENU_FORM_HIDDEN: echo "<input type=\"hidden\" name=\"".$menuitem['variable']."\" value=\"".stc_form_escape_value($menuitem['value'])."\"/>"; break;
     case STC_MENU_FORM_TEXT: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"text\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
     case STC_MENU_FORM_PASS: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"password\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
     case STC_MENU_FORM_BUTTON: echo "<div><button>".$menuitem['text']."</button></div>\n"; break;
@@ -318,6 +341,100 @@ function stc_form_check_date ($date) {
   return checkdate($m,$d,$y);
 }
 
+/* checkbox */
+
+function stc_form_clean_checkbox ($box) {
+  if (trim($box)=='on') return true;
+  else return false;
+}
+
+/* url */
+
+function stc_form_clean_url($url) {
+  return trim($url);
+}
+
+function stc_form_check_url($url,&$e) {
+  $u = parse_url($url);
+  if (is_bool($u)&&!$u) {
+    $e = 'Adresse mal formée';
+    return false;
+  }
+  if (array_key_exists('scheme',$u)) {
+    if (array_key_exists('port',$u)) $port = $u['port'];
+    else $port = 0;
+    switch ($u['scheme']) {
+    case 'http':
+      if ($port==0) $port=80;
+      break;
+    case 'https':
+      if ($port==0) $port=443 ;
+      break;
+    default:
+      $e = 'Protocole \''.$u['scheme'].'\' inconnu (\'http\' ou \'https\' attendu)';
+      return false;
+    }
+    $u['port']=$port;
+  } else {
+    $e = 'Type de protocole manquant (\'http\' ou \'https\' attendu)';
+    return false; /* force http ?? better not */
+  }
+  if (array_key_exists('host',$u)) {
+    $ips = dns_get_record($u['host']);
+    if ((is_bool($ips)&&!$ips)||(count($ips)==0)) {
+      $e = 'Serveur \''.$u['host'].'\' introuvable';
+      return false;
+    }
+    /* trouve si une des adresses réponds */
+    $ok = false;
+    foreach ($ips as $ip) {
+      switch ($ip['type']) {
+      case 'A':
+	$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
+	$ok |= @socket_connect($s,$ip['ip'],$u['port']);
+	error_log($ip['type'].' - '.$ip['ip'].':'.$u['port'].' '.($ok?'ok':'nok'));
+	socket_close($s);
+	break;
+      case 'AAAA':
+	$s=socket_create(AF_INET6,SOCK_STREAM,SOL_TCP);
+	$ok |= @socket_connect($s,$ip['ipv6'],$u['port']);
+	error_log($ip['type'].' - ['.$ip['ipv6'].']:'.$u['port'].' '.($ok?'ok':'nok'));
+	socket_close($s);
+	break;
+      default:
+	continue;
+      }
+    }
+    if (!$ok) {
+      $e = 'Connection au serveur impossible';
+      return false;
+    }
+  } else {
+    $e = 'Nom de serveur manquant';
+    return false; /* si on a pas de host, c'est compromis... */
+  }
+  /* timeout a 5 secondes */
+  $r = http_head($url,array('timeout'=>5),$info);
+  if ($info['response_code']>=400) {
+    $e = 'Accès au document impossible';
+    return false;
+  }
+  return true;
+}
+
+/* select */
+
+function stc_form_check_select ($value, $table) {
+  GLOBAL $db;
+  if (strlen($value)==0) return false;
+  $sql="select key, value from ".$table." where key=$1";
+  $r=pg_query_params($db, $sql, array(intval($value)));
+  if (pg_num_rows($r)==0) $ok=false;
+  else $ok=true;
+  pg_free_result($r);
+  return $ok;
+}
+
 /* multi select */
 
 function stc_form_clean_multi ($values) {
@@ -353,6 +470,7 @@ function stc_form ($method, $action, $errors) {
 }
 
 function stc_form_hidden($form, $variable, $value="") {
+  echo stc_form_check_errors ($form, $variable);
   echo "<input type=\"hidden\" name=\"".$variable."\"";
   if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
   echo "/>";
@@ -475,7 +593,7 @@ function stc_form_checkbox ($form, $label, $variable, $value="", $group=null) {
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
   echo "<input type=\"checkbox\" name=\"".$variable."\"";
-  if (!strcmp($value,'on')) echo " checked";
+  if ((is_bool($value)&&$value)||(!strcmp($value,'on'))) echo " checked";
   echo "/></div>\n";
 }
 
@@ -703,6 +821,105 @@ function stc_user_login($login, $password) {
   return intval($row['id']);
 }
 
+function stc_rollback($message=null) {
+  GLOBAL $db;
+  if (is_string($message)) {
+    $message = trim($message);
+    if (strlen($message)>0)
+      error_log($message);
+  }
+  pg_free_result(pg_query($db, 'rollback;'));
+  return false;
+}
+
+function stc_offre_add($type, $categories, 
+		       $sujet, $description, $url,
+		       $nature_stage, $prerequis,
+		       $infoscmpl, $start_date, $length,
+		       $co_encadrant, $co_enc_email,
+		       $pay_state, $thesis) {
+  GLOBAL $db;
+
+  $thesis = ($thesis?'true':'false');
+
+  /* debut de transaction */
+  pg_free_result(pg_query($db, 'begin;'));
+
+  /**
+   * obtention de l'id type offre 
+   */
+  $sql = "select id from type_offre where code=$1;";
+  $r = pg_send_query_params($db, $sql, array($type));
+  $r = pg_get_result($db);
+  /* should not fail */
+  $n = pg_num_rows($r);
+    /* $n doit toujours etre 1 ici. quelqu'un doit jouer... */
+  if ($n!=1) return stc_rollback('Impossible de trouver le code d\'offre '.$type);
+  $row = pg_fetch_assoc($r);
+  pg_free_result($r);
+
+  /**
+   * ajout de l'offre
+   */
+  $id_type_offre = $row['id'];
+  $id_project_mgr = $_SESSION['userid'];
+  /* TODO: calculate year value */
+  $year_value = 0;
+  /* insertion des infos de l'offre */
+  $sql = "insert into offres (id_type_offre, id_project_mgr, year_value, sujet, ".
+    "description, project_url, prerequis, infoscmpl, start_date, duree, co_encadrant, ".
+    "co_enc_email, pay_state, thesis, create_date) values ".
+    "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP) returning id;";
+  $arr = array(intval($id_type_offre), intval($id_project_mgr), $year_value, $sujet, $description, $url,
+	       $prerequis, $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email,
+	       intval($pay_state), $thesis);
+  $r = pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result($db);
+  if (pg_result_status($r)!=PGSQL_TUPLES_OK)
+    /* houston, we have a problem ! */
+      return stc_rollback('insert offre => '.pg_result_error_field($r, PGSQL_DIAG_SQLSTATE).
+		      ' - '.pg_last_error($db));
+  $n = pg_num_rows($r);
+  if (pg_num_rows($r)!=1) {
+    /* CAN'T HAPPEN */
+    pg_free_result($r);
+    return stc_rollback('Nombre de réponses invalide ('.$n.') lors de l\'insertion d\'une offre');
+  }
+  $row = pg_fetch_assoc($r);
+  $offreid = $row['id'];
+
+  /**
+   * insertion des categories s'appliquant à l'offre
+   */
+  $sql = "insert into offres_categories (id_offre, id_categorie) values ($1, $2);";
+  foreach($categories as $categorie) {
+    $r = pg_send_query_params($db, $sql, array($offreid, $categorie));
+    $r = pg_get_result($db);
+    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+      return stc_rollback('categories execute => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+		      ' - '.pg_last_error($db));
+  }
+
+  /**
+   * insertion des nature_stage s'appliquant a l'offre
+   */
+  $sql = "insert into offres_nature_stage (id_offre, id_nature_stage) values ($1, $2);";
+  foreach($nature_stage as $ns) {
+    $r = pg_send_query_params($db, $sql, array($offreid, $ns));
+    $r = pg_get_result($db);
+    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+      return stc_rollback('nature_stage execute => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+		      ' - '.pg_last_error($db));
+  }
+
+  /**
+   * tout s'est bien passé, on committe la transaction et on renvoie le 
+   * numéro de l'offre nouvellement créée
+   */
+  pg_free_result(pg_query($db, 'commit;'));
+  return $offreid;
+}
+
 /****
  *
  * Gestion des utilisateurs
@@ -711,6 +928,10 @@ function stc_user_login($login, $password) {
 
 function stc_is_logged () {
   return array_key_exists('userid',$_SESSION);
+}
+
+function stc_is_admin () {
+  return false;
 }
 
 function stc_must_be_logged() {

@@ -39,8 +39,12 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
       /* vérifie la cohérence des données entrées */
       if (!stc_form_check_phone($phone))
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
+      if (!stc_form_check_select($status, 'liste_statuts')) 
+	stc_form_add_error($errors, 'status', "le statut n'existe pas");
       if (intval($umr)!=intval($labo))
 	stc_form_add_error($errors, 'labo', "Incohérence entre numéro d'UMR et laboratoire");
+      if (!stc_form_check_select($labo, 'liste_labos'))
+	stc_form_add_error($errors, 'labo', "Le laboratoire n'existe pas");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
 

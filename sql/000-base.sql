@@ -448,7 +448,7 @@ create table offres_categories (
        id_categorie	       bigint not null references categories ( id ),
        primary key (id_offre, id_categorie)
 );
-
+grant select, insert, delete, update on offres_categories to stcollweb;
 --
 -- table de liaison offres <-> nature_stage (n to n)
 --
@@ -458,7 +458,7 @@ create table offres_nature_stage (
        id_nature_stage		 bigint not null references nature_stage(id),
        primary key (id_offre, id_nature_stage)
 );
-
+grant select, insert, delete, update on offres_nature_stage to stcollweb;
 --
 -- table des validations par les M2
 --
