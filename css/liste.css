@@ -1,0 +1,34 @@
+#content > div {
+    font-size: 12pt;
+    font-weight: bold;
+    line-height: 14pt;
+    vertical-align: top;
+}
+#content > div > span {
+    padding-bottom: 6pt;
+}
+#content > a {
+    display: block;
+    color: black;
+    line-height: 14pt;
+}
+#content > * > span {
+    display: inline-block;
+}
+.odd > span {
+    background-color: #e7e7e7;
+}
+.sujet {
+    width: 400pt;
+}
+.labo {
+    width: 60pt;
+}
+.ville {
+    width: 100pt;
+}
+.m2 {
+    width: 50pt;
+    text-align: center;
+    border-left: 1px solid #cccccc;
+}

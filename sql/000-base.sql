@@ -127,6 +127,7 @@ grant select on liste_labos to stcollweb;
 create sequence seq__m2__id;
 create table m2 (
        id		bigint not null,
+       short_desc	text not null,
        description	text not null,
        from_value	char (8) not null
 );
@@ -155,7 +156,7 @@ $$ language plpgsql;
 
 create trigger trig_m2_set_from_value before insert on m2 for each row execute procedure m2_set_from_value ();
 
-insert into m2 (description) values ('M2 Université Joseph Fourrier');
+insert into m2 (short_desc, description) values ('UJF', 'M2 Université Joseph Fourrier');
 
 --
 -- table des catégories
@@ -202,6 +203,8 @@ create table statuts (
        primary key (id)
 );
 
+grant select on statuts to stcollweb;
+
 create view liste_statuts as select id as key, description as value from statuts;
 grant select on liste_statuts to stcollweb;
 
@@ -219,15 +222,19 @@ create table users (
        l_name	      text,
        email	      text,
        phone	      text,
-       statut	      bigint not null references statuts (id),
-       id_laboratoire bigint not null references laboratoires (id),
+       statut	      bigint not null references statuts ( id ),
+       id_laboratoire bigint not null references laboratoires ( id ),
        login	      text not null unique,
        passwd	      text,
        salt	      bytea,
        login_fails    smallint default 0,
        account_valid  boolean default false,
+       m2_admin	      bigint default NULL references m2 ( id ),
        primary key (id)
 );
+
+create view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire from users;
+grant select on users_view to stcollweb;
 
 --
 -- generates some salt for the password encryption functions
@@ -312,32 +319,37 @@ $$ language plpgsql security definer;
 -- uid if login successful
 -- account is locked out after 3 failures
 --
-create function user_login(t_login text, t_password text) returns bigint as $$
+create function user_login(t_login text, t_password text) returns record as $$
         declare
 		t_account	record;
 		t_temp  	bytea;
 		t_passwd	text;
 		t_lf		smallint;
+		t_rec		record;
         begin
 		-- grab the account info for the login
 		select * into t_account from users where login=t_login;
 		if found then
 		   	if (t_account.login_fails >= 3) then
-			        return -1;
+			        t_rec := ( -1, false );
+				return t_rec;
 			end if;
 			if (t_account.account_valid = false) then
-			        return -2;
+			        t_rec := ( -2, false );
+			        return t_rec;
 			end if;
 			t_passwd := hash_password ( t_password, t_account.salt ); 
 			if (t_passwd = t_account.passwd) then
 			   	update users set login_fails = 0 where id=t_account.id;
-			        return t_account.id;
+			        t_rec := ( t_account.id, t_account.m2_admin );
+				return t_rec;
 			else
 				t_lf := t_account.login_fails + 1;
 				update users set login_fails = t_lf where id=t_account.id;
 			end if;
 		end if;
-		return 0;
+		t_rec := ( 0, false );
+		return t_rec;
 	end;
 $$ language plpgsql security definer;
 
@@ -382,6 +394,8 @@ create table nature_stage (
        description	  text unique
 );
 
+grant select on nature_stage to stcollweb;
+
 create view liste_nature_stage as select id as key, description as value from nature_stage;
 grant select on liste_nature_stage to stcollweb;
 
@@ -400,6 +414,7 @@ create table pay_states (
        id    		bigint primary key,
        description      text unique
 );
+grant select on pay_states to stcollweb;
 
 create view liste_pay_states as select id as key, description as value from pay_states;
 grant select on liste_pay_states to stcollweb;
@@ -468,3 +483,4 @@ create table offres_m2 (
        primary key (id_offre, id_m2)
 );
     
+grant select, insert, delete, update on offres_m2 to stcollweb;

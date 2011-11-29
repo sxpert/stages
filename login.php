@@ -20,13 +20,23 @@ $login = stc_get_variable ($_POST, 'user');
 $passwd = stc_get_variable ($_POST, 'password');
 
 if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
-  $result = stc_user_login($login, $passwd);
+  $r = stc_user_login($login, $passwd);
   $options=array();
-  switch ($result) {
-  case -2: unset($_SESSION['loginerr']); break;
-  case -1: $_SESSION['loginerr']="Compte bloqué"; break;
-  case  0: $_SESSION['loginerr']="Nom d'utilisateur ou mot de passse erroné";break;
-  default: unset($_SESSION['loginerr']); $_SESSION['userid'] = $result;
+  switch ($r[0]) {
+  case -2: 
+    unset($_SESSION['loginerr']); 
+    break;
+  case -1: 
+    $_SESSION['loginerr']="Compte bloqué"; 
+    break;
+  case  0: 
+    $_SESSION['loginerr']="Nom d'utilisateur ou mot de passse erroné";
+    break;
+  default: 
+    unset($_SESSION['loginerr']); 
+    error_log(print_r($r,1));
+    $_SESSION['userid'] = $r[0]; 
+    $_SESSION['admin'] = $r[1];
   }
 }
 header('Location: '.$referer);

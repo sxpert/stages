@@ -87,7 +87,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
     if (is_bool($offre)&&(!$offre))
       stc_form_add_error($errors, 'type', 'Erreur lors de l\'ajout de l\'offre');
     else 
-      stc_redirect("/affiche.php?offreid=".$offre);
+      stc_redirect("/detail.php?offreid=".$offre);
   }
 }
 

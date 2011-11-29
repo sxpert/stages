@@ -1,89 +1,102 @@
-html, input, select, button {
-    font-family: "Ubuntu", deja-vu sans, sans-serif;
-    font-size: 10pt;
+@media screen {
+    html, input, select, button {
+	font-family: "Ubuntu", deja-vu sans, sans-serif;
+	font-size: 10pt;
+    }
+    #top {
+	height: 100pt;
+    }
+    #menu {
+	float: left;
+	width: 200pt;
+	font-size: 9pt;
+    }
+    #menu > div {
+	font-weight: bold;
+	clear: both;
+    }
+    #menu > a {
+	clear: both;
+	padding-left: 10pt;
+	display: block;
+    }
+    #menu > hr {
+	clear: both;
+	border: none;
+	border-bottom: 1px solid #CCCCCC;
+    }
+    #menu > form > div {
+	clear: both;
+	padding-left: 10pt;
+    }
+    #menu > form > div.error {
+	color: red;
+	background-color: #FFFFC0;
+	border: 1px solid red;
+    }
+    #menu > form > div > label {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: 18pt;
+    }
+    #menu > form > div > input {
+	float: right;
+	font-family: inherit;
+	font-size: 9pt;
+    }
+    #menu > form > div > button {
+	float: right;
+	font-family: inherit;
+	font-size: 9pt;
+    }
+    #menusepbar {
+	float: left;
+	width: 5pt;
+	margin-right: 5pt;
+	height: 100%;
+	min-height: 300pt;
+	border-right: 1px solid #CCCCCC;
+    }
+    #content {
+	padding-left:210pt;
+	min-height: 300pt;
+    }
+    #content > form > div.error {
+	color: red;
+	background-color: #FFFFC0;
+	border: 1px solid red;
+	width: 400pt;
+    }
+    #content > form > div > label {
+	display: inline-block;
+	width: 100pt;
+	vertical-align: top;
+    }
+    #content > form > div > .wrapper {
+	display: inline-block;
+    }
+    #content > form > div > textarea {
+	vertical-align: top;
+    }
+    #content > form > div > button {
+	margin-left: 100pt;
+    }
+    #footer {
+	height: 100pt;
+    }
 }
-div {
-    #border: 1px solid red;
-}
-
-#top {
-    height: 100pt;
-}
-#menu {
-    float: left;
-    width: 200pt;
-    font-size: 9pt;
-}
-#menu > div {
-    font-weight: bold;
-    clear: both;
-}
-#menu > a {
-    clear: both;
-    padding-left: 10pt;
-    display: block;
-}
-#menu > hr {
-    clear: both;
-    border: none;
-    border-bottom: 1px solid #CCCCCC;
-}
-#menu > form > div {
-    clear: both;
-    padding-left: 10pt;
-}
-#menu > form > div.error {
-    color: red;
-    background-color: #FFFFC0;
-    border: 1px solid red;
-}
-#menu > form > div > label {
-    display: inline-block;
-    vertical-align: middle;
-    line-height: 18pt;
-}
-#menu > form > div > input {
-    float: right;
-    font-family: inherit;
-    font-size: 9pt;
-}
-#menu > form > div > button {
-    float: right;
-    font-family: inherit;
-    font-size: 9pt;
-}
-#menusepbar {
-    float: left;
-    width: 5pt;
-    margin-right: 5pt;
-    height: 100%;
-    min-height: 300pt;
-    border-right: 1px solid #CCCCCC;
-}
-#content {
-    padding-left:210pt;
-    min-height: 300pt;
-}
-#content > form > div.error {
-    color: red;
-    background-color: #FFFFC0;
-    border: 1px solid red;
-    width: 400pt;
-}
-#content > form > div > label {
-    display: inline-block;
-    width: 100pt;
-    vertical-align: top;
-}
-#content > form > div > .wrapper {
-    display: inline-block;
-}
-#content > form > div > textarea {
-    vertical-align: top;
-}
-#content > form > div > button {
-    margin-left: 100pt;
-}
-#footer {
-    height: 100pt;
+@media print {
+    html {
+	font-family: "Ubuntu", deja-vu sans, sans-serif;
+	font-size: 8pt;
+    }
+    #top {
+	display: none;
+    }
+    #menu {
+	display: none;
+    }
+    #footer {
+	display: none;
+    }
 }

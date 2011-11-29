@@ -83,6 +83,24 @@ function stc_reject () {
   exit(1);
 }
 
+function stc_fail ($code, $message) {
+  switch($code) {
+  case 403: $msg = 'Forbidden'; break;
+  case 405: $msg = 'Method not allowed'; break;
+  case 500: $msg = 'Internal server error'; break;
+  default: $code = 200; $msg = 'OK';
+  }
+
+  header($_SERVER['SERVER_PROTOCOL'].' '.$code.' '.$msg);
+  stc_close_session();  
+  stc_top();
+  $menu = stc_default_menu();
+  stc_menu($menu);
+  echo $message;
+  stc_footer();
+  exit (1);
+}
+
 /******************************************************************************
  *
  * Fonctions html (entete, menu, ...)
@@ -118,18 +136,19 @@ function stc_script_add($statement, $script_id=null) {
 
 function stc_top ($styles=null) {
   xhtml_header();
-  ?><head>
-<title>Stages et Thèses</title>
-<link href="//fonts.googleapis.com/css?family=Ubuntu:regular,bold" rel="stylesheet" type="text/css">
-<link rel="stylesheet" href="/css/base.css" type="text/css"/>
-<?php
-   if (!is_null($styles) and is_array($styles))
-     foreach ($styles as $style)
-       echo "<link rel=\"stylesheet\" href=\"".$style."\"/>\n";
-?></head>
-<body>
-   <div id="top"><a href="/">logos et autres</a></div>
-<?php
+  echo "<head>\n";
+  echo "<title>Stages et Thèses</title>\n";
+  echo "<link rel=\"stylesheet\" href=\"/css/base.css\" type=\"text/css\"/>";
+  echo "<link href=\"http://fonts.googleapis.com/css?family=Ubuntu:regular,bold\" rel=\"stylesheet\" type=\"text/css\">\n";
+  if (!is_null($styles) and is_array($styles))
+    foreach ($styles as $style)
+      echo "<link rel=\"stylesheet\" href=\"".$style."\"/>\n";
+  echo "</head>\n";
+  echo "<body>\n";
+  echo "<div id=\"top\"><a href=\"/\">logos et autres</a>";
+  echo " <a href=\"http://stcoll.sxpert.org/?from=02714f16\">from Grenoble</a>";
+  echo " <a href=\"http://stcoll.sxpert.org/?from=fa3dac69\">from Paris</a>";
+  echo "</div>\n";
 }
 
 /******************************************************************************
@@ -654,27 +673,23 @@ function _append_scripts($scripts=null) {
 
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
-  ?></div></div>
-<div id="footer">footer<br/>
-Accès par <?php
-    if (array_key_exists('from', $_SESSION)) {
-      $m2 = stc_get_m2($_SESSION['from']);
-      echo $m2['description'].' - '.$m2['from_value'];
-    } else {
-      echo "unknown entity";
-    }
-?>
-</div>
-<?php
+  echo "</div></div>\n<div id=\"footer\">footer<br/>\nAccès par ";
+   if (array_key_exists('from', $_SESSION)) {
+     $m2 = stc_get_m2($_SESSION['from']);
+     echo $m2['description'].' - '.$m2['from_value'];
+   } else {
+     echo "unknown entity";
+   }
+   if (array_key_exists('admin', $_SESSION))
+     echo " admin = ".($_SESSION['admin']?'true':'false').' '.$_SESSION['admin'];
+   echo "\n</div>\n";
     // jquery
     echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
     // les scripts
     if (!is_null($scripts)) 
 	_append_scripts($scripts);
     _append_scripts();
-?></body>
-</html>
-<?php
+    echo "</body>\n</html>\n";
 }
 
 /******************************************************************************
@@ -689,6 +704,7 @@ function stc_default_menu ($options=null) {
   $menu = stc_menu_init();
   
   $logged = stc_is_logged();
+  $admin  = stc_is_admin();
   $opt_login = True;
   $opt_register = True;
   $opt_home = False;
@@ -709,11 +725,12 @@ function stc_default_menu ($options=null) {
   $r = pg_get_result($db);
   while ($row = pg_fetch_assoc($r)) {
     stc_menu_add_section ($menu, 'Propositions de '.$row['denom_prop']);
-    stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
+    if ((!$logged)||$admin)
+      stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
     if ($logged) {
       stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
-      stc_menu_add_item($menu, 'gérer ses propositions', 'manage.php?type='.$row['code']);
-    }
+      stc_menu_add_item($menu, 'gérer ses propositions', 'search.php?type='.$row['code']);
+    } 
     stc_menu_add_separator($menu);
   }
   pg_free_result ($r);
@@ -812,13 +829,21 @@ function stc_user_validate_account($login, $password, $hash) {
 function stc_user_login($login, $password) {
   GLOBAL $db;
   
-  $sql = "select user_login($1, $2) as id;";
+  $sql = "select * from user_login($1, $2) as ( id bigint, m2_admin bigint);";
   $arr = array($login, $password);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   $row = pg_fetch_assoc($r);
   pg_free_result($r);
-  return intval($row['id']);
+  error_log('stc_user_login: row = '.print_r($row,1));
+  $id = intval($row['id']);
+  $m2adm = intval($row['m2_admin']);
+  return array($id, $m2adm);
+}
+
+function stc_user_logout() {
+  unset($_SESSION['userid']);
+  unset($_SESSION['admin']);
 }
 
 function stc_rollback($message=null) {
@@ -864,7 +889,7 @@ function stc_offre_add($type, $categories,
   $id_type_offre = $row['id'];
   $id_project_mgr = $_SESSION['userid'];
   /* TODO: calculate year value */
-  $year_value = 0;
+  $year_value = stc_calc_year();
   /* insertion des infos de l'offre */
   $sql = "insert into offres (id_type_offre, id_project_mgr, year_value, sujet, ".
     "description, project_url, prerequis, infoscmpl, start_date, duree, co_encadrant, ".
@@ -930,8 +955,19 @@ function stc_is_logged () {
   return array_key_exists('userid',$_SESSION);
 }
 
+function stc_user_id () {
+  if (array_key_exists('userid',$_SESSION)) return $_SESSION['userid'];
+  return 0;
+}
+
 function stc_is_admin () {
+  if (array_key_exists('admin',$_SESSION)) return $_SESSION['admin'];
   return false;
+}
+
+function stc_from () {
+  if (array_key_exists('from',$_SESSION)) return intval($_SESSION['from']);
+  return 0;
 }
 
 function stc_must_be_logged() {
@@ -971,7 +1007,21 @@ function stc_set_m2_provenance ($from) {
   }
 }
 
-// gestion de la session
+/*******************************************************************************
+ * Fonctions utilitaires
+ */
+
+function stc_calc_year () {
+  $d = getdate();
+  $y = $d['year'];
+  $m = $d['mon'];
+  if ($m>=9) $y++;
+  return $y;
+}
+
+/*******************************************************************************
+ * gestion de la session
+ */
 session_start();
 $db = stc_connect_db();
 

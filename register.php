@@ -9,7 +9,7 @@
 
 require_once('lib/stc.php');
 
-unset($_SESSION['userid']);
+stc_user_logout();
 
 /******************************************************************************
  *
