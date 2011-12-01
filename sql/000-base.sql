@@ -120,6 +120,9 @@ create view liste_labos as select id as key,
        order by value;
 grant select on liste_labos to stcollweb;
 
+create view liste_villes as select distinct city as key, city as value from laboratoires order by city;
+grant select on liste_villes to stcollweb;
+
 --
 -- table des M2
 --

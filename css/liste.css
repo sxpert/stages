@@ -1,3 +1,8 @@
+h1 {
+    font-size: 14pt; 
+    font-weight: bold;
+    margin-bottom: 1ex;
+}
 #content > div {
     font-size: 12pt;
     font-weight: bold;
@@ -31,4 +36,10 @@
     width: 50pt;
     text-align: center;
     border-left: 1px solid #cccccc;
+}
+#content > hr {
+    border: none;
+    border-bottom: 1px solid #CCCCCC;
+    margin-left: 0;
+    margin-bottom: 12pt;
 }

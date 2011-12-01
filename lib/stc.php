@@ -295,6 +295,7 @@ function stc_form_add_error(&$errors, $variable, $message) {
 }
 
 function stc_form_check_errors($form, $variable) {
+  if (is_null($form)) return;
   if (array_key_exists($variable, $form)) {
     echo "<div class=\"error\">";
     $first = True;
@@ -457,6 +458,7 @@ function stc_form_check_select ($value, $table) {
 /* multi select */
 
 function stc_form_clean_multi ($values) {
+  if (is_null($values)) return $values;
   $val = array();
   sort($values, SORT_NUMERIC);
   foreach($values as $v) {
@@ -555,7 +557,40 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     GLOBAL $_stc_scripts;
     stc_script_add('/lib/js/multiselect.js', -1);
     echo "<div>";
-    echo "<label for=\"".$variable."[]\">".$label."</label>";
+    echo "<label for=\"".$variable."[]\">".$label;
+    if (array_key_exists('operator', $options)) {
+      $op = $options['operator'];
+      if (array_key_exists('type',$op)) $op_type=$op['type']; else $op_type=null;
+      if (array_key_exists('name',$op)) $op_name=$op['name']; else $op_name=null;
+      if (array_key_exists('value',$op)) $op_value=$op['value']; else $op_value=null;
+      if (array_key_exists('labels',$op)) $op_labels=$op['labels']; else $op_labels=null;
+      if (array_key_exists('values',$op)) $op_values=$op['values']; else $op_values=null;
+      if (!(is_null($op_type)   ||
+	    is_null($op_name)   ||
+	    is_null($op_labels) ||
+	    is_null($op_values)) &&
+	  ($op_type=='radio' ||
+	   $op_type=='checkbox')
+	  ) {
+	echo "<br/>\n";
+	$o = array();
+	for($i=0;$i<count($op_labels);$i++) {
+	  $s = "<input type=\"".$op_type."\" ";
+	  $s.= "name=\"".$op_name;
+	  if ($op_type=='checkbox') $s.="[]";
+	  $s.= "\" ";
+	  $s.="value=\"".$op_values[$i]."\" ";
+	  if (!is_null($op_value)) 
+	    if ($op_type=='radio') 
+	      if ($op_value==$op_values[$i])
+		$s.="checked";
+	  $s.="/>".$op_labels[$i];
+	  array_push($o,$s);
+	}
+	echo implode("&nbsp;",$o);
+      }
+    }
+    echo "</label>";
     echo "<div id=\"".$variable."\" class=\"wrapper\">";
     echo "</div></div>\n";
     $sql = "select key, value from ".$values.";";
@@ -703,6 +738,7 @@ function stc_default_menu ($options=null) {
 
   $menu = stc_menu_init();
   
+  $user = stc_user_id();
   $logged = stc_is_logged();
   $admin  = stc_is_admin();
   $opt_login = True;
@@ -729,7 +765,7 @@ function stc_default_menu ($options=null) {
       stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
     if ($logged) {
       stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
-      stc_menu_add_item($menu, 'gérer ses propositions', 'search.php?type='.$row['code']);
+      stc_menu_add_item($menu, 'gérer ses propositions', 'search.php?type='.$row['code'].'&projmgr='.$user);
     } 
     stc_menu_add_separator($menu);
   }
