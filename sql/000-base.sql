@@ -450,10 +450,21 @@ create table offres (
        thesis		boolean,       
 
        create_date	timestamp,
-       last_update	timestamp
+       last_update	timestamp,
+       fulltext         tsvector
 );
 alter sequence seq__offres__id owned by offres.id;
 alter table offres alter column id set default nextval('seq__offres__id');
+create index fulltext on offres using gin(fulltext);
+
+create function offre_generate_fulltext() returns trigger as $$
+       begin
+		  NEW.fulltext = to_tsvector('french', NEW.sujet || ' ' || NEW.short_desc || ' ' || NEW.description);
+		  return NEW;
+       end;
+$$ language plpgsql;
+
+create trigger trig_generate_fulltext before insert or update on offres for each row execute procedure offre_generate_fulltext ();
 
 grant select, insert, update on offres to stcollweb;
 grant usage on sequence seq__offres__id to stcollweb;

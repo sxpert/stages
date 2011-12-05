@@ -59,6 +59,7 @@ $projmgr        = intval(stc_get_variable($_REQUEST,'projmgr'));
 $categories     = stc_get_variable($_POST, 'categories');
 $categories_op  = stc_get_variable($_POST, 'categories_op');
 $nature_stage   = stc_get_variable($_POST, 'nature_stage');
+$nature_op      = stc_get_variable($_POST, 'nature_op');
 $labo           = stc_get_variable($_POST, 'labo');
 $ville          = stc_get_variable($_POST, 'ville');
 $keywords       = stc_get_variable($_POST, 'keywords');
@@ -76,7 +77,7 @@ if ($projmgr) {
 }
 
 $categories = stc_form_clean_multi($categories);
-if (count($categories)>0) {
+if (is_array($categories) and (count($categories)>0)) {
   $outer_select=true;
   array_push($select, "array(select id_categorie from offres_categories where offres_categories.id_offre=offres.id) as categories");
   // 1 = ANY (categories) and 2 = ANY (categories) ;
@@ -84,6 +85,46 @@ if (count($categories)>0) {
   foreach($categories as $c)
     array_push($w, "$".append_value($arr, $c)." = any ( categories )");
   array_push($outer_where,"( ".implode(" ".$categories_op." ",$w)." )");
+}
+
+$nature_stage = stc_form_clean_multi($nature_stage);
+if (is_array($nature_stage) and (count($nature_stage)>0)) {
+  $outer_select=true;
+  array_push($select, "array(select id_nature_stage from offres_nature_stage where offres_nature_stage.id_offre=offres.id) ".
+	     "as nature_stage");
+  $w = array();
+  foreach($nature_stage as $n)
+    array_push($w, "$".append_value($arr, $n)." = any ( nature_stage)");
+  array_push($outer_where, "( ".implode(" ".$nature_op." ",$w)." )");
+}
+
+$labo=intval($labo);
+if ($labo>0) {
+  if (!in_array('users_view',$tables)) array_push($tables, 'users_view');
+  $where.=" and offres.id_project_mgr=users_view.id and users_view.id_laboratoire=$".append_value($arr, $labo);
+  
+}
+
+$ville=trim($ville);
+if (strlen($ville)>0) {
+  if ($labo==0) { 
+    if (!in_array('users_view', $tables)) array_push($tables, 'users_view');
+    $where.=" and offres.id_project_mgr=users_view.id";
+  }
+  if (!in_array('laboratoires', $tables)) array_push($tables, 'laboratoires');
+  $where.=" and users_view.id_laboratoire=laboratoires.id and laboratoires.city=$".append_value($arr, $ville);
+}
+
+/****
+ * TODO: gérer l'opérateur "ou" ? opérateurs sélectionnés par l'utilisateur ?
+ * expressions ?
+ */
+$keywords=trim($keywords);
+if (strlen($keywords)>0) {
+  $words = explode(' ',$keywords);
+  $vector = implode(' & ',$words);
+  error_log('keywords => '.$vector);
+  $where.=" and fulltext @@ to_tsquery('french', $".array_push($arr,$vector).")";
 }
 
 $sql = 
@@ -110,7 +151,15 @@ stc_form_select ($form, "Catégories", "categories", $categories, "liste_categor
 		       )
 		 );
 stc_form_select ($form, "Nature du travail", "nature_stage", $nature_stage, "liste_nature_stage",
-		 array("multi" => true, "width" => $width));
+		 array("multi" => true, "width" => $width,
+		       "operator" => array("type" => "radio",
+					   "name" => "nature_op",
+					   "value" => $nature_op,
+					   "labels" => array("ou", "et"),
+					   "values" => array("or", "and")
+					   )
+		       )
+		 );
 stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", array("width" => $width));
 stc_form_select ($form, "Ville", "ville", $ville, "liste_villes", array("width" => $width));
 stc_form_text ($form, "Mots clé", "keywords", $keywords, $width);

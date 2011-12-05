@@ -459,6 +459,7 @@ function stc_form_check_select ($value, $table) {
 
 function stc_form_clean_multi ($values) {
   if (is_null($values)) return $values;
+  if (!is_array($values)) return $values;
   $val = array();
   sort($values, SORT_NUMERIC);
   foreach($values as $v) {
