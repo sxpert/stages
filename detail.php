@@ -53,7 +53,8 @@ function stc_detail_subsection ($title) {
  * displays detail information
  * defaults to text
  */
-function stc_detail_display ($value) {
+function stc_detail_display ($value, $fieldtype='text') {
+  GLOBAL $user, $offre;
   echo "<div class=\"detail\">";
   echo $value;
   echo "</div>\n";
@@ -64,6 +65,22 @@ function stc_detail_display ($value) {
  * Informations standard
  *
  */
+
+$sql = "select * from offres where id=$1";
+$r = pg_query_params($db, $sql, array($offre_id));
+if (pg_num_rows($r)==0) {
+  /* l'offre a disparue ??? */
+}
+$offre = pg_fetch_assoc($r);
+pg_free_result ($r);
+
+if (intval($offre['id_project_mgr'])==intval($user)) {
+  echo "<div class=\"link\">";
+  echo "<a href=\"propose.php?action=edit&offreid=".$offre['id']."\">";
+  echo "Modifier l'offre";
+  echo "</a></div>\n<hr/>\n";
+}
+
 stc_detail_section ("Informations sur le stage");
 
 $sql = "select description from offres_categories, categories ".
@@ -78,22 +95,17 @@ while ($row=pg_fetch_assoc($r)) {
 }
 pg_free_result($r);
 
-$sql = "select * from offres where id=$1";
-$r = pg_query_params($db, $sql, array($offre_id));
-if (pg_num_rows($r)==0) {
-  /* l'offre a disparue ??? */
-}
-$offre = pg_fetch_assoc($r);
-pg_free_result ($r);
-
 /* description du stage */
 
 stc_detail_subsection ("Sujet du stage");
 stc_detail_display ($offre['sujet']);
 stc_detail_subsection ("Description");
 stc_detail_display ($offre['description']);
-stc_detail_subsection ("Plus d'informations");
-stc_detail_display ($offre['project_url']);
+$url = trim($offre['project_url']);
+if (strlen($url)>0) {
+  stc_detail_subsection ("Plus d'informations");
+  stc_detail_display ($url);
+}
 
 /* nature du travail */
 stc_detail_subsection ("Nature du travail demandé");
@@ -106,8 +118,11 @@ while ($row=pg_fetch_assoc($r)) {
 pg_free_result ($r);
 
 /* prérequis */
-stc_detail_subsection ("Pré-requis");
-stc_detail_display ($offre['prerequis']);
+$pr = trim($offre['prerequis']);
+if (strlen($pr)>0) {
+  stc_detail_subsection ("Pré-requis");
+  stc_detail_display ($pr);
+}
 
 /****
  *
@@ -162,6 +177,10 @@ stc_detail_display($pay_state['description']);
 stc_detail_subsection("Poursuite en thèse possible");
 stc_detail_display(($offre['thesis']=='t')?'Oui':'Non');
 
+/****
+ * bouton de validation de l'offre
+ */
+
 if ($admin) {
   echo "<hr/>\n";
   
@@ -181,7 +200,10 @@ if ($admin) {
       error_log("detail.php impossible de trouver id_project_mgr pour l'offre ".$offre_id);
     } else {
       $row = pg_fetch_assoc($r);
-      if (intval($row['id_project_mgr'])==intval($user)) {
+      $projmgr = intval($row['id_project_mgr']);
+      $r = pg_query_params($db, "select id from users_view where m2_admin=$1;",array($admin));
+      $nb=pg_num_rows($r);
+      if ($projmgr==intval($user)&&($nb>1)) {
 	echo "<span>Vous ne pouvez valider les offres dont vous êtes l'auteur</span>";
       } else {
 	$r = pg_query_params($db,

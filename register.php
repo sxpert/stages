@@ -60,21 +60,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	  pg_free_result($res);
 	  $id = $row['id'];
 	  if ($id>0) {
-	    // send verification email
-	    $message = "
-Une personne a demandé la création d'un compte sur le site des stages 
-de M2 afin de pouvoir poster des offres.
-
-Si vous êtes cette personne, cliquez sur le lien ci-dessous pour 
-valider votre compte
-
-http://".$_SERVER['SERVER_NAME']."/validate-account.php?hash=".$row['hash']."
-
-Cordialement,
-
-L'administrateur du site
-";
-	    mail($email, "Validez votre compte", $message);
+	    stc_send_email ($email, $row['hash']);
 	    // do not log the user, show page that tells to go check his email
 	    stc_top();
 	    $options = array();

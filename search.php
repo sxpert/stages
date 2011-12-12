@@ -12,7 +12,9 @@ require_once('lib/stc.php');
 $user = stc_user_id();
 $admin = stc_is_admin();
 $from = stc_from();
+$projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
 $type = stc_get_variable ($_GET,'type');
+$notvalid = intval(stc_get_variable($_REQUEST,'notvalid'));
 
 stc_top(array("/css/liste.css"));
 $menu = stc_default_menu();
@@ -36,7 +38,7 @@ if ($user==0) {
     $arr    = array(stc_calc_year(), $from);
   }
 } else {
-  if ($admin) {
+  if ($admin&&(!$projmgr)) {
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville");
     $tables = array("offres","users_view","laboratoires");
     $where  ="offres.year_value=$1 and ".
@@ -55,7 +57,6 @@ if ($user==0) {
  */
 
 
-$projmgr        = intval(stc_get_variable($_REQUEST,'projmgr'));
 $categories     = stc_get_variable($_POST, 'categories');
 $categories_op  = stc_get_variable($_POST, 'categories_op');
 $nature_stage   = stc_get_variable($_POST, 'nature_stage');
@@ -115,6 +116,10 @@ if (strlen($ville)>0) {
   $where.=" and users_view.id_laboratoire=laboratoires.id and laboratoires.city=$".append_value($arr, $ville);
 }
 
+if (($notvalid!=0)&&($admin>0)) {
+  $where.=' and offres.id not in (select id_offre from offres_m2 where offres_m2.id_m2=$'.append_value($arr, $admin).")";
+}
+
 /****
  * TODO: gérer l'opérateur "ou" ? opérateurs sélectionnés par l'utilisateur ?
  * expressions ?
@@ -137,43 +142,62 @@ $sql =
 
 $width="400pt";
 
-echo "<h1>Options de recherche</h1>\n";
-$form = stc_form("POST", "search.php", null);
-stc_form_hidden($form, 'projmgr', $projmgr);
-stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
-		 array("multi" => true, "width" => $width, 
-		       "operator" => array("type" => "radio", 
-					   "name" => "categories_op",
-					   "value" => $categories_op,
-					   "labels" => array("ou", "et"),
-					   "values" => array("or", "and")
-					   )
-		       )
-		 );
-stc_form_select ($form, "Nature du travail", "nature_stage", $nature_stage, "liste_nature_stage",
-		 array("multi" => true, "width" => $width,
-		       "operator" => array("type" => "radio",
-					   "name" => "nature_op",
-					   "value" => $nature_op,
-					   "labels" => array("ou", "et"),
-					   "values" => array("or", "and")
-					   )
-		       )
-		 );
-stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", array("width" => $width));
-stc_form_select ($form, "Ville", "ville", $ville, "liste_villes", array("width" => $width));
-stc_form_text ($form, "Mots clé", "keywords", $keywords, $width);
-stc_form_button ($form, "Filtrer", "filter");
-stc_form_end();
-echo "<hr/>\n";
+/****
+ * Options de recherche
+ * Affichées si on est pas en mode "manager de projet" 
+ * (on ne cherche pas dans ses propres offres)
+ */
+if (!$projmgr) {
+  echo "<h1>Options de recherche</h1>\n";
+  $form = stc_form("POST", "search.php", null);
+  stc_form_hidden($form, 'projmgr', $projmgr);
+  stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
+		   array("multi" => true, "width" => $width, 
+			 "operator" => array("type" => "radio", 
+					     "name" => "categories_op",
+					     "value" => $categories_op,
+					     "labels" => array("ou", "et"),
+					     "values" => array("or", "and")
+					     )
+			 )
+		   );
+  stc_form_select ($form, "Nature du travail", "nature_stage", $nature_stage, "liste_nature_stage",
+		   array("multi" => true, "width" => $width,
+			 "operator" => array("type" => "radio",
+					     "name" => "nature_op",
+					     "value" => $nature_op,
+					     "labels" => array("ou", "et"),
+					     "values" => array("or", "and")
+					     )
+			 )
+		   );
+  stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", array("width" => $width));
+  stc_form_select ($form, "Ville", "ville", $ville, "liste_villes", array("width" => $width));
+  stc_form_text ($form, "Mots clé", "keywords", $keywords, $width);
+  stc_form_button ($form, "Filtrer", "filter");
+  stc_form_end();
+  echo "<hr/>\n";
+}
+
+/*******************************************************************************
+ * 
+ *
+ *
+ */
+
+
+if (!$projmgr) {
+  stc_form("POST", "detail.php", null);
+}
 
 /****
  * entêtes
  */
 $m2 = array();
 echo "<div>";
+if (!$projmgr) echo "<span class=\"checkbox\"></span>";
 echo "<span class=\"sujet\">Sujet du stage</span>";
-if (($user==0)||($admin)) {
+if ((($user==0)||($admin))&&(!$projmgr)) {
   echo "<span class=\"labo\">Labo</span>";
   echo "<span class=\"ville\">Ville</span>";
 }
@@ -207,6 +231,10 @@ while ($row = pg_fetch_assoc($r)) {
   echo "<a href=\"/detail.php?offreid=".$row['id']."\"";
   if ($odd) echo " class=\"odd\"";
   echo ">";
+  if (!$projmgr) {
+    echo "<span class=\"checkbox\"><input type=\"checkbox\" name=\"multisel[]\" ".
+      "value=\"".$row['id']."\"></span>";
+  }
   echo "<span class=\"sujet\">".$row['sujet']."</span>";
   if (array_key_exists('labo', $row))
     echo "<span class=\"labo\">".$row['labo']."</span>";
@@ -235,12 +263,23 @@ while ($row = pg_fetch_assoc($r)) {
   $odd = ($odd+1)%2;
 }
 
-echo "<hr/>\n";
-echo "<tt>".$sql."</tt><br/>\n";
-echo "<tt>".print_r($arr,1)."</tt><br/>\n";
-pg_result_seek($r,0);
-while($row=pg_fetch_assoc($r)) 
-  echo "<tt>".implode(' | ',$row)."</tt><br/>\n";
+if (!$projmgr) {
+  /* boutons a la fin */
+  echo "<hr/>\n<div class=\"buttons\">";
+  echo "<span>";
+  echo "<button id=\"select\">Tout sélectionner</button>";
+  echo "&nbsp;";
+  echo "<button id=\"deselect\">Tout désélectionner</button>";
+  echo "</span>";
+  echo "<span style=\"float:right;\"><button id=\"print\" name=\"action\" value=\"print\">Impression</button></span>";
+  echo "</div>";
+  stc_form_end();
+  stc_script_add('/js/search.js',-1);
+}
+
+if (DEBUG) {
+  echo "<tt>".$sql."<br/>\n".print_r($arr,1)."</tt>";
+}
 
 stc_footer();
 pg_free_result($r);

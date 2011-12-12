@@ -10,6 +10,8 @@
 require_once ('db.php');
 require_once('xhtml.php');
 
+define('DEBUG', False);
+
 /******************************************************************************
  *
  * Fonctions de gestion et nettoyages des entrées
@@ -86,13 +88,13 @@ function stc_reject () {
 function stc_fail ($code, $message) {
   switch($code) {
   case 403: $msg = 'Forbidden'; break;
+  case 404: $msg = 'Not found'; break;
   case 405: $msg = 'Method not allowed'; break;
   case 500: $msg = 'Internal server error'; break;
   default: $code = 200; $msg = 'OK';
   }
 
   header($_SERVER['SERVER_PROTOCOL'].' '.$code.' '.$msg);
-  stc_close_session();  
   stc_top();
   $menu = stc_default_menu();
   stc_menu($menu);
@@ -114,8 +116,11 @@ function stc_script_add($statement, $script_id=null) {
   
   // implementer $script_id = -1 et numérique
   if (is_int($script_id)) {
-    if ($script_id==-1) array_push($_stc_scripts,$statement);
-    else $_stc_scripts[$script_id] = $statement;
+    if ($script_id==-1) {
+      $s = array_search($statement, $_stc_scripts);
+      if (is_bool($s)&&(!$s))
+	array_push($_stc_scripts,$statement);
+    } else $_stc_scripts[$script_id] = $statement;
   } else { 
     if (is_null($script_id)) $script_id='_default';
     else if ($script_id[0]=='_') {
@@ -146,8 +151,10 @@ function stc_top ($styles=null) {
   echo "</head>\n";
   echo "<body>\n";
   echo "<div id=\"top\"><a href=\"/\">logos et autres</a>";
-  echo " <a href=\"http://stcoll.sxpert.org/?from=02714f16\">from Grenoble</a>";
-  echo " <a href=\"http://stcoll.sxpert.org/?from=fa3dac69\">from Paris</a>";
+  if (DEBUG) {
+    echo " <a href=\"http://stcoll.sxpert.org/?from=b7e0c71d\">from Grenoble</a>";
+    echo " <a href=\"http://stcoll.sxpert.org/?from=72e79adb\">from Paris</a>";
+  }
   echo "</div>\n";
 }
 
@@ -709,23 +716,26 @@ function _append_scripts($scripts=null) {
 
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
-  echo "</div></div>\n<div id=\"footer\">footer<br/>\nAccès par ";
-   if (array_key_exists('from', $_SESSION)) {
-     $m2 = stc_get_m2($_SESSION['from']);
-     echo $m2['description'].' - '.$m2['from_value'];
-   } else {
-     echo "unknown entity";
-   }
-   if (array_key_exists('admin', $_SESSION))
-     echo " admin = ".($_SESSION['admin']?'true':'false').' '.$_SESSION['admin'];
-   echo "\n</div>\n";
-    // jquery
-    echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
-    // les scripts
-    if (!is_null($scripts)) 
-	_append_scripts($scripts);
-    _append_scripts();
-    echo "</body>\n</html>\n";
+  echo "</div></div>\n<div id=\"footer\">footer<br/>\n";
+  if (DEBUG) {
+    echo "Accès par ";
+    if (array_key_exists('from', $_SESSION)) {
+      $m2 = stc_get_m2($_SESSION['from']);
+      echo $m2['description'].' - '.$m2['from_value'];
+    } else {
+      echo "unknown entity";
+    }
+    if (array_key_exists('admin', $_SESSION))
+      echo " admin = ".($_SESSION['admin']?'true':'false').' '.$_SESSION['admin'];
+  }
+  echo "\n</div>\n";
+  // jquery
+  echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
+  // les scripts
+  if (!is_null($scripts)) 
+    _append_scripts($scripts);
+  _append_scripts();
+  echo "</body>\n</html>\n";
 }
 
 /******************************************************************************
@@ -744,11 +754,13 @@ function stc_default_menu ($options=null) {
   $admin  = stc_is_admin();
   $opt_login = True;
   $opt_register = True;
+  $opt_access = True;
   $opt_home = False;
   $loginerr = False;
   if (is_array($options)) {
     if (array_key_exists('login', $options)) $opt_login=$options['login'];
     if (array_key_exists('register', $options)) $opt_register=$options['register'];
+    if (array_key_exists('access', $options)) $opt_access=$options['access'];
     if (array_key_exists('home', $options)) $opt_home=$options['home'];
   }
   if (array_key_exists('loginerr', $_SESSION)) {
@@ -763,9 +775,11 @@ function stc_default_menu ($options=null) {
   while ($row = pg_fetch_assoc($r)) {
     stc_menu_add_section ($menu, 'Propositions de '.$row['denom_prop']);
     if ((!$logged)||$admin)
-      stc_menu_add_item($menu, 'rechercher', 'search.php?type='.$row['code']);
+      stc_menu_add_item($menu, 'rechercher un stage', 'search.php?type='.$row['code']);
+    if ($admin) 
+      stc_menu_add_item($menu, 'propositions en attende de validation', 'search.php?type='.$row['code'].'&notvalid=1');
     if ($logged) {
-      stc_menu_add_item($menu, 'proposer', 'propose.php?type='.$row['code']);
+      stc_menu_add_item($menu, 'proposer un stage', 'propose.php?type='.$row['code']);
       stc_menu_add_item($menu, 'gérer ses propositions', 'search.php?type='.$row['code'].'&projmgr='.$user);
     } 
     stc_menu_add_separator($menu);
@@ -777,6 +791,7 @@ function stc_default_menu ($options=null) {
     stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
   } else {
     if ($opt_login) {
+      /* TODO: faire un lien qui s'ouvre */
       stc_menu_add_section ($menu, 'Connexion');
       stc_menu_add_form($menu,"post", "login.php");
       if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
@@ -786,6 +801,7 @@ function stc_default_menu ($options=null) {
       stc_menu_form_end($menu);
     }
     if ($opt_register) stc_menu_add_item($menu, "s'enregistrer", "register.php");
+    if ($opt_access) stc_menu_add_item($menu, "problèmes d'accès", "account-access.php");
     if ($opt_home) stc_menu_add_item($menu, "accueil", "index.php");
   }
   return $menu;
@@ -849,6 +865,36 @@ function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $la
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   return $r;
+}
+
+function stc_send_check_email($email, $hash) {
+  // send verification email
+  $message = "
+Une personne a demandé la création d'un compte sur le site des stages 
+de M2 afin de pouvoir poster des offres.
+
+Si vous êtes cette personne, cliquez sur le lien ci-dessous pour 
+valider votre compte
+
+http://".$_SERVER['SERVER_NAME']."/validate-account.php?hash=".$hash."
+
+Cordialement,
+
+L'administrateur du site
+";
+  mail($email, "Validez votre compte", $message);
+}
+
+function stc_user_resend_email($login, $password) {
+  GLOBAL $db;
+
+  $sql = "select * from user_get_email_hash ($1, $2) as (id bigint, email text, mhash text)";
+  $arr = array($login, $password);
+  pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result ($db);
+  $row = pg_fetch_assoc($r);
+  if ($row['id']>0) stc_send_check_email($row['email'], $row['mhash']);
+  return $row['id'];
 }
 
 function stc_user_validate_account($login, $password, $hash) {
@@ -993,7 +1039,7 @@ function stc_is_logged () {
 }
 
 function stc_user_id () {
-  if (array_key_exists('userid',$_SESSION)) return $_SESSION['userid'];
+  if (array_key_exists('userid',$_SESSION)) return intval($_SESSION['userid']);
   return 0;
 }
 

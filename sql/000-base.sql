@@ -104,7 +104,7 @@ grant select on laboratoires to stcollweb;
 
 create function laboratoires_set_from_value() returns trigger as $$
        begin
-		  NEW.from_value = substr(encode(digest(NEW.description, 'sha1'), 'hex'), 1, 8);
+		  NEW.from_value = substr(encode(digest(NEW.description, 'sha512'), 'hex'), 1, 8);
 		  return NEW;
        end;
 $$ language plpgsql;
@@ -152,7 +152,7 @@ grant select on m2 to stcollweb;
 
 create function m2_set_from_value() returns trigger as $$
        begin
-		  NEW.from_value = substr(encode(digest(NEW.description, 'sha1'), 'hex'), 1, 8);
+		  NEW.from_value = substr(encode(digest(NEW.description, 'sha512'), 'hex'), 1, 8);
 		  return NEW;
        end;
 $$ language plpgsql;
@@ -190,11 +190,13 @@ insert into categories(description) values
        ('Formation, structure et évolution des étoiles'),
        ('Exoplanetes: origine, structure et évolution des systèmes planétaires, planétologie comparée'),
        ('Système solaire: origine, composition, évolution, structure physico-chimique et dynamique de ses objets et des astromateriaux; cosmochimie'),
-       ('Physique du soleil et de l''héliosphere, relations Soleil-Terre'),
+       ('Physique du soleil et de l''héliosphere'),
        ('Planétologie : physique, dynamique et chimie des atmosphères planétaires'),
+       ('Géophysique : Terre, atmosphère, ionosphère, magnétosphère'),
        ('Processus physiques en astrophysique'),
        ('Systèmes de référence spatio-temporels'),
-       ('Instrumentation pour les grands observatoires au sol et dans l''espace');
+       ('Instrumentation pour les grands observatoires au sol et dans l''espace'),
+       ('Autres');
 
 --
 -- Statuts des utilisateurs
@@ -236,7 +238,7 @@ create table users (
        primary key (id)
 );
 
-create view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire from users;
+create or replace view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire, m2_admin from users;
 grant select on users_view to stcollweb;
 
 --
@@ -354,6 +356,36 @@ create function user_login(t_login text, t_password text) returns record as $$
 		t_rec := ( 0, false );
 		return t_rec;
 	end;
+$$ language plpgsql security definer;
+
+-- 
+-- récupère le hash pour envoyer l'email de nouveau
+--
+create or replace function user_get_email_hash(t_login text, t_password text) returns record as $$
+        declare
+		t_account	record;
+		t_passwd	text;
+		t_emailh	text;
+		t_rec		record;
+        begin
+	        select * into t_account from users where login=t_login;
+		if found then
+		        if (t_account.login_fails >= 3) then
+			        t_rec := (-1::bigint, null::text, null::text);
+				return t_rec;
+                        end if;
+			t_passwd := hash_password ( t_password, t_account.salt );
+			if (t_passwd = t_account.passwd) then
+			        t_emailh := hash_email(t_account.email, t_account.salt);
+				t_rec := ( t_account.id, t_account.email, t_emailh);
+				return t_rec;
+			end if;
+			-- fail
+			update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
+		end if;
+		t_rec := (0::bigint, null::text, null::text);
+		return t_rec;
+        end;
 $$ language plpgsql security definer;
 
 --

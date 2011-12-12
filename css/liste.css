@@ -3,25 +3,34 @@ h1 {
     font-weight: bold;
     margin-bottom: 1ex;
 }
-#content > div {
+label {
+    font-size: 10pt;
+    font-weight: normal;
+    vertical-align: text-bottom;
+}
+#content > div > span, #content > form > div > span {
     font-size: 12pt;
+    padding-bottom: 6pt;
     font-weight: bold;
     line-height: 14pt;
     vertical-align: top;
 }
-#content > div > span {
-    padding-bottom: 6pt;
-}
-#content > a {
+#content > a, #content > form > a {
     display: block;
     color: black;
+    height: 16pt;
     line-height: 14pt;
 }
-#content > * > span {
+#content > * > span, #content > form > * > span {
     display: inline-block;
+    height: 16pt;
+    vertical-align: bottom;
 }
 .odd > span {
     background-color: #e7e7e7;
+}
+.checkbox {
+    width: 20pt;
 }
 .sujet {
     width: 400pt;
@@ -37,7 +46,10 @@ h1 {
     text-align: center;
     border-left: 1px solid #cccccc;
 }
-#content > hr {
+.buttons {
+    width: 600pt;
+}
+#content > hr, #content > form > hr {
     border: none;
     border-bottom: 1px solid #CCCCCC;
     margin-left: 0;

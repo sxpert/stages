@@ -40,6 +40,12 @@ if (pg_num_rows($r)==0) {
   pg_free_result(pg_query($db,"commit;"));
 }
 
-header('Location: /detail.php?offreid='.$offre_id);
+$r=pg_query_params($db,
+		   'select code from offres, type_offres where offres.id_type_offre=type_offre.id and offres.id=$1',
+		   array($offre_id));
+$row = pg_fetch_assoc($r);
+pg_free_result($r);
+
+header('Location: /search.php?type='.$row['code'].'&notvalid=1');
 
 ?>
