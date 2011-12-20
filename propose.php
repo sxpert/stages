@@ -155,6 +155,13 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       }
       if ($mode==UPDATE) {
 	stc_form_add_error($errors, 'type', 'mise à jour des offres en cours d\'implémentation');
+	$offre = stc_offre_update($offreid, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
+			       $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state, $thesis);
+	if (is_bool($offre)&&(!$offre))
+	  stc_form_add_error($errors, 'type', 'Erreur lors de la mise à jour de l\'offre');
+	else 
+	  stc_redirect("/detail.php?offreid=".$offre);
+	
       }
     }
   }
@@ -170,6 +177,7 @@ $width="400pt";
 
 $form = stc_form('post', 'propose.php', $errors);
 stc_form_hidden ($form, "type", $type);
+if (($mode==EDIT)||($mode==UPDATE)) stc_form_hidden($form, "offreid", $offreid);
 
 stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
 		 array("multi" => true, "width" => $width));		 

@@ -15,7 +15,9 @@ $from = stc_from();
 
 $offre_id = intval(stc_get_variable ($_GET,'offreid'));
 
-stc_top(array("/css/detail.css"));
+stc_style_add("/css/detail.css");
+
+stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 

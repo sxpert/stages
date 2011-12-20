@@ -132,6 +132,7 @@ create table m2 (
        id		bigint not null,
        short_desc	text not null,
        description	text not null,
+       ville		text not null,
        from_value	char (8) not null
 );
 alter sequence seq__m2__id owned by m2.id;
@@ -150,16 +151,26 @@ grant select on m2 to stcollweb;
 -- note: la valeur n'est calculée automatiquement qu'a l'insertion initiale. elle est conservée en cas de modifications
 --
 
-create function m2_set_from_value() returns trigger as $$
+create or replace function m2_set_from_value() returns trigger as $$
        begin
-		  NEW.from_value = substr(encode(digest(NEW.description, 'sha512'), 'hex'), 1, 8);
+		  NEW.from_value = substr(encode(digest(NEW.short_desc || NEW.description || NEW.ville, 'sha512'), 'hex'), 1, 8);
 		  return NEW;
        end;
 $$ language plpgsql;
 
 create trigger trig_m2_set_from_value before insert on m2 for each row execute procedure m2_set_from_value ();
 
-insert into m2 (short_desc, description) values ('UJF', 'M2 Université Joseph Fourrier');
+insert into m2 (short_desc, description, ville) values ('A2P', 'Astrophysique, Plasmas et Planètes', 'Grenoble');
+insert into m2 (short_desc, description, ville) values ('Astro', 'Astrophysique', 'Paris');
+insert into m2 (short_desc, description, ville) values ('DSG', 'Dynamique des Systèmes Gravitationnels', 'Paris');
+insert into m2 (short_desc, description, ville) values ('OSAE', 'Outils et Systèmes de l''Astronomie de de l''Espace', 'Paris');
+insert into m2 (short_desc, description, ville) values ('Astro', 'Astrophysique', 'Strasbourg');
+insert into m2 (short_desc, description, ville) values ('ASEP', 'Astrophysique, Sciences de l''Espace, Planétologie', 'Toulouse');
+insert into m2 (short_desc, description, ville) values ('TSI', 'Techniques Spatiales et Instrumentation', 'Toulouse');
+insert into m2 (short_desc, description, ville) values ('OMEGA', 'Optique, Dynamique, Images, Astrophysique', 'Nice');
+insert into m2 (short_desc, description, ville) values ('AER', 'Astrophysique, Energie, Rayonnement', 'Marseille');
+insert into m2 (short_desc, description, ville) values ('APC', 'Astrophysique et Physique Corpusculaire', 'Bordeaux');
+insert into m2 (short_desc, description, ville) values ('PF', 'Physique Fondamentale', 'Lyon');
 
 --
 -- table des catégories
@@ -324,7 +335,7 @@ $$ language plpgsql security definer;
 -- uid if login successful
 -- account is locked out after 3 failures
 --
-create function user_login(t_login text, t_password text) returns record as $$
+create or replace function user_login(t_login text, t_password text) returns record as $$
         declare
 		t_account	record;
 		t_temp  	bytea;
@@ -336,11 +347,11 @@ create function user_login(t_login text, t_password text) returns record as $$
 		select * into t_account from users where login=t_login;
 		if found then
 		   	if (t_account.login_fails >= 3) then
-			        t_rec := ( -1, false );
+			        t_rec := ( -1::bigint, 0::bigint );
 				return t_rec;
 			end if;
 			if (t_account.account_valid = false) then
-			        t_rec := ( -2, false );
+			        t_rec := ( -2::bigint, 0::bigint );
 			        return t_rec;
 			end if;
 			t_passwd := hash_password ( t_password, t_account.salt ); 
@@ -353,7 +364,7 @@ create function user_login(t_login text, t_password text) returns record as $$
 				update users set login_fails = t_lf where id=t_account.id;
 			end if;
 		end if;
-		t_rec := ( 0, false );
+		t_rec := ( 0::bigint, 0::bigint );
 		return t_rec;
 	end;
 $$ language plpgsql security definer;
@@ -489,11 +500,32 @@ alter sequence seq__offres__id owned by offres.id;
 alter table offres alter column id set default nextval('seq__offres__id');
 create index fulltext on offres using gin(fulltext);
 
-create function offre_generate_fulltext() returns trigger as $$
-       begin
-		  NEW.fulltext = to_tsvector('french', NEW.sujet || ' ' || NEW.short_desc || ' ' || NEW.description);
-		  return NEW;
-       end;
+create or replace function offre_generate_fulltext() returns trigger as $$
+        declare
+                tv	tsvector;
+		sujet	text;
+		short	text;
+		descr	text;
+        begin
+		if (NEW.sujet IS NULL) then
+		        sujet := '';
+		else
+			sujet := NEW.sujet;
+		end if;
+		if (NEW.short_desc IS NULL) then
+		        short := '';
+		else
+			short := NEW.short_desc;
+		end if;
+		if (NEW.description IS NULL) then
+		        descr := '';
+		else
+			descr := NEW.description;
+		end if;
+		tv := to_tsvector('french', sujet || ' ' || short || ' ' || descr);
+		NEW.fulltext := tv;
+		return NEW;
+        end;
 $$ language plpgsql;
 
 create trigger trig_generate_fulltext before insert or update on offres for each row execute procedure offre_generate_fulltext ();

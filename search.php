@@ -16,7 +16,8 @@ $projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
 $type = stc_get_variable ($_GET,'type');
 $notvalid = intval(stc_get_variable($_REQUEST,'notvalid'));
 
-stc_top(array("/css/liste.css"));
+stc_style_add("/css/liste.css");
+stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
@@ -187,14 +188,14 @@ if (!$projmgr) {
 
 
 if (!$projmgr) {
-  stc_form("POST", "detail.php", null);
+  stc_form("POST", "detail.php", null, "list");
 }
 
 /****
  * entêtes
  */
 $m2 = array();
-echo "<div>";
+echo "<div class=\"header\">";
 if (!$projmgr) echo "<span class=\"checkbox\"></span>";
 echo "<span class=\"sujet\">Sujet du stage</span>";
 if ((($user==0)||($admin))&&(!$projmgr)) {
@@ -203,10 +204,11 @@ if ((($user==0)||($admin))&&(!$projmgr)) {
 }
 if ($user!=0) {
   /* lister les m2 */
-  $r=pg_query($db, "select id, short_desc from m2 order by id;");
+  $r=pg_query($db, "select id, short_desc, ville from m2 order by id;");
   while ($row = pg_fetch_assoc($r)) {
     array_push($m2, intval($row['id']));
-    echo "<span class=\"m2\">".$row['short_desc']."</span>";
+    echo "<span class=\"m2\"><span class=\"m2hdr\">".$row['short_desc'].
+      "<br/>".$row['ville']."</span></span>";
   }
   pg_free_result($r);
 }
@@ -228,13 +230,17 @@ if (pg_result_status($r)!=PGSQL_TUPLES_OK) {
   exit(1);
 }
 while ($row = pg_fetch_assoc($r)) {
-  echo "<a href=\"/detail.php?offreid=".$row['id']."\"";
-  if ($odd) echo " class=\"odd\"";
-  echo ">";
+  echo "<div class=\"offre";
+  if ($odd) echo " odd";
+  echo "\">";
   if (!$projmgr) {
-    echo "<span class=\"checkbox\"><input type=\"checkbox\" name=\"multisel[]\" ".
-      "value=\"".$row['id']."\"></span>";
+    echo "<span class=\"checkbox";
+    if ($odd) echo " odd";
+    echo "\"><input type=\"checkbox\" name=\"multisel[]\" ";
+    echo "value=\"".$row['id']."\"></span>";
   }
+  echo "<a href=\"/detail.php?offreid=".$row['id']."\"";
+  echo ">";
   echo "<span class=\"sujet\">".$row['sujet']."</span>";
   if (array_key_exists('labo', $row))
     echo "<span class=\"labo\">".$row['labo']."</span>";
@@ -259,7 +265,7 @@ while ($row = pg_fetch_assoc($r)) {
     }
     pg_free_result($rm2);
   }
-  echo "</a>\n";
+  echo "</a></div>\n";
   $odd = ($odd+1)%2;
 }
 
@@ -275,6 +281,7 @@ if (!$projmgr) {
   echo "</div>";
   stc_form_end();
   stc_script_add('/js/search.js',-1);
+  stc_script_add( "search_init();",'window.onload');
 }
 
 if (DEBUG) {

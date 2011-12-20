@@ -86,8 +86,8 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
  * Formulaire
  *
  */
-
-stc_top(array("/css/register.css"));
+stc_style_add("/css/register.css");
+stc_top();
 
 $options = array();
 $options['login']=false;
@@ -107,14 +107,16 @@ stc_form_text ($form, "Téléphone", "phone", $phone);
 stc_form_select ($form, "Statut", "status", $status, "liste_statuts");
 stc_form_text ($form, "Numéro d'unité", "umr", $umr);
 stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", 
-		 array("onchange"=>"javascript:update_adresse_labo('labo')"));
+		 array("onchange"=>"javascript:update_adresse_labo('labo')", "width" => "400pt"));
 echo "<br/>\n";
 stc_form_text ($form, "Nom d'utilisateur", "login", $login);
 stc_form_password ($form, "Mot de passe", "pass1", $pass1);
 stc_form_password ($form, "Mot de passe", "pass2", $pass2);
 stc_form_button ($form, "Créer mon compte", "create_account");
 stc_form_end ();
+stc_script_add('/js/register.js',-1);
+stc_script_add("register_init();",'window.onload');
 
-stc_footer(array('/js/register.js'));
+stc_footer();
 
 ?>

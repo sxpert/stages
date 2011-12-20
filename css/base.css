@@ -1,4 +1,15 @@
+/*******************************************************************************
+ *
+ * Gestion des offres de stage de M2 en Astro
+ * (c) Raphaël Jacquot 2011
+ * Fichier sous licence GPL-3
+ *
+ ******************************************************************************/
+
 @media screen {
+    body {
+	margin: 2pt;
+    }
     html, input, select, button {
 	font-family: "Ubuntu", deja-vu sans, sans-serif;
 	font-size: 10pt;
@@ -8,22 +19,33 @@
     }
     #menu {
 	float: left;
-	width: 200pt;
+	width: 170pt;
 	font-size: 9pt;
     }
     #menu > div {
 	font-weight: bold;
 	clear: both;
+	height: 12pt;
     }
     #menu > a {
 	clear: both;
-	padding-left: 10pt;
+	padding-left: 5pt;
 	display: block;
+	height: 12pt;
     }
     #menu > hr {
 	clear: both;
 	border: none;
 	border-bottom: 1px solid #CCCCCC;
+    }
+    #menu > a.header {
+	color: black;
+	text-decoration: none;
+	font-weight: bold;
+	padding-left: 0pt;
+	margin : 0;
+	clear: inherit;
+	height: 12pt;
     }
     #menu > form > div {
 	clear: both;
@@ -43,6 +65,7 @@
 	float: right;
 	font-family: inherit;
 	font-size: 9pt;
+	width : 80pt;
     }
     #menu > form > div > button {
 	float: right;
@@ -58,7 +81,7 @@
 	border-right: 1px solid #CCCCCC;
     }
     #content {
-	padding-left:210pt;
+	padding-left:180pt;
 	min-height: 300pt;
     }
     #content > form > div.error {

@@ -14,4 +14,10 @@ $DB_USER="stcollweb";
 $DB_PASS="test";
 $DB_ADMIN_USER="stcolladm";
 $DB_ADMIN_PASS="testadm";
+
+$MAIL_SRV="stcoll.sxpert.org";
+
+$JQUERY_VER="1.7.1";
+$JQUERYUI_VER="1.8.16";
+$JQUERYUI_THEME="base";
 ?>

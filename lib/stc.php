@@ -10,7 +10,8 @@
 require_once ('db.php');
 require_once('xhtml.php');
 
-define('DEBUG', False);
+define('DEBUG', false);
+
 
 /******************************************************************************
  *
@@ -110,16 +111,19 @@ function stc_fail ($code, $message) {
  */
 
 $_stc_scripts = array();
+$_stc_styles = array();
 
 function stc_script_add($statement, $script_id=null) {
   GLOBAL $_stc_scripts;
   
   // implementer $script_id = -1 et numérique
   if (is_int($script_id)) {
-    if ($script_id==-1) {
+    if ($script_id<0) {
       $s = array_search($statement, $_stc_scripts);
-      if (is_bool($s)&&(!$s))
-	array_push($_stc_scripts,$statement);
+      if (is_bool($s)&&(!$s)) {
+	if ($script_id==-1) array_push($_stc_scripts,$statement);
+	if ($script_id==-2) $_stc_scripts = array_merge(array($statement),$_stc_scripts);
+      }
     } else $_stc_scripts[$script_id] = $statement;
   } else { 
     if (is_null($script_id)) $script_id='_default';
@@ -139,15 +143,37 @@ function stc_script_add($statement, $script_id=null) {
   }
 }
 
+function stc_style_add($style) {
+  GLOBAL $_stc_styles;
+  $s = array_search($style, $_stc_styles);
+  if (is_bool($s)&&(!$s))
+    array_push($_stc_styles, $style);
+}
+
+function stc_add_jquery() {
+  GLOBAL $JQUERY_VER;
+  stc_script_add ("https://ajax.googleapis.com/ajax/libs/jquery/".$JQUERY_VER."/jquery.js", -2);
+}
+
+function stc_add_jqueryui() {
+  GLOBAL $JQUERYUI_VER, $JQUERYUI_THEME;
+  stc_add_jquery ();
+  stc_script_add ("/jquery/ui/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
+  stc_style_add ("/jquery/ui/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.css");
+}
+
 function stc_top ($styles=null) {
+  GLOBAL $_stc_styles;
+  
+  stc_style_add("/css/base.css");
+  stc_style_add("http://fonts.googleapis.com/css?family=Ubuntu:regular,bold");
+  stc_add_jqueryui();
+  
   xhtml_header();
   echo "<head>\n";
   echo "<title>Stages et Thèses</title>\n";
-  echo "<link rel=\"stylesheet\" href=\"/css/base.css\" type=\"text/css\"/>";
-  echo "<link href=\"http://fonts.googleapis.com/css?family=Ubuntu:regular,bold\" rel=\"stylesheet\" type=\"text/css\">\n";
-  if (!is_null($styles) and is_array($styles))
-    foreach ($styles as $style)
-      echo "<link rel=\"stylesheet\" href=\"".$style."\"/>\n";
+  foreach ($_stc_styles as $style)
+    echo "<link rel=\"stylesheet\" href=\"".$style."\" type=\"text/css\"/>\n";
   echo "</head>\n";
   echo "<body>\n";
   echo "<div id=\"top\"><a href=\"/\">logos et autres</a>";
@@ -201,11 +227,13 @@ function stc_menu_add_separator (&$menu) {
   array_push($menu, $menuitem);
 }
 
-function stc_menu_add_form (&$menu, $method, $action) {
+function stc_menu_add_form (&$menu, $method, $action, $id=null,$start_hidden=false) {
   $menuitem = array();
   $menuitem['type']=STC_MENU_FORM;
   $menuitem['method']=$method;
   $menuitem['action']=$action;
+  $menuitem['id']=$id;
+  $menuitem['start_hidden']=$start_hidden;
   array_push($menu, $menuitem);
 }
 
@@ -262,7 +290,18 @@ function stc_menu($menu) {
     case STC_MENU_SECTION: echo "<div>".$menuitem['item']."</div>\n"; break;
     case STC_MENU_ITEM: echo "<a href=\"".$menuitem['url']."\">".$menuitem['item']."</a>\n"; break;
     case STC_MENU_SEPARATOR: echo "<hr/>\n";break;
-    case STC_MENU_FORM: echo "<form method=\"".$menuitem['method']."\" action=\"".$menuitem['action']."\">\n"; break;
+    case STC_MENU_FORM : {
+      echo "<form method=\"".$menuitem['method']."\" action=\"".$menuitem['action']."\"";
+      if (!is_null($menuitem['id'])) {
+	echo " id=\"".$menuitem['id']."\"";
+	if ($menuitem['start_hidden']) {
+	  stc_script_add('/lib/js/hide.js',-1);
+	  stc_script_add("init_hidden('".$menuitem['id']."');","_begin");   
+	}
+      }
+      echo ">\n"; 
+      break;
+    }
     case STC_MENU_FORM_ERROR: echo "<div class=\"error\">".$menuitem['message']."</div>\n"; break;
     case STC_MENU_FORM_HIDDEN: echo "<input type=\"hidden\" name=\"".$menuitem['variable']."\" value=\"".stc_form_escape_value($menuitem['value'])."\"/>"; break;
     case STC_MENU_FORM_TEXT: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"text\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
@@ -493,8 +532,10 @@ function stc_form_check_multi ($values, $table) {
  * Fonction de génération du HTML pour les formulaires
  */
 
-function stc_form ($method, $action, $errors) {
-  echo "<form method=\"".$method. "\" action=\"".$action."\">\n";
+function stc_form ($method, $action, $errors, $id=null) {
+  echo "<form method=\"".$method. "\" action=\"".$action."\"";
+  if (!is_null($id)) echo " id=\"".$id."\"";
+  echo ">\n";
   return $errors;
 }
 
@@ -521,9 +562,18 @@ function stc_form_date ($form, $label, $variable, $value="") {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
-  echo "<input type=\"text\" name=\"".$variable."\"";
+  echo "<input type=\"text\" id=\"".$variable."\" name=\"".$variable."\"";
   if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
   echo "/></div>\n";
+
+  // https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js
+  
+  stc_script_add("$(function() { $(\"#".$variable."\").datepicker({showOn:\"button\",".
+		 "buttonImage: \"/jquery/ui/development-bundle/demos/datepicker/images/calendar.gif\"".
+		 ",buttonImageOnly: true,".
+		 "dateFormat: \"yy-mm-dd\"".
+		 "});});","_begin");
+  
 }
 
 function stc_form_password ($form, $label, $variable, $value="") {
@@ -714,8 +764,10 @@ function _append_scripts($scripts=null) {
   echo "</script>\n";
 }
 
+
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
+  stc_add_jquery ();
   echo "</div></div>\n<div id=\"footer\">footer<br/>\n";
   if (DEBUG) {
     echo "Accès par ";
@@ -730,7 +782,6 @@ function stc_footer($scripts=null) {
   }
   echo "\n</div>\n";
   // jquery
-  echo "<script type=\"text/javascript\" src=\"http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js\"></script>\n";
   // les scripts
   if (!is_null($scripts)) 
     _append_scripts($scripts);
@@ -786,14 +837,17 @@ function stc_default_menu ($options=null) {
   }
   pg_free_result ($r);
   
-  if ($logged) {
-    //stc_menu_add_section ($menu, '');
-    stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
-  } else {
+  if (($logged)&&($admin)) {
+    stc_menu_add_section($menu, 'Options administratives');
+    stc_menu_add_item($menu, 'gestion des catégories', 'gere-categories.php');
+    stc_menu_add_separator($menu);
+  }  
+  stc_menu_add_section($menu, 'Gestion de la connexion');
+  if ($logged) stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
+  else {
     if ($opt_login) {
       /* TODO: faire un lien qui s'ouvre */
-      stc_menu_add_section ($menu, 'Connexion');
-      stc_menu_add_form($menu,"post", "login.php");
+      stc_menu_add_form($menu,"post", "login.php", "loginform", true);
       if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
       stc_menu_form_add_text($menu,"Utilisateur","user");
       stc_menu_form_add_password($menu,"Mot de Passe","password");
@@ -1024,6 +1078,82 @@ function stc_offre_add($type, $categories,
    * tout s'est bien passé, on committe la transaction et on renvoie le 
    * numéro de l'offre nouvellement créée
    */
+  pg_free_result(pg_query($db, 'commit;'));
+  return $offreid;
+}
+
+function stc_offre_update($offreid, $categories, 
+		       $sujet, $description, $url,
+		       $nature_stage, $prerequis,
+		       $infoscmpl, $start_date, $length,
+		       $co_encadrant, $co_enc_email,
+		       $pay_state, $thesis) {
+  GLOBAL $db;
+  
+  $thesis = ($thesis?'true':'false');
+
+  /* début de transaction */
+  pg_free_result(pg_query($db, 'begin;'));
+
+  /* mise à jour de l'offre elle meme */
+  
+  $sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, '.
+    'infoscmpl=$5, start_date=$6, duree=$7, co_encadrant=$8, co_enc_email=$9, pay_state=$10, '.
+    'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
+  $arr = array($sujet, $description, $url, $prerequis, $infoscmpl, $start_date, $length,
+	       $co_encadrant, $co_enc_email, $pay_state, $thesis, $offreid);
+  $r = pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result($db);
+  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+    return stc_rollback('offre_update[update offre] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+
+  /* remplacement des catégories */
+  $sql = 'delete from offres_categories where id_offre = $1';
+  $arr = array($offreid);
+  $r = pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result($db);
+  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+    return stc_rollback('offre_update[remove categories] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+  $sql = "insert into offres_categories (id_offre, id_categorie) values ($1, $2);";
+  foreach($categories as $categorie) {
+    $r = pg_send_query_params($db, $sql, array($offreid, $categorie));
+    $r = pg_get_result($db);
+    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+      return stc_rollback('offre_update[add categorie] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+		      ' - '.pg_last_error($db));
+  }  
+
+  /* remplacement des nature_stage */
+  $sql = 'delete from offres_nature_stage where id_offre = $1';
+  $arr = array($offreid);
+  $r = pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result($db);
+  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+    return stc_rollback('offre_update[remove nature stage] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+  $sql = "insert into offres_nature_stage (id_offre, id_nature_stage) values ($1, $2);";
+  foreach($nature_stage as $ns) {
+    $r = pg_send_query_params($db, $sql, array($offreid, $ns));
+    $r = pg_get_result($db);
+    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+      return stc_rollback('offre_update[add nature_stage] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+		      ' - '.pg_last_error($db));
+  }
+
+  /* suppression des validations */
+  
+  $sql = 'delete from offres_m2 where id_offre = $1;';
+  $arr = array($offreid);
+  $r = pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result($db);
+  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+    return stc_rollback('offre_update[remove m2 validations] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+
+  /* sauvegarde des modifs */
+
   pg_free_result(pg_query($db, 'commit;'));
   return $offreid;
 }
