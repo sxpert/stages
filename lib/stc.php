@@ -296,7 +296,7 @@ function stc_menu($menu) {
 	echo " id=\"".$menuitem['id']."\"";
 	if ($menuitem['start_hidden']) {
 	  stc_script_add('/lib/js/hide.js',-1);
-	  stc_script_add("init_hidden('".$menuitem['id']."');","_begin");   
+	  stc_script_add("init_hidden('".$menuitem['id']."');","window.onload");   
 	}
       }
       echo ">\n"; 

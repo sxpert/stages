@@ -149,8 +149,10 @@ $width="400pt";
  * (on ne cherche pas dans ses propres offres)
  */
 if (!$projmgr) {
+  stc_script_add('/lib/js/hide.js',-1);
+  stc_script_add("init_hidden('searchfilter');","window.onload");   
   echo "<h1>Options de recherche</h1>\n";
-  $form = stc_form("POST", "search.php", null);
+  $form = stc_form("POST", "search.php", null, "searchfilter");
   stc_form_hidden($form, 'projmgr', $projmgr);
   stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
 		   array("multi" => true, "width" => $width, 
