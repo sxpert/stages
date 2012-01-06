@@ -36,6 +36,10 @@ label {
     line-height: 14pt;
     text-decoration: none;
 }
+.offre > a > span {
+    line-height: 16pt;
+    vertical-align: middle;
+}
 .offre > span, .offre > * > span {
     display: inline-block;
     height: 16pt;
@@ -49,6 +53,7 @@ label {
 }
 .sujet {
     width: 350pt;
+    overflow: hidden;
 }
 .labo {
     width: 40pt;
@@ -76,6 +81,12 @@ label {
 }
 .buttons {
     width: 600pt;
+}
+.buttons > span > button {
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin: 0 3px 3px 0;
+    height: 22px;
 }
 #content > hr, #content > form > hr {
     border: none;

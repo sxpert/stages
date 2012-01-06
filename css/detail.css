@@ -52,6 +52,15 @@
 	font-style: italic;
 	font-weight: bold;
     }
+    div.pagebreak {
+	display: none;
+    }
+    button[value="validate"] {
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	margin: 0;
+    }
+
 }
 @media print {
     h1 {
@@ -75,5 +84,8 @@
     }
     #validate, hr {
 	display: none;
+    }
+    div.pagebreak {
+	page-break-after: always;
     }
 }

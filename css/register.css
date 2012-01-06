@@ -12,4 +12,6 @@
     background: #ffffcc;
     width: 300pt;
     height: 40pt;
+    border-radius: 3px;
+    margin: 0 3px 3px 0;
 }

@@ -46,6 +46,10 @@
     #menu > form > div {
 	clear: both;
 	padding-left: 10pt;
+	margin-bottom : 3pt;
+    }
+    #menu > form > div.button {
+	text-align: right;
     }
     #menu > form > div.error {
 	color: red;
@@ -54,18 +58,23 @@
     }
     #menu > form > div > label {
 	display: inline-block;
-	vertical-align: middle;
-	line-height: 18pt;
+	vertical-align: text-top;
+	line-height: 13pt;
     }
     #menu > form > div > input {
+	margin: 0;
 	float: right;
 	font-family: inherit;
 	font-size: 9pt;
 	width : 80pt;
+	border: 1px solid #ccc;
+	border-radius: 3pt;
     }
     #menu > form > div > button {
-	float: right;
+	margin: 0;
 	font-family: inherit;
+	border: 1px solid #CCC;
+	border-radius: 3pt;
 	font-size: 9pt;
     }
     #menusepbar {
@@ -74,7 +83,7 @@
 	margin-right: 5pt;
 	height: 100%;
 	min-height: 300pt;
-	border-right: 1px solid #CCCCCC;
+	border-right: 1px solid #ccc;
     }
     #content {
 	padding-left:180pt;
@@ -90,15 +99,46 @@
 	display: inline-block;
 	width: 100pt;
 	vertical-align: top;
+	line-height: 22px;
     }
     #content > form > div > .wrapper {
 	display: inline-block;
     }
-    #content > form > div > textarea {
+    #content > form > div > input,
+    #content > form > div > select,
+    #content > form > div > div > select,
+    #content > form > div > textarea,
+    #content > form > div > button,
+    #content > form > div > div > button {
+	border: 1px solid #ccc;
+        border-radius: 3px;
+	margin: 0 3px 3px 0;
 	vertical-align: top;
+    }
+    #content > form > div > select,
+    #content > form > div > div > select,
+    #content > form > div > textarea,
+    #content > form > div > button,
+    #content > form > div > div > button {
+	height: 22px;
+    }
+    #content > form > div > textarea {
+	padding: 0;
+    }
+    #content > form > div > input {
+	height: 18px;
+    }
+    #content > form > div > input[type="checkbox"] {
+	height: 22px;
     }
     #content > form > div > button {
 	margin-left: 100pt;
+    }
+    .ui-datepicker-trigger {
+	padding-top: 3px;
+    }
+    .multi-select-button {
+	width: 22px;
     }
     #footer {
 	height: 100pt;

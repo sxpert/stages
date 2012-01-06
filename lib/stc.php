@@ -152,21 +152,21 @@ function stc_style_add($style) {
 
 function stc_add_jquery() {
   GLOBAL $JQUERY_VER;
-  stc_script_add ("https://ajax.googleapis.com/ajax/libs/jquery/".$JQUERY_VER."/jquery.js", -2);
+  stc_script_add ("/lib/jquery/core/".$JQUERY_VER.".min.js", -2);
 }
 
 function stc_add_jqueryui() {
   GLOBAL $JQUERYUI_VER, $JQUERYUI_THEME;
   stc_add_jquery ();
-  stc_script_add ("/jquery/ui/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
-  stc_style_add ("/jquery/ui/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.css");
+  stc_script_add ("/lib/jquery/ui/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
+  stc_style_add ("/lib/jquery/ui/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.css");
 }
 
 function stc_top ($styles=null) {
   GLOBAL $_stc_styles;
   
   stc_style_add("/css/base.css");
-  stc_style_add("http://fonts.googleapis.com/css?family=Ubuntu:regular,bold");
+  stc_style_add("/lib/css/fonts.css");
   stc_add_jqueryui();
   
   xhtml_header();
@@ -306,7 +306,10 @@ function stc_menu($menu) {
     case STC_MENU_FORM_HIDDEN: echo "<input type=\"hidden\" name=\"".$menuitem['variable']."\" value=\"".stc_form_escape_value($menuitem['value'])."\"/>"; break;
     case STC_MENU_FORM_TEXT: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"text\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
     case STC_MENU_FORM_PASS: echo "<div><label for=\"".$menuitem['variable']."\">".$menuitem['label']."</label><input type=\"password\" name=\"".$menuitem['variable']."\"></input></div>\n"; break;
-    case STC_MENU_FORM_BUTTON: echo "<div><button>".$menuitem['text']."</button></div>\n"; break;
+    case STC_MENU_FORM_BUTTON: {
+      echo "<div class=\"button\"><button>".$menuitem['text']."</button></div>\n"; 
+      break;
+    }
     case STC_MENU_FORM_END: echo "</form>"; break;
     }
   }

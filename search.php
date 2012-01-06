@@ -16,7 +16,7 @@ $projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
 $type = stc_get_variable ($_GET,'type');
 $notvalid = intval(stc_get_variable($_REQUEST,'notvalid'));
 
-stc_style_add("/css/liste.css");
+stc_style_add("/css/search.css");
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
@@ -276,7 +276,6 @@ if (!$projmgr) {
   echo "<hr/>\n<div class=\"buttons\">";
   echo "<span>";
   echo "<button id=\"select\">Tout sélectionner</button>";
-  echo "&nbsp;";
   echo "<button id=\"deselect\">Tout désélectionner</button>";
   echo "</span>";
   echo "<span style=\"float:right;\"><button id=\"print\" name=\"action\" value=\"print\">Impression</button></span>";

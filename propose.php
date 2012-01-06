@@ -173,7 +173,7 @@ stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
-$width="400pt";
+$width="550px";
 
 $form = stc_form('post', 'propose.php', $errors);
 stc_form_hidden ($form, "type", $type);

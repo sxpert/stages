@@ -60,7 +60,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	  pg_free_result($res);
 	  $id = $row['id'];
 	  if ($id>0) {
-	    stc_send_email ($email, $row['hash']);
+	    stc_send_check_email ($email, $row['hash']);
 	    // do not log the user, show page that tells to go check his email
 	    stc_top();
 	    $options = array();
