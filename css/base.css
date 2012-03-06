@@ -8,16 +8,58 @@
 
 @media screen {
     body {
-	margin: 2pt;
+	margin: 0;
     }
     html, input, select, button {
 	font-family: "Ubuntu", deja-vu sans, sans-serif;
 	font-size: 10pt;
     }
     #top {
-	height: 100pt;
+	height: 120px;
+    }
+    #top > a {
+	display: block;
+	text-decoration: none;
+	text-align: center;
+	vertical-align: middle;
+	background-color: black;
+	z-index: 0;
+	height: 86px;
+    }
+    #text-logo-centre {
+	position: absolute;
+	color: black;
+	top: 0px;
+	left: 0px;
+	z-index: 2;
+	font-size: 18pt;
+	height: 20pt;
+	padding-top: 90px;
+	width: 100%;
+    }
+    #logo-m2-gauche {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 86px;
+	z-index: 1;
+    }
+    #logo-sf2a-gauche {
+	position: absolute;
+	top: 0;
+	left: 0;
+	height: 100px;
+	z-index: 1;
+    }
+    #logo-sf2a-droit {
+	position: absolute;
+	top: 0;
+	right: 0;
+	height: 100px;
+	z-index: 1;
     }
     #menu {
+	margin-left: 3px;
 	float: left;
 	width: 170pt;
 	font-size: 9pt;
@@ -86,6 +128,7 @@
 	border-right: 1px solid #ccc;
     }
     #content {
+	margin-right: 3px;
 	padding-left:180pt;
 	min-height: 300pt;
     }
@@ -97,7 +140,7 @@
     }
     #content > form > div > label {
 	display: inline-block;
-	width: 100pt;
+	width: 140pt;
 	vertical-align: top;
 	line-height: 22px;
     }
@@ -132,7 +175,7 @@
 	height: 22px;
     }
     #content > form > div > button {
-	margin-left: 100pt;
+	margin-left: 140pt;
     }
     .ui-datepicker-trigger {
 	padding-top: 3px;
@@ -142,6 +185,18 @@
     }
     #footer {
 	height: 100pt;
+    }
+    .symbol {
+	font-family: OpenSymbol;
+    }
+    .dot {
+	color: red;
+    }
+    .formhelp {
+	display: inline-block;
+	vertical-align: top;
+	line-height: 22px;
+	width: 200px;
     }
 }
 @media print {

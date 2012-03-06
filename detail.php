@@ -61,7 +61,7 @@ function stc_affiche_offre($id, $multi=false) {
     } else {
       /* l'utilisateur est un étudiant qui vient d'une M2 particulière */
       $sql = "select * from offres_m2 where id_offre = $1 and id_m2 = $2;";
-      $r = pg_query_params($db, $sql, array($offre_id, $from));
+      $r = pg_query_params($db, $sql, array($id, $from));
       if (pg_num_rows($r)!=1) {
 	if ($multi) return false;
 	echo "Offre non disponible pour votre M2";
@@ -194,9 +194,9 @@ $from = stc_from();
 
 $offre_id = intval(stc_get_variable ($_GET,'offreid'));
 $multisel = stc_get_variable ($_REQUEST,'multisel');
+$mode = stc_get_variable ($_REQUEST,'mode');
 
 stc_style_add("/css/detail.css");
-
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
@@ -208,6 +208,9 @@ if (is_array($multisel)) {
   }
 
 } else {
+  if ($mode == "new") echo "<p>La proposition de stage suivante a bien été enregistrée.</p>\n";
+  if ($mode == "update") echo "<p>La proposition de stage suivante a bien été mise à jour.</p>\n";
+  
 
   if (!stc_affiche_offre($offre_id)) exit(0);
 

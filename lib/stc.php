@@ -176,9 +176,22 @@ function stc_top ($styles=null) {
     echo "<link rel=\"stylesheet\" href=\"".$style."\" type=\"text/css\"/>\n";
   echo "</head>\n";
   echo "<body>\n";
-  echo "<div id=\"top\"><a href=\"/\">logos et autres</a>";
+  echo "<div id=\"top\"><a href=\"/\">";
+  if (stc_is_logged()) {
+    echo "<img id=\"logo-sf2a-gauche\" src=\"/images/logo-sf2a.jpg\"/>";
+    echo "<div id=\"text-logo-centre\">Base de données des stages de M2R en Astronomie et Astrophysique</div>";
+  } else {
+    $from = stc_from();
+    if ($from) {
+      $url = stc_get_logo_url($from);
+      if ($url)	echo "<img id=\"logo-m2-gauche\" src=\"".$url."\"/>";    
+    }
+    echo "<div id=\"text-logo-centre\">Stages de M2R en Astronomie et Astrophysique</div>";
+    echo "<img id=\"logo-sf2a-droit\" src=\"/images/logo-sf2a.jpg\"/>";    
+  }
+  echo "</a>";
   if (DEBUG) {
-    echo " <a href=\"http://stcoll.sxpert.org/?from=b7e0c71d\">from Grenoble</a>";
+    echo " <a href=\"http://stcoll.sxpert.org/?from=869a18eb\">from Grenoble</a>";
     echo " <a href=\"http://stcoll.sxpert.org/?from=72e79adb\">from Paris</a>";
   }
   echo "</div>\n";
@@ -549,7 +562,7 @@ function stc_form_hidden($form, $variable, $value="") {
   echo "/>";
 }
 
-function stc_form_text ($form, $label, $variable, $value="", $width=null, $length=null) {
+function stc_form_text ($form, $label, $variable, $value="", $width=null, $length=null, $help=null) {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
@@ -557,7 +570,9 @@ function stc_form_text ($form, $label, $variable, $value="", $width=null, $lengt
   if (!is_null($width)) echo " style=\"width:".$width."\"";
   if (!is_null($length)) echo " maxlength=\"".$length."\"";
   if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
-  echo "/></div>\n";
+  echo "/>";
+  if (!is_null($help)) echo "<div class=\"formhelp\">".$help."</div>";
+  echo "</div>\n";
 }
 
 // TODO: mettre un sélecteur de date
@@ -572,7 +587,7 @@ function stc_form_date ($form, $label, $variable, $value="") {
   // https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js
   
   stc_script_add("$(function() { $(\"#".$variable."\").datepicker({showOn:\"button\",".
-		 "buttonImage: \"/jquery/ui/development-bundle/demos/datepicker/images/calendar.gif\"".
+		 "buttonImage: \"/lib/jquery/ui/development-bundle/demos/datepicker/images/calendar.gif\"".
 		 ",buttonImageOnly: true,".
 		 "dateFormat: \"yy-mm-dd\"".
 		 "});});","_begin");
@@ -588,7 +603,7 @@ function stc_form_password ($form, $label, $variable, $value="") {
   echo "></div>\n";
 }
 
-function stc_form_textarea ($form, $label, $variable, $value="", $width=null, $height=null) {
+function stc_form_textarea ($form, $label, $variable, $value="", $width=null, $height=null, $help=null) {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
@@ -599,7 +614,9 @@ function stc_form_textarea ($form, $label, $variable, $value="", $width=null, $h
   if (strlen($s)>0) $s=" style=\"".$s."\"";
   echo $s.">";
   if (strlen($value)>0) echo stc_form_escape_value($value);
-  echo "</textarea></div>\n";
+  echo "</textarea>";
+  if (!is_null($help)) echo "<div class=\"formhelp\">".$help."</div>";
+  echo "</div>\n";
 }
 
 function stc_form_select ($form, $label, $variable, $value="", $values=null, $options=null) {
@@ -612,6 +629,7 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     if (array_key_exists('onchange',$options)) $onchange = $options['onchange'];
     if (array_key_exists('multi',$options)) $multi=$options['multi'];
     if (array_key_exists('width',$options)) $width=$options['width'];
+    if (array_key_exists('help',$options)) $help=$options['help']; else $help=null;
   }
   echo stc_form_check_errors ($form, $variable);
   if ($multi) {
@@ -653,7 +671,9 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     }
     echo "</label>";
     echo "<div id=\"".$variable."\" class=\"wrapper\">";
-    echo "</div></div>\n";
+    echo "</div>";
+    if (!is_null($help)) echo "<div class=\"formhelp\">".$help."</div>";
+    echo "</div>\n";
     $sql = "select key, value from ".$values.";";
     pg_send_query ($db, $sql);
     $r = pg_get_result ($db);
@@ -771,10 +791,11 @@ function _append_scripts($scripts=null) {
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
-  echo "</div></div>\n<div id=\"footer\">footer<br/>\n";
+  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2012<br/>\n";
   if (DEBUG) {
     echo "Accès par ";
     if (array_key_exists('from', $_SESSION)) {
+      echo stc_from()." - ";
       $m2 = stc_get_m2($_SESSION['from']);
       echo $m2['description'].' - '.$m2['from_value'];
     } else {
@@ -811,6 +832,8 @@ function stc_default_menu ($options=null) {
   $opt_access = True;
   $opt_home = False;
   $loginerr = False;
+  $from = stc_from();
+
   if (is_array($options)) {
     if (array_key_exists('login', $options)) $opt_login=$options['login'];
     if (array_key_exists('register', $options)) $opt_register=$options['register'];
@@ -827,39 +850,48 @@ function stc_default_menu ($options=null) {
   pg_send_query($db, $sql);
   $r = pg_get_result($db);
   while ($row = pg_fetch_assoc($r)) {
-    stc_menu_add_section ($menu, 'Propositions de '.$row['denom_prop']);
-    if ((!$logged)||$admin)
-      stc_menu_add_item($menu, 'rechercher un stage', 'search.php?type='.$row['code']);
-    if ($admin) 
-      stc_menu_add_item($menu, 'propositions en attende de validation', 'search.php?type='.$row['code'].'&notvalid=1');
     if ($logged) {
-      stc_menu_add_item($menu, 'proposer un stage', 'propose.php?type='.$row['code']);
-      stc_menu_add_item($menu, 'gérer ses propositions', 'search.php?type='.$row['code'].'&projmgr='.$user);
+      if ($admin) stc_menu_add_section ($menu, 'Actions gestionnaire de M2 :');
+      else stc_menu_add_section ($menu, 'Vous désirez :');
+    }
+    
+    if (($logged&&$admin)||(stc_from()>0)) 
+      stc_menu_add_item($menu, 'Rechercher un stage de M2R', 'search.php?type='.$row['code']); 
+    if ($logged){
+      if ($admin) {
+        stc_menu_add_item($menu, 'Propositions en attente de validation', 'search.php?type='.$row['code'].'&notvalid=1');
+	stc_menu_add_item($menu, 'Voir les stages comme un étudiant', 'search.php?type='.$row['code'].'&simulm2=true');
+	stc_menu_add_separator($menu);
+      }
+      if ($admin) stc_menu_add_section ($menu, 'Actions responsable de stage :');
+      stc_menu_add_item($menu, 'Proposer un sujet de stage', 'propose.php?type='.$row['code']);
+      stc_menu_add_item($menu, 'Mes propositions de stage', 'search.php?type='.$row['code'].'&projmgr='.$user);
+      stc_menu_add_separator($menu);
     } 
-    stc_menu_add_separator($menu);
   }
   pg_free_result ($r);
   
+  /*
   if (($logged)&&($admin)) {
     stc_menu_add_section($menu, 'Options administratives');
     stc_menu_add_item($menu, 'gestion des catégories', 'gere-categories.php');
     stc_menu_add_separator($menu);
-  }  
-  stc_menu_add_section($menu, 'Gestion de la connexion');
-  if ($logged) stc_menu_add_item ($menu, 'déconnexion', 'logout.php');
+  } 
+  */ 
+  if ($logged) stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
   else {
-    if ($opt_login) {
-      /* TODO: faire un lien qui s'ouvre */
-      stc_menu_add_form($menu,"post", "login.php", "loginform", true);
+    if (($opt_login)&&stc_from()==0) {
+      stc_menu_add_section($menu, 'Connexion à l\'application');
+      stc_menu_add_form($menu,"post", "login.php", "loginform");
       if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
       stc_menu_form_add_text($menu,"Utilisateur","user");
       stc_menu_form_add_password($menu,"Mot de Passe","password");
-      stc_menu_form_add_button($menu,"se connecter");
+      stc_menu_form_add_button($menu,"Se connecter");
       stc_menu_form_end($menu);
     }
-    if ($opt_register) stc_menu_add_item($menu, "s'enregistrer", "register.php");
-    if ($opt_access) stc_menu_add_item($menu, "problèmes d'accès", "account-access.php");
-    if ($opt_home) stc_menu_add_item($menu, "accueil", "index.php");
+    if (($opt_register)&&(stc_from()==0)) stc_menu_add_item($menu, "Créer un compte", "register.php");
+    if (($opt_access)&&(stc_from()==0)) stc_menu_add_item($menu, "Problèmes d'accès", "account-access.php");
+    if ($opt_home) stc_menu_add_item($menu, "Accueil", "index.php");
   }
   return $menu;
 }
@@ -1186,6 +1218,42 @@ function stc_from () {
   return 0;
 }
 
+function stc_get_logo_url($m2) {
+  GLOBAL $db;
+  $sql = "select url_logo from m2 where id=$1;";
+  $r = pg_query_params($db,$sql,array($m2));
+  $nb = pg_num_rows($r);
+  if ($nb!=1) return null;
+  $row = pg_fetch_assoc($r);
+  return $row['url_logo'];
+}
+
+function stc_get_user_name($userid) {
+  GLOBAL $db;
+  $sql = "select f_name || ' ' || l_name from users_view where id=$1;";
+  $r = pg_query_params($db, $sql, array($userid));
+  $row = pg_fetch_row($r);
+  pg_free_result($r);
+  return $row[0];
+}
+
+function stc_get_m2_name($from) {
+  if (!($from>0)) return "inconnu";
+  $m2_row = stc_get_m2($from);
+  $m2 = $m2_row['description']." (".$m2_row['ville'].")";
+  return $m2;
+}
+
+function stc_get_nb_offres($from) {
+  GLOBAL $db;
+  $y = stc_calc_year();
+  $sql = "select count(id) from offres, offres_m2 where offres.id=offres_m2.id_offre and id_m2=$1 and year_value=$2;";
+  $r = pg_query_params($db, $sql, array($from, $y));
+  $row = pg_fetch_row($r);
+  pg_free_result($r);
+  return intval($row[0]);
+}
+
 function stc_must_be_logged() {
   if (stc_is_logged()) return;
   
@@ -1204,10 +1272,14 @@ function stc_set_m2_provenance ($from) {
   case False:
     // error during request
     error_log ('stc_set_m2_provenance: sql request failure');
+    unset($_SESSION['from']);
     break;
   case 0:
     // not found.
     error_log ('unable to find m2 for from = \''.$from.'\'');
+    unset($_SESSION['userid']);
+    unset($_SESSION['admin']);
+    unset($_SESSION['from']);
     break;
   case 1:
     // all ok
@@ -1215,6 +1287,8 @@ function stc_set_m2_provenance ($from) {
     pg_free_result($r);
     $m2_id = $row[0];
     error_log('found m2_id = '.$m2_id.' for from=\''.$from.'\'');
+    unset($_SESSION['userid']);
+    unset($_SESSION['admin']);
     $_SESSION['from']=$m2_id;
     break;
   default:

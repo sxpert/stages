@@ -15,16 +15,24 @@ $from = stc_from();
 $projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
 $type = stc_get_variable ($_GET,'type');
 $notvalid = intval(stc_get_variable($_REQUEST,'notvalid'));
+$simulm2 = stc_get_variable($_REQUEST,'simulm2');
+if ($simulm2=='true') {
+  $simulm2=true;
+  $from = $admin;
+} else $simulm2=false;
+
 
 stc_style_add("/css/search.css");
 stc_top();
-$menu = stc_default_menu();
+$opt = array();
+$opt['home']=true;
+$menu = stc_default_menu($opt);
 stc_menu($menu);
 
 $outer_select=false;
 $outer_where = array();
 
-if ($user==0) {
+if (($user==0)||($simulm2)) {
   /* utilisateur non loggué */
   if ($from==0) { 
     /* utilisateur ne provenant pas d'une M2 */
@@ -74,7 +82,7 @@ function append_value(&$arr, $value) {
   return count($arr);
 }
 
-if ($projmgr) {
+if (($projmgr)&&(!$simulm2)) {
   $where.=" and offres.id_project_mgr=$".append_value($arr, $projmgr);
 }
 
@@ -138,20 +146,27 @@ $sql =
   "select "." ".implode(',',$select).
   " from ".implode(',',$tables).
   " where ".$where.
+  " order by id ".
   ($outer_select?(" ) as offres where ".implode(" and ",$outer_where)):"").
   ";";
 
 $width="400pt";
+
+if ($notvalid==1) {
+  echo "<h1>Stages en attente de validation</h1>\n";
+} else {
+  echo "<h1>Liste des stages</h1>\n";
+}
 
 /****
  * Options de recherche
  * Affichées si on est pas en mode "manager de projet" 
  * (on ne cherche pas dans ses propres offres)
  */
-if (!$projmgr) {
+if (((!$projmgr)&&($notvalid!=1))||($simulm2)) {
   stc_script_add('/lib/js/hide.js',-1);
   stc_script_add("init_hidden('searchfilter');","window.onload");   
-  echo "<h1>Options de recherche</h1>\n";
+  echo "<h2>Options de recherche</h2>\n";
   $form = stc_form("POST", "search.php", null, "searchfilter");
   stc_form_hidden($form, 'projmgr', $projmgr);
   stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
@@ -177,50 +192,30 @@ if (!$projmgr) {
   stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", array("width" => $width));
   stc_form_select ($form, "Ville", "ville", $ville, "liste_villes", array("width" => $width));
   stc_form_text ($form, "Mots clé", "keywords", $keywords, $width);
-  stc_form_button ($form, "Filtrer", "filter");
+  stc_form_button ($form, "Rechercher", "filter");
   stc_form_end();
   echo "<hr/>\n";
 }
 
 /*******************************************************************************
  * 
- *
+ * Liste des stages sélectionnés par la recherche
  *
  */
 
+if (($user)&&(!$simulm2)) {
+  echo "<p>Un stage est validé par un M2R quand un <span class=\"symbol\">☑</span> apparait dans la colonne correspondante<br/>".
+    "Pour toute question concernant la validation de vos stages, prière de vous adresser ".
+    "au(x) responsable(s) du M2 correspondant.</p>";
+}
 
-if (!$projmgr) {
+if ((!$projmgr)||($simulm2)) {
   stc_form("POST", "detail.php", null, "list");
 }
 
 /****
  * entêtes
  */
-$m2 = array();
-echo "<div class=\"header\">";
-if (!$projmgr) echo "<span class=\"checkbox\"></span>";
-echo "<span class=\"sujet\">Sujet du stage</span>";
-if ((($user==0)||($admin))&&(!$projmgr)) {
-  echo "<span class=\"labo\">Labo</span>";
-  echo "<span class=\"ville\">Ville</span>";
-}
-if ($user!=0) {
-  /* lister les m2 */
-  $r=pg_query($db, "select id, short_desc, ville from m2 order by id;");
-  while ($row = pg_fetch_assoc($r)) {
-    array_push($m2, intval($row['id']));
-    echo "<span class=\"m2\"><span class=\"m2hdr\">".$row['short_desc'].
-      "<br/>".$row['ville']."</span></span>";
-  }
-  pg_free_result($r);
-}
-echo "</div>";
-
-/****
- * lignes
- */
-$odd = 1;
-
 pg_send_query_params($db, $sql, $arr);
 $r = pg_get_result($db);
 if (pg_result_status($r)!=PGSQL_TUPLES_OK) {
@@ -231,6 +226,35 @@ if (pg_result_status($r)!=PGSQL_TUPLES_OK) {
   stc_footer();
   exit(1);
 }
+$nb_offres = pg_num_rows($r);
+
+echo "<p>Il y a $nb_offres stage(s) répondant à ces critères</p>\n";
+
+$m2 = array();
+echo "<div class=\"header\">";
+if ((!$projmgr)||($simulm2)) echo "<span class=\"checkbox\"></span>";
+echo "<span class=\"sujet\">Sujet du stage</span>";
+if ((($user==0)||($admin))&&(!$projmgr)) {
+  echo "<span class=\"labo\">Labo</span>";
+  echo "<span class=\"ville\">Ville</span>";
+}
+if (($user!=0)&&(!$simulm2)) {
+  /* lister les m2 */
+  $rh=pg_query($db, "select id, short_desc, ville from m2 order by id;");
+  while ($row = pg_fetch_assoc($rh)) {
+    array_push($m2, intval($row['id']));
+    echo "<span class=\"m2\"><span class=\"m2hdr\">".$row['short_desc'].
+      "<br/>".$row['ville']."</span></span>";
+  }
+  pg_free_result($rh);
+}
+echo "</div>";
+
+/****
+ * lignes
+ */
+$odd = 1;
+
 while ($row = pg_fetch_assoc($r)) {
   echo "<div class=\"offre";
   if ($odd) echo " odd";
@@ -249,8 +273,8 @@ while ($row = pg_fetch_assoc($r)) {
   if (array_key_exists('ville', $row))
     echo "<span class=\"ville\">".$row['ville']."</span>";
   /* si on a un utilisateur loggué, on montre les M2 */
-  if ($user!=0) {
-    $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1", array($row['id']));
+  if (($user!=0)&&(!$simulm2)) {
+    $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($row['id']));
     $cur = 0;
     error_log(print_r($m2,1));
     for($i=0;$i<count($m2);$i++) {   
@@ -261,7 +285,7 @@ while ($row = pg_fetch_assoc($r)) {
       
       error_log($i.' => '.$cur.' - '.$m2[$i]);
       if ($cur==$m2[$i]) {
-	echo "<span class=\"m2\">ok</span>";
+	echo "<span class=\"m2\">☑</span>";
 	$cur=0;
       } else echo "<span class=\"m2\">&nbsp;</span>";
     }

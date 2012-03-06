@@ -91,8 +91,6 @@ create table laboratoires (
 );
 create unique index pk__laboratoires__id on laboratoires ( id );
 alter table laboratoires add primary key using index pk__laboratoires__id;
-create unique index idx__laboratoires__desc on laboratoires ( description );
-alter table laboratoires add unique using index idx__laboratoires__desc;
 create index idx__laboratoires__from_value on laboratoires ( from_value );
 
 grant select on laboratoires to stcollweb;
@@ -133,14 +131,13 @@ create table m2 (
        short_desc	text not null,
        description	text not null,
        ville		text not null,
-       from_value	char (8) not null
+       from_value	char (8) not null,
+       url_logo		text
 );
 alter sequence seq__m2__id owned by m2.id;
 alter table m2 alter column id set default nextval('seq__m2__id');
 create unique index pk__m2__id on m2 ( id );
 alter table m2 add primary key using index pk__m2__id;
-create unique index idx__m2__desc on m2 ( description );
-alter table m2 add unique using index idx__m2__desc;
 create index idx__m2__from_value on m2 ( from_value );
 
 grant usage on sequence seq__m2__id to stcollweb;
@@ -161,10 +158,10 @@ $$ language plpgsql;
 create trigger trig_m2_set_from_value before insert on m2 for each row execute procedure m2_set_from_value ();
 
 insert into m2 (short_desc, description, ville) values ('A2P', 'Astrophysique, Plasmas et Planètes', 'Grenoble');
-insert into m2 (short_desc, description, ville) values ('Astro', 'Astrophysique', 'Paris');
+insert into m2 (short_desc, description, ville) values ('Astro75', 'Astrophysique', 'Paris');
 insert into m2 (short_desc, description, ville) values ('DSG', 'Dynamique des Systèmes Gravitationnels', 'Paris');
 insert into m2 (short_desc, description, ville) values ('OSAE', 'Outils et Systèmes de l''Astronomie de de l''Espace', 'Paris');
-insert into m2 (short_desc, description, ville) values ('Astro', 'Astrophysique', 'Strasbourg');
+insert into m2 (short_desc, description, ville) values ('Astro67', 'Astrophysique UNISTRA', 'Strasbourg');
 insert into m2 (short_desc, description, ville) values ('ASEP', 'Astrophysique, Sciences de l''Espace, Planétologie', 'Toulouse');
 insert into m2 (short_desc, description, ville) values ('TSI', 'Techniques Spatiales et Instrumentation', 'Toulouse');
 insert into m2 (short_desc, description, ville) values ('OMEGA', 'Optique, Dynamique, Images, Astrophysique', 'Nice');

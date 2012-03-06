@@ -29,6 +29,17 @@ $pass2     = stc_get_variable ($_POST, 'pass2');
 
 $errors = array();
 
+function stc_clean_umr ($umr) {
+  // suppression de tout ce qui n'est pas un chiffre
+  $u = '';
+  for($i=0;$i<strlen($umr);$i++) {
+    $c = $umr[$i];
+    if (preg_match('/\d/',$c))
+      $u.=$c;
+  }
+  return intval($u);
+}
+
 if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
   $referer = stc_check_referer();
   if ($referer == False) stc_reject();
@@ -41,10 +52,13 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
       if (!stc_form_check_select($status, 'liste_statuts')) 
 	stc_form_add_error($errors, 'status', "le statut n'existe pas");
+      $umr = stc_clean_umr($umr);
       if (intval($umr)!=intval($labo))
 	stc_form_add_error($errors, 'labo', "Incohérence entre numéro d'UMR et laboratoire");
       if (!stc_form_check_select($labo, 'liste_labos'))
 	stc_form_add_error($errors, 'labo', "Le laboratoire n'existe pas");
+      if (strlen(trim($login))==0) 
+	stc_form_add_error($errors, 'login', "le nom d'utilisateur ne doit pas être vide et ne peut contenir d'espaces");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
 

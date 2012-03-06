@@ -35,12 +35,15 @@ $options['access']=false;
 $options['home']=true;
 $menu = stc_default_menu($options);
 stc_menu($menu);
+echo "<p>Si vous n'avez pas reçu le mail de confirmation, remplissez le formulaire ci-dessous</p>\n";
 
 $form = stc_form("post", "account-access.php", $errors);
 stc_form_text($form, "Nom d'utilisateur", "login", $login);
 stc_form_password($form, "Mot de passe", "pass", $pass);
 stc_form_button($form, "Envoyer le mail de validation", "send_validation_email");
 stc_form_end();
+
+echo "<p>Pour tout autre probleme, envoyez un mail à raphael [point] jacquot [@] obs [point] ujf-grenoble [point] fr</p>\n";
 
 
 

@@ -50,7 +50,7 @@ if ($mode==EDIT) {
   $co_encadrant = $offre['co_encadrant'];
   $co_enc_email = $offre['co_enc_email'];
   $pay_state    = $offre['pay_state'];
-  $thesis       = ($offre['thesis']=='t'?true:false);
+  $thesis       = ($offre['thesis']=='t'?"true":"false");
 
   /* type offre */
   $r = pg_query_params($db, 'select code from type_offre where id=$1', array(intval($offre['id_type_offre'])));
@@ -138,8 +138,9 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       stc_form_add_error($errors, 'pay_state', 'Option de gratification invalide');  
     
     /* thesis */
-    $thesis = stc_form_clean_checkbox($thesis);
-    
+    if (strcmp($thesis,"true")==0) $thesis=true;
+    else $thesis=false;
+   
     /****
      * Si on arrive la et que $errors est vide c'est que tout va bien
      */
@@ -151,7 +152,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de l\'ajout de l\'offre');
 	else 
-	  stc_redirect("/detail.php?offreid=".$offre);
+	  stc_redirect("/detail.php?mode=new&offreid=".$offre);
       }
       if ($mode==UPDATE) {
 	stc_form_add_error($errors, 'type', 'mise à jour des offres en cours d\'implémentation');
@@ -160,7 +161,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de la mise à jour de l\'offre');
 	else 
-	  stc_redirect("/detail.php?offreid=".$offre);
+	  stc_redirect("/detail.php?mode=update&offreid=".$offre);
 	
       }
     }
@@ -169,35 +170,49 @@ if (($mode==INSERT)||($mode==UPDATE)) {
   
 /* génération du formulaire */
 
+stc_style_add("/css/propose.css");
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
 $width="550px";
 
+echo "<div class=\"important\">Le déposant s'engage à informer sa hiérarchie de la diffusion de cette proposition.</div>\n";
+
+echo "<p><span class=\"symbol dot\">●</span> Champs obligatoires</p>\n";
+
+
 $form = stc_form('post', 'propose.php', $errors);
 stc_form_hidden ($form, "type", $type);
 if (($mode==EDIT)||($mode==UPDATE)) stc_form_hidden($form, "offreid", $offreid);
 
-stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
-		 array("multi" => true, "width" => $width));		 
+stc_form_select ($form, "Catégories <span class=\"symbol dot\">●</span>", "categories", $categories, "liste_categories",
+		 array("multi" => true, "width" => $width, "help" => "vous pouvez en ajouter autant que nécessaire"));		 
 echo "<br/>\n";
 
-stc_form_text ($form, "Sujet du stage", "sujet", $sujet, $width);
-stc_form_textarea ($form, "Description", "description", $description, $width, "200pt");
+stc_form_text ($form, "Sujet du stage <span class=\"symbol dot\">●</span>", "sujet", $sujet, $width);
+stc_form_textarea ($form, "Description <span class=\"symbol dot\">●</span><br/><span id=\"counter\"></span>", 
+		   "description", $description, $width, "200pt",
+		   "$MAX_CHARS signes maximum<br/>Si nécessaire, plus d'informations peuvent être données dans une page ".
+		   "web dédiée (champ suivant)");
+stc_script_add('/js/propose.js.php',-1);
 echo "<br/>\n";
 
 stc_form_text ($form, "Page web du projet", "url", $url, $width);
 echo "<br/>\n";
-stc_form_select ($form, "Nature du travail", "nature_stage", $nature_stage, "liste_nature_stage",
+stc_form_select ($form, "Nature du travail <span class=\"symbol dot\">●</span>", "nature_stage", $nature_stage, "liste_nature_stage",
 		 array("multi" => true, "width" => $width));
 echo "<br/>\n";
 
-stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width);
-stc_form_text ($form, "Informations complémentaires", "infoscmpl", $infoscmpl, $width);
+stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width,null,
+	       "Compétences ou connaissances spécifiques nécessaires");
 echo "<br/>\n";
 
-stc_form_date ($form, "Date indicative de début du stage", "start_date", $start_date);
+stc_form_text ($form, "Informations complémentaires", "infoscmpl", $infoscmpl, $width, null,
+	       "Déplacement prévu en conférence ou dans d'autres laboratoires, stage en co-direction (...)");
+echo "<br/>\n";
+
+stc_form_date ($form, "Date indicative de début <span class=\"symbol dot\">●</span>", "start_date", $start_date);
 stc_form_text ($form, "Durée du stage", "length", $length, $width);
 echo "<br/>\n";
 
@@ -205,11 +220,13 @@ stc_form_text ($form, "Nom du co-encadrant", "co_encadrant", $co_encadrant, $wid
 stc_form_text ($form, "Email du co-encadrant", "co_enc_email", $co_enc_email, $width);
 echo "<br/>\n";
 
-stc_form_select ($form, "Gratification du stage", "pay_state", $pay_state, "liste_pay_states");
-stc_form_checkbox ($form, "Poursuite en thèse possible", "thesis", $thesis);
+stc_form_select ($form, "Gratification du stage <span class=\"symbol dot\">●</span>", "pay_state", $pay_state, "liste_pay_states");
+stc_form_select ($form, "Poursuite en thèse possible <span class=\"symbol dot\">●</span>", "thesis", $thesis, array("true" => "oui", "false" => "non"));
+
+echo "<br/>\n";
 
 if (($mode==EDIT)||($mode==UPDATE)) stc_form_button ($form, "Mettre à jour", "update_task");
-else stc_form_button ($form, "Proposer un stage", "propose_task");
+else stc_form_button ($form, "Enregistrer la proposition", "propose_task");
 stc_form_end();
 stc_footer();
 ?>
