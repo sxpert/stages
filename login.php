@@ -20,9 +20,8 @@ $login = stc_get_variable ($_POST, 'user');
 $passwd = stc_get_variable ($_POST, 'password');
 
 if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
-  $r = stc_user_login($login, $passwd);
-  $options=array();
-  switch ($r[0]) {
+  $user = stc_user_login($login, $passwd);
+  switch ($user) {
   case -2: 
     unset($_SESSION['loginerr']); 
     break;
@@ -34,9 +33,8 @@ if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
     break;
   default: 
     unset($_SESSION['loginerr']); 
-    error_log(print_r($r,1));
-    $_SESSION['userid'] = $r[0]; 
-    $_SESSION['admin'] = $r[1];
+    error_log(print_r($user,1));
+    $_SESSION['userid'] = $user; 
   }
 }
 header('Location: '.$referer);

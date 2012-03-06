@@ -19,6 +19,10 @@ $simulm2 = stc_get_variable($_REQUEST,'simulm2');
 if ($simulm2=='true') {
   $simulm2=true;
   $from = $admin;
+  function simulate_m2() {
+    GLOBAL $from;
+    return $from;
+  }
 } else $simulm2=false;
 
 

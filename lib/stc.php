@@ -178,8 +178,16 @@ function stc_top ($styles=null) {
   echo "<body>\n";
   echo "<div id=\"top\"><a href=\"/\">";
   if (stc_is_logged()) {
-    echo "<img id=\"logo-sf2a-gauche\" src=\"/images/logo-sf2a.jpg\"/>";
-    echo "<div id=\"text-logo-centre\">Base de données des stages de M2R en Astronomie et Astrophysique</div>";
+    $texte = "<div id=\"text-logo-centre\">Base de données des stages de M2R en Astronomie et Astrophysique</div>";
+    if (function_exists('simulate_m2')) {
+      $url = stc_get_logo_url(simulate_m2());
+      if ($url)	echo "<img id=\"logo-m2-gauche\" src=\"".$url."\"/>";    
+      echo $texte;
+      echo "<img id=\"logo-sf2a-droit\" src=\"/images/logo-sf2a.jpg\"/>";    
+    } else {
+      echo "<img id=\"logo-sf2a-gauche\" src=\"/images/logo-sf2a.jpg\"/>";
+      echo $texte;
+    }
   } else {
     $from = stc_from();
     if ($from) {
@@ -801,8 +809,9 @@ function stc_footer($scripts=null) {
     } else {
       echo "unknown entity";
     }
-    if (array_key_exists('admin', $_SESSION))
-      echo " admin = ".($_SESSION['admin']?'true':'false').' '.$_SESSION['admin'];
+    $adm = stc_is_admin();
+    if ($adm)
+      echo " admin = ".($adm?'true':'false').' '.$adm;
   }
   echo "\n</div>\n";
   // jquery
@@ -1009,13 +1018,11 @@ function stc_user_login($login, $password) {
   pg_free_result($r);
   error_log('stc_user_login: row = '.print_r($row,1));
   $id = intval($row['id']);
-  $m2adm = intval($row['m2_admin']);
-  return array($id, $m2adm);
+  return $id;
 }
 
 function stc_user_logout() {
   unset($_SESSION['userid']);
-  unset($_SESSION['admin']);
 }
 
 function stc_rollback($message=null) {
@@ -1209,8 +1216,12 @@ function stc_user_id () {
 }
 
 function stc_is_admin () {
-  if (array_key_exists('admin',$_SESSION)) return $_SESSION['admin'];
-  return false;
+  GLOBAL $db;
+  $sql = 'select m2_admin from users_view where id=$1;';
+  $r = pg_query_params($db, $sql, array($_SESSION['userid']));
+  $row = pg_fetch_assoc($r);
+  if (is_null($row['m2_admin'])) return false;
+  return $row['m2_admin'];
 }
 
 function stc_from () {
@@ -1278,7 +1289,6 @@ function stc_set_m2_provenance ($from) {
     // not found.
     error_log ('unable to find m2 for from = \''.$from.'\'');
     unset($_SESSION['userid']);
-    unset($_SESSION['admin']);
     unset($_SESSION['from']);
     break;
   case 1:
@@ -1288,7 +1298,6 @@ function stc_set_m2_provenance ($from) {
     $m2_id = $row[0];
     error_log('found m2_id = '.$m2_id.' for from=\''.$from.'\'');
     unset($_SESSION['userid']);
-    unset($_SESSION['admin']);
     $_SESSION['from']=$m2_id;
     break;
   default:
