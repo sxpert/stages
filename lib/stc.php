@@ -800,6 +800,9 @@ function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
   echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2012<br/>\n";
+  echo "<a href=\"http://ipag.obs.ujf-grenoble.fr/?lang=fr\">";
+  echo "<img src=\"/images/logo-ipag-small.png\"/>";
+  echo "</a><br/>\n";
   if (DEBUG) {
     echo "Accès par ";
     if (array_key_exists('from', $_SESSION)) {
@@ -980,7 +983,7 @@ Cordialement,
 
 L'administrateur du site
 ";
-  mail($email, "Validez votre compte", $message);
+  mail($email, "[stages M2R] Validez votre compte", $message, 'From: Serveur Stages M2 <www-data@stcoll.sxpert.org>'."\r\n");
 }
 
 function stc_user_resend_email($login, $password) {
@@ -1217,8 +1220,10 @@ function stc_user_id () {
 
 function stc_is_admin () {
   GLOBAL $db;
+  $uid = stc_user_id();
+  if ($uid==0) return false;
   $sql = 'select m2_admin from users_view where id=$1;';
-  $r = pg_query_params($db, $sql, array($_SESSION['userid']));
+  $r = pg_query_params($db, $sql, array($uid));
   $row = pg_fetch_assoc($r);
   if (is_null($row['m2_admin'])) return false;
   return $row['m2_admin'];

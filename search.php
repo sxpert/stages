@@ -159,7 +159,11 @@ $width="400pt";
 if ($notvalid==1) {
   echo "<h1>Stages en attente de validation</h1>\n";
 } else {
-  echo "<h1>Liste des stages</h1>\n";
+  // détermination de l'intitulé de la M2
+  
+  echo "<h1>Liste des stages";
+  if ($from) echo " validés par le M2R ".stc_get_m2_name($from);
+  echo "</h1>\n";
 }
 
 /****

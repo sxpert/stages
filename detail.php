@@ -250,11 +250,11 @@ if (is_array($multisel)) {
 	    $row = pg_fetch_assoc($r);
 	    echo "<form method=\"post\" action=\"validate-offre.php\">";
 	    echo "<input type=\"hidden\" name=\"offreid\" value=\"".$offre_id."\"/>";
-	    echo "<button name=\"action\" value=\"validate\">Valider l'offre pour la M2<br/>";
+	    echo "<button name=\"action\" value=\"validate\">Valider l'offre pour le M2R<br/>";
 	    echo $row['short_desc']." - ".$row['ville']."</button>";
 	    echo "</form>";
 	  } else {
-	    error_log("Impossible de trouver la M2 correspondant a l'indice ".$admin);
+	    error_log("Impossible de trouver le M2R correspondant a l'indice ".$admin);
 	  }
 	}
       }
