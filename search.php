@@ -45,7 +45,7 @@ if (($user==0)||($simulm2)) {
     exit(0);
   } else {
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
-		    "(users_view.f_name || ' ' || users_view.l_name) as user");
+		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","offres_m2","users_view","laboratoires");
     $where  = "offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
@@ -54,13 +54,13 @@ if (($user==0)||($simulm2)) {
 } else {
   if ($admin&&(!$projmgr)) {
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
-		    "(users_view.f_name || ' ' || users_view.l_name) as user");
+		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","users_view","laboratoires");
     $where  ="offres.year_value=$1 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
     $arr    = array(stc_calc_year());
   } else {
-    $select = array("offres.id","offres.sujet");
+    $select = array("offres.id","offres.sujet","offres.pers_found");
     $tables = array("offres");
     $where  = "offres.year_value=$1 and offres.id_project_mgr = $2";
     $arr    = array(stc_calc_year(), $user);
@@ -267,8 +267,10 @@ echo "</div>";
 $odd = 1;
 
 while ($row = pg_fetch_assoc($r)) {
-  echo "<div class=\"offre";
-  if ($odd) echo " odd";
+  error_log(print_r($row,1));
+  echo "\n<div class=\"offre";
+  if ($row['pers_found']==='t') echo " found";
+  else if ($odd) echo " odd";
   echo "\">";
   if (!$projmgr) {
     echo "<span class=\"checkbox";
@@ -289,14 +291,12 @@ while ($row = pg_fetch_assoc($r)) {
   if (($user!=0)&&(!$simulm2)) {
     $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($row['id']));
     $cur = 0;
-    //    error_log(print_r($m2,1));
     for($i=0;$i<count($m2);$i++) {   
       if ($cur==0) {
 	$row = pg_fetch_assoc($rm2);
 	$cur = intval($row['id_m2']);
       }
       
-      error_log($i.' => '.$cur.' - '.$m2[$i]);
       if ($cur==$m2[$i]) {
 	echo "<span class=\"m2\">☑</span>";
 	$cur=0;
@@ -304,9 +304,10 @@ while ($row = pg_fetch_assoc($r)) {
     }
     pg_free_result($rm2);
   }
-  echo "</a></div>\n";
+  echo "</a></div>";
   $odd = ($odd+1)%2;
 }
+echo "\n";
 
 if (!$projmgr) {
   /* boutons a la fin */

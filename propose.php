@@ -50,7 +50,7 @@ if ($mode==EDIT) {
   $co_encadrant = $offre['co_encadrant'];
   $co_enc_email = $offre['co_enc_email'];
   $pay_state    = $offre['pay_state'];
-  $thesis       = ($offre['thesis']=='t'?"true":"false");
+  //$thesis       = ($offre['thesis']=='t'?"true":"false");
 
   /* type offre */
   $r = pg_query_params($db, 'select code from type_offre where id=$1', array(intval($offre['id_type_offre'])));
@@ -95,7 +95,7 @@ if ($mode==EDIT) {
   $co_enc_email = stc_get_variable($_POST, 'co_enc_email');
 
   $pay_state    = stc_get_variable($_POST, 'pay_state');
-  $thesis       = stc_get_variable($_POST, 'thesis');
+  //$thesis       = stc_get_variable($_POST, 'thesis');
 }
 
 if (($mode==INSERT)||($mode==UPDATE)) {
@@ -138,8 +138,8 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       stc_form_add_error($errors, 'pay_state', 'Option de gratification invalide');  
     
     /* thesis */
-    if (strcmp($thesis,"true")==0) $thesis=true;
-    else $thesis=false;
+    //if (strcmp($thesis,"true")==0) $thesis=true;
+    //else $thesis=false;
    
     /****
      * Si on arrive la et que $errors est vide c'est que tout va bien
@@ -148,7 +148,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       if ($mode==INSERT) {
 	/* insertion dans la base de données */
 	$offre = stc_offre_add($type, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
-			       $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state, $thesis);
+			       $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/);
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de l\'ajout de l\'offre');
 	else 
@@ -157,7 +157,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       if ($mode==UPDATE) {
 	stc_form_add_error($errors, 'type', 'mise à jour des offres en cours d\'implémentation');
 	$offre = stc_offre_update($offreid, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
-			       $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state, $thesis);
+				  $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/);
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de la mise à jour de l\'offre');
 	else 
@@ -221,7 +221,7 @@ stc_form_text ($form, "Email du co-encadrant", "co_enc_email", $co_enc_email, $w
 echo "<br/>\n";
 
 stc_form_select ($form, "Gratification du stage <span class=\"symbol dot\">●</span>", "pay_state", $pay_state, "liste_pay_states");
-stc_form_select ($form, "Poursuite en thèse possible <span class=\"symbol dot\">●</span>", "thesis", $thesis, array("true" => "oui", "false" => "non"));
+//stc_form_select ($form, "Poursuite en thèse possible <span class=\"symbol dot\">●</span>", "thesis", $thesis, array("true" => "oui", "false" => "non"));
 
 echo "<br/>\n";
 

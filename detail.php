@@ -183,9 +183,8 @@ function stc_affiche_offre($id, $multi=false) {
   pg_free_result($r);
   stc_detail_display($pay_state['description']);
   
-
-  stc_detail_subsection("Poursuite en thèse possible");
-  stc_detail_display(($offre['thesis']=='t')?'Oui':'Non');
+  //stc_detail_subsection("Poursuite en thèse possible");
+  //stc_detail_display(($offre['thesis']=='t')?'Oui':'Non');
   
   return true;
 }

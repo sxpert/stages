@@ -1047,10 +1047,10 @@ function stc_offre_add($type, $categories,
 		       $nature_stage, $prerequis,
 		       $infoscmpl, $start_date, $length,
 		       $co_encadrant, $co_enc_email,
-		       $pay_state, $thesis) {
+		       $pay_state/*, $thesis*/) {
   GLOBAL $db;
 
-  $thesis = ($thesis?'true':'false');
+  //$thesis = ($thesis?'true':'false');
 
   /* debut de transaction */
   pg_free_result(pg_query($db, 'begin;'));
@@ -1078,11 +1078,13 @@ function stc_offre_add($type, $categories,
   /* insertion des infos de l'offre */
   $sql = "insert into offres (id_type_offre, id_project_mgr, year_value, sujet, ".
     "description, project_url, prerequis, infoscmpl, start_date, duree, co_encadrant, ".
-    "co_enc_email, pay_state, thesis, create_date) values ".
-    "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP) returning id;";
+    //"co_enc_email, pay_state, thesis, create_date) values ".
+    "co_enc_email, pay_state, create_date) values ".
+    //"($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP) returning id;";
+    "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,CURRENT_TIMESTAMP) returning id;";
   $arr = array(intval($id_type_offre), intval($id_project_mgr), $year_value, $sujet, $description, $url,
 	       $prerequis, $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email,
-	       intval($pay_state), $thesis);
+	       intval($pay_state)/*, $thesis*/);
   $r = pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result($db);
   if (pg_result_status($r)!=PGSQL_TUPLES_OK)
@@ -1135,10 +1137,10 @@ function stc_offre_update($offreid, $categories,
 		       $nature_stage, $prerequis,
 		       $infoscmpl, $start_date, $length,
 		       $co_encadrant, $co_enc_email,
-		       $pay_state, $thesis) {
+			  $pay_state/*, $thesis*/) {
   GLOBAL $db;
   
-  $thesis = ($thesis?'true':'false');
+  //$thesis = ($thesis?'true':'false');
 
   /* début de transaction */
   pg_free_result(pg_query($db, 'begin;'));
@@ -1147,9 +1149,10 @@ function stc_offre_update($offreid, $categories,
   
   $sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, '.
     'infoscmpl=$5, start_date=$6, duree=$7, co_encadrant=$8, co_enc_email=$9, pay_state=$10, '.
-    'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
+    //'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
+    'last_update=CURRENT_TIMESTAMP where id=$11;';
   $arr = array($sujet, $description, $url, $prerequis, $infoscmpl, $start_date, $length,
-	       $co_encadrant, $co_enc_email, $pay_state, $thesis, $offreid);
+	       $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/, $offreid);
   $r = pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result($db);
   if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
@@ -1228,7 +1231,7 @@ function stc_is_admin () {
   $sql = 'select m2_admin, super from users_view where id=$1;';
   $r = pg_query_params($db, $sql, array($uid));
   $row = pg_fetch_assoc($r);
-  if ($row['super']) return true;
+  if ($row['super']==='t') return true;
   if (is_null($row['m2_admin'])) return false;
   return $row['m2_admin'];
 }

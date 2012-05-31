@@ -56,6 +56,9 @@ label {
 .odd > span, .odd > * > span {
     background-color: #e7e7e7;
 }
+.found > span, .found > * > span {
+    background-color: #ffe7e7;
+}
 .checkbox {
     min-width: 18pt;
     width: 18pt;
@@ -123,6 +126,7 @@ label {
 #list {
     display: block;
     overflow-x: scroll;
+    padding-bottom: 6pt;
 }
 .header {
     display: block;

@@ -488,7 +488,9 @@ create table offres (
        co_encadrant	text,
        co_enc_email	text,
        pay_state	bigint not null references pay_states (id),
-       thesis		boolean,       
+       pers_found	boolean,
+
+       deleted		boolean,       
 
        create_date	timestamp,
        last_update	timestamp,
