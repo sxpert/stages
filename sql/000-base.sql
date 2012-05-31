@@ -243,10 +243,11 @@ create table users (
        login_fails    smallint default 0,
        account_valid  boolean default false,
        m2_admin	      bigint default NULL references m2 ( id ),
+       super	      boolean default False,
        primary key (id)
 );
 
-create or replace view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire, m2_admin from users;
+create or replace view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire, m2_admin, super from users;
 grant select on users_view to stcollweb;
 
 --

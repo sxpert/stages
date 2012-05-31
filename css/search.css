@@ -35,10 +35,10 @@ label {
     padding-bottom: 18pt;
     font-weight: bold;
     vertical-align: top;
-    display: inline-block;
+    display: table-cell;
 }
 .offre > a {
-    display: inline-block;
+    display: table-cell;
     color: black;
     height: 16pt;
     line-height: 14pt;
@@ -49,34 +49,52 @@ label {
     vertical-align: middle;
 }
 .offre > span, .offre > * > span {
-    display: inline-block;
+    display: table-cell;
     height: 16pt;
-    vertical-align: bottom;
+    vertical-align: top;
 }
 .odd > span, .odd > * > span {
     background-color: #e7e7e7;
 }
 .checkbox {
+    min-width: 18pt;
     width: 18pt;
+    max-width: 18pt;
+}
+.checkbox > [type="checkbox"] {
+    height: 14pt;
 }
 .sujet {
+    min-width: 350pt;
     width: 350pt;
-    overflow: hidden;
+    max-width: 350pt;
 }
 .labo {
+    min-width: 40pt;
     width: 40pt;
+    max-width: 40pt;
 }
 .ville {
+    min-width: 100pt;
     width: 100pt;
+    max-width: 100pt;
+}
+.user {
+    min-width: 100pt;
+    width: 100pt;
+    max-width: 100pt;
 }
 .m2 {
+    min-width: 25pt;
     width: 25pt;
+    max-width: 25pt;
     text-align: center;
     border-left: 1px solid #cccccc;
 }
 .m2hdr {
     font-size: 8pt;
     line-height: 8pt;
+    min-width: 40pt;
     width: 40pt;
     height: 16pt;
     text-rendering: geometricPrecision;
@@ -101,4 +119,11 @@ label {
     border-bottom: 1px solid #CCCCCC;
     margin-left: 0;
     margin-bottom: 12pt;
+}
+#list {
+    display: block;
+    overflow-x: scroll;
+}
+.header {
+    display: block;
 }

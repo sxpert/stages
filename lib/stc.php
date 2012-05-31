@@ -879,6 +879,7 @@ function stc_default_menu ($options=null) {
       stc_menu_add_item($menu, 'Proposer un sujet de stage', 'propose.php?type='.$row['code']);
       stc_menu_add_item($menu, 'Mes propositions de stage', 'search.php?type='.$row['code'].'&projmgr='.$user);
       stc_menu_add_separator($menu);
+      
     } 
   }
   pg_free_result ($r);
@@ -890,8 +891,10 @@ function stc_default_menu ($options=null) {
     stc_menu_add_separator($menu);
   } 
   */ 
-  if ($logged) stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
-  else {
+  if ($logged) { 
+    stc_menu_add_item ($menu, 'Liste des Responsables', 'liste-responsables.php');
+    stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
+  } else {
     if (($opt_login)&&stc_from()==0) {
       stc_menu_add_section($menu, 'Connexion à l\'application');
       stc_menu_add_form($menu,"post", "login.php", "loginform");
@@ -1222,9 +1225,10 @@ function stc_is_admin () {
   GLOBAL $db;
   $uid = stc_user_id();
   if ($uid==0) return false;
-  $sql = 'select m2_admin from users_view where id=$1;';
+  $sql = 'select m2_admin, super from users_view where id=$1;';
   $r = pg_query_params($db, $sql, array($uid));
   $row = pg_fetch_assoc($r);
+  if ($row['super']) return true;
   if (is_null($row['m2_admin'])) return false;
   return $row['m2_admin'];
 }
@@ -1316,6 +1320,7 @@ function stc_set_m2_provenance ($from) {
  */
 
 function stc_calc_year () {
+  date_default_timezone_set('Europe/Paris');
   $d = getdate();
   $y = $d['year'];
   $m = $d['mon'];

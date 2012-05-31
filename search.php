@@ -44,7 +44,8 @@ if (($user==0)||($simulm2)) {
     stc_footer();
     exit(0);
   } else {
-    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville");
+    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
+		    "(users_view.f_name || ' ' || users_view.l_name) as user");
     $tables = array("offres","offres_m2","users_view","laboratoires");
     $where  = "offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
@@ -52,7 +53,8 @@ if (($user==0)||($simulm2)) {
   }
 } else {
   if ($admin&&(!$projmgr)) {
-    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville");
+    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
+		    "(users_view.f_name || ' ' || users_view.l_name) as user");
     $tables = array("offres","users_view","laboratoires");
     $where  ="offres.year_value=$1 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
@@ -141,7 +143,7 @@ $keywords=trim($keywords);
 if (strlen($keywords)>0) {
   $words = explode(' ',$keywords);
   $vector = implode(' & ',$words);
-  error_log('keywords => '.$vector);
+  //  error_log('keywords => '.$vector);
   $where.=" and fulltext @@ to_tsquery('french', $".array_push($arr,$vector).")";
 }
 
@@ -245,6 +247,7 @@ echo "<span class=\"sujet\">Sujet du stage</span>";
 if ((($user==0)||($admin))&&(!$projmgr)) {
   echo "<span class=\"labo\">Labo</span>";
   echo "<span class=\"ville\">Ville</span>";
+  echo "<span class=\"user\">Encadrant</span>";
 }
 if (($user!=0)&&(!$simulm2)) {
   /* lister les m2 */
@@ -280,11 +283,13 @@ while ($row = pg_fetch_assoc($r)) {
     echo "<span class=\"labo\">".$row['labo']."</span>";
   if (array_key_exists('ville', $row))
     echo "<span class=\"ville\">".$row['ville']."</span>";
+  if (array_key_exists('user', $row))
+    echo "<span class=\"user\">".$row['user']."</span>";
   /* si on a un utilisateur loggué, on montre les M2 */
   if (($user!=0)&&(!$simulm2)) {
     $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($row['id']));
     $cur = 0;
-    error_log(print_r($m2,1));
+    //    error_log(print_r($m2,1));
     for($i=0;$i<count($m2);$i++) {   
       if ($cur==0) {
 	$row = pg_fetch_assoc($rm2);
