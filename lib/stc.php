@@ -556,9 +556,10 @@ function stc_form_check_multi ($values, $table) {
  * Fonction de génération du HTML pour les formulaires
  */
 
-function stc_form ($method, $action, $errors, $id=null) {
+function stc_form ($method, $action, $errors, $id=null, $style=null) {
   echo "<form method=\"".$method. "\" action=\"".$action."\"";
   if (!is_null($id)) echo " id=\"".$id."\"";
+  if (!is_null($style)) echo " style=\"".$style."\"";
   echo ">\n";
   return $errors;
 }
@@ -633,11 +634,12 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
   $onchange = null;
   $multi=false;
   $width=null;
+  $help=null;
   if (!is_null($options) and is_array($options)) {
     if (array_key_exists('onchange',$options)) $onchange = $options['onchange'];
     if (array_key_exists('multi',$options)) $multi=$options['multi'];
     if (array_key_exists('width',$options)) $width=$options['width'];
-    if (array_key_exists('help',$options)) $help=$options['help']; else $help=null;
+    if (array_key_exists('help',$options)) $help=$options['help'];
   }
   echo stc_form_check_errors ($form, $variable);
   if ($multi) {
@@ -727,7 +729,9 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
 	error_log("stc_form_select : type ".gettype($values)." not supported for values");
       }
     }
-    echo "</select></div>";
+    echo "</select>";
+    if (!is_null($help)) echo "<div class=\"formhelp\">".$help."</div>";
+    echo "</div>";
   }
 }
 

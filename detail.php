@@ -255,7 +255,7 @@ if (is_array($multisel)) {
 			   array($offre_id, $admin));
       if (pg_num_rows($r)==1) {
 	$row= pg_fetch_assoc($r);
-	echo "<span>Offre déjà validée pour la M2 '".$row['description']."'</span>";
+	echo "<span>Offre déjà validée pour le M2R '".$row['description']."'</span>";
       } else {
 	pg_free_result($r);
 	$r = pg_query_params($db, "select id_project_mgr from offres where id=$1", array($offre_id));

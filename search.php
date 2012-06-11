@@ -47,7 +47,7 @@ if (($user==0)||($simulm2)) {
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","offres_m2","users_view","laboratoires");
-    $where  = "offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
+    $where  = "offres.deleted=false and offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
     $arr    = array(stc_calc_year(), $from);
   }
@@ -56,13 +56,13 @@ if (($user==0)||($simulm2)) {
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","users_view","laboratoires");
-    $where  ="offres.year_value=$1 and ".
+    $where  ="offres.deleted=false and offres.year_value=$1 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
     $arr    = array(stc_calc_year());
   } else {
     $select = array("offres.id","offres.sujet","offres.pers_found");
     $tables = array("offres");
-    $where  = "offres.year_value=$1 and offres.id_project_mgr = $2";
+    $where  = "offres.deleted=false and offres.year_value=$1 and offres.id_project_mgr = $2";
     $arr    = array(stc_calc_year(), $user);
   }
 }
@@ -177,7 +177,7 @@ if (((!$projmgr)&&($notvalid!=1))||($simulm2)) {
   stc_script_add('/lib/js/hide.js',-1);
   stc_script_add("init_hidden('searchfilter');","window.onload");   
   echo "<h2>Options de recherche</h2>\n";
-  $form = stc_form("POST", "search.php", null, "searchfilter");
+  $form = stc_form("POST", "search.php", null, "searchfilter", "display: none;");
   stc_form_hidden($form, 'projmgr', $projmgr);
   stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
 		   array("multi" => true, "width" => $width, 
@@ -267,7 +267,7 @@ echo "</div>";
 $odd = 1;
 
 while ($row = pg_fetch_assoc($r)) {
-  error_log(print_r($row,1));
+  //error_log(print_r($row,1));
   echo "\n<div class=\"offre";
   if ($row['pers_found']==='t') echo " found";
   else if ($odd) echo " odd";

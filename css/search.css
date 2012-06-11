@@ -123,6 +123,9 @@ label {
     margin-left: 0;
     margin-bottom: 12pt;
 }
+#searchfilter {
+    display: none;
+}
 #list {
     display: block;
     overflow-x: scroll;

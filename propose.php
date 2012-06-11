@@ -115,6 +115,10 @@ if (($mode==INSERT)||($mode==UPDATE)) {
     elseif (!stc_form_check_multi($categories, 'liste_categories'))
       stc_form_add_error($errors, 'categories', 'Problème de cohérence dans les catégories');
     
+    if (mb_strlen($description, 'UTF-8')>$MAX_CHARS) {
+      stc_form_add_error($errors, 'description', 'Texte trop long, la taille maximale autorisée est '.$MAX_CHARS.' signes');
+    }
+    
     /* url */
     $url = stc_form_clean_url($url);
     if ((strlen($url)>0)&&(!stc_form_check_url($url, $e)))
@@ -204,7 +208,7 @@ stc_form_select ($form, "Nature du travail <span class=\"symbol dot\">●</span>
 		 array("multi" => true, "width" => $width));
 echo "<br/>\n";
 
-stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width,null,
+stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width, null,
 	       "Compétences ou connaissances spécifiques nécessaires");
 echo "<br/>\n";
 

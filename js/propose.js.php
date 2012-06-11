@@ -1,7 +1,9 @@
 <?php
 require_once ('../lib/db_config.php');
 echo "function update_counter(counter, length) {\n";
-echo "    counter.text('reste '+(".$MAX_CHARS."-length)+' signes');\n";
+echo "    var remaining = ".$MAX_CHARS."-length;\n";
+echo "    if (remaining<0) remaining = '<span style=\"color:red;\">'+remaining+'</span>';\n";
+echo "    counter.html('reste '+remaining+' signes');\n";
 echo "}\n";
 echo "\n";
 echo "$(function() {\n";

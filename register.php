@@ -119,10 +119,10 @@ stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
 stc_form_text ($form, "Adresse email", "email", $email);
 stc_form_text ($form, "Téléphone", "phone", $phone);
 stc_form_select ($form, "Statut", "status", $status, "liste_statuts");
-echo "<div>Si votre laboratoire n'apparaît pas ou si vous ne connaissez pas votre numéro d'unité, contactez l'assistance</div>\n";
 stc_form_text ($form, "Numéro d'unité", "umr", $umr);
 stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", 
-		 array("onchange"=>"javascript:update_adresse_labo('labo')", "width" => "400pt"));
+		 array("onchange"=>"javascript:update_adresse_labo('labo')", "width" => "400pt",
+		       "help" => "Si votre laboratoire n'apparaît pas ou si vous ne connaissez pas votre numéro d'unité, contactez l'assistance"));
 echo "<br/>\n";
 stc_form_text ($form, "Nom d'utilisateur", "login", $login);
 stc_form_password ($form, "Mot de passe", "pass1", $pass1);
