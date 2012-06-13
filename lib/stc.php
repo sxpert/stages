@@ -945,6 +945,18 @@ function stc_dump_sql_error ($res) {
   echo "</pre></div>\n";
 }
 
+function stc_get_remote_ip() {
+  return $_SERVER['REMOTE_ADDR'];
+}
+
+function stc_append_log ($function, $message) {
+  GLOBAL $db;
+  $userid = stc_user_id();
+  $ipaddr = stc_get_remote_ip();
+  $sql = "select * from append_log ($1,$2,$3,$4);";
+  pg_query_params($db,$sql,array($function,$userid,$message,$ipaddr));
+}
+
 function stc_get_laboratoire ($labo_id) {
   GLOBAL $db;
 
@@ -968,8 +980,9 @@ function stc_get_m2 ($m2_id) {
 function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $labo, $login, $pass1) {
   GLOBAL $db;
   
-  $sql = "select * from user_add($1,$2,$3,$4,$5,$6,$7,$8) as (id bigint, hash text);";
-  $arr = array($f_name, $l_name, $email, $phone, $status, $labo, $login, $pass1);
+  $ip = stc_get_remote_ip();
+  $sql = "select * from user_add($1,$2,$3,$4,$5,$6,$7,$8,$9) as (id bigint, hash text);";
+  $arr = array($f_name, $l_name, $email, $phone, $status, $labo, $login, $pass1,$ip);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   return $r;
@@ -996,8 +1009,9 @@ L'administrateur du site
 function stc_user_resend_email($login, $password) {
   GLOBAL $db;
 
-  $sql = "select * from user_get_email_hash ($1, $2) as (id bigint, email text, mhash text)";
-  $arr = array($login, $password);
+  $ip = stc_get_remote_ip();
+  $sql = "select * from user_get_email_hash ($1, $2, $3) as (id bigint, email text, mhash text)";
+  $arr = array($login, $password,$ip);
   pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result ($db);
   $row = pg_fetch_assoc($r);
@@ -1008,8 +1022,9 @@ function stc_user_resend_email($login, $password) {
 function stc_user_validate_account($login, $password, $hash) {
   GLOBAL $db;
   
-  $sql = "select user_validate_account ($1, $2, $3) as id;";
-  $arr = array($login,$password,$hash);
+  $ip = stc_get_remote_ip();
+  $sql = "select user_validate_account ($1, $2, $3, $4) as id;";
+  $arr = array($login,$password,$hash,$ip);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   $row = pg_fetch_assoc($r);
@@ -1020,8 +1035,9 @@ function stc_user_validate_account($login, $password, $hash) {
 function stc_user_login($login, $password) {
   GLOBAL $db;
   
-  $sql = "select * from user_login($1, $2) as ( id bigint, m2_admin bigint);";
-  $arr = array($login, $password);
+  $ip = stc_get_remote_ip();
+  $sql = "select * from user_login($1, $2, $3) as ( id bigint, m2_admin bigint);";
+  $arr = array($login, $password, $ip);
   pg_send_query_params($db,$sql,$arr);
   $r = pg_get_result($db);
   $row = pg_fetch_assoc($r);
@@ -1082,9 +1098,7 @@ function stc_offre_add($type, $categories,
   /* insertion des infos de l'offre */
   $sql = "insert into offres (id_type_offre, id_project_mgr, year_value, sujet, ".
     "description, project_url, prerequis, infoscmpl, start_date, duree, co_encadrant, ".
-    //"co_enc_email, pay_state, thesis, create_date) values ".
     "co_enc_email, pay_state, create_date) values ".
-    //"($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP) returning id;";
     "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,CURRENT_TIMESTAMP) returning id;";
   $arr = array(intval($id_type_offre), intval($id_project_mgr), $year_value, $sujet, $description, $url,
 	       $prerequis, $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email,
@@ -1132,6 +1146,7 @@ function stc_offre_add($type, $categories,
    * tout s'est bien passé, on committe la transaction et on renvoie le 
    * numéro de l'offre nouvellement créée
    */
+  stc_append_log ('add_offer','added offer ['.$offreid.' -\''.$sujet.'\']');
   pg_free_result(pg_query($db, 'commit;'));
   return $offreid;
 }
@@ -1336,10 +1351,24 @@ function stc_calc_year () {
 }
 
 /*******************************************************************************
- * gestion de la session
+ * initialisation de la session
  */
 session_start();
 $db = stc_connect_db();
 
-
+$u = stc_user_id();
+if ($u!=0) {
+  $sql = "select id from users_view where id=$1";
+  $r = pg_query_params($db, $sql, array($u));
+  if (!is_bool($r)) {
+    $n = pg_num_rows($r);
+    if ($n != 1) {
+      stc_append_log('session','User '.$u.' has disappeared. session setup fail');
+      stc_close_session();
+      stc_redirect ('/');
+      exit();
+    }
+    pg_free_result($r);
+  }
+}
 ?>

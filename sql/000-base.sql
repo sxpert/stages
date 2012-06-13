@@ -251,6 +251,42 @@ create or replace view users_view as select id, f_name, l_name, email, phone, st
 grant select on users_view to stcollweb;
 
 --
+-- table des logs
+--
+
+create table logs (
+	date			timestamp not null,
+	ipaddr			inet,
+	function		text not null,
+	login			text,
+	message			text
+);
+
+grant select, insert on logs to stcollweb;
+
+create or replace function append_log_login(t_function text, t_login text, t_message text, t_ipaddr inet) returns void as $$
+	begin
+		
+		insert into logs values (CURRENT_TIMESTAMP, t_ipaddr, t_function, t_login, t_message);
+        end;
+$$ language plpgsql security definer;
+
+create or replace function append_log(t_function text, t_uid bigint, t_message text, t_ipaddr inet default null) returns void as $$
+        declare
+		t_account record;
+		t_login   text;
+	begin
+		select * into t_account from users where id=t_uid;
+		if found then
+		        t_login := t_account.login;
+		else
+			t_login := 'Unknown User';
+		end if;
+		perform append_log_login (t_function, t_login, t_message, t_ipaddr);
+	end;
+$$ language plpgsql security definer;
+
+--
 -- generates some salt for the password encryption functions
 --
 create function generate_salt() returns bytea as $$
@@ -297,7 +333,8 @@ $$ language plpgsql security definer;
 create or replace function user_add(t_fname text, t_lname text, 
        	                 t_email text, t_phone text,
 			 t_statut bigint, t_id_labo bigint, 
-			 t_login text, t_password text) 
+			 t_login text, t_password text,
+			 t_ipaddr inet) 
 			 returns record as $$
         declare
 		t_salt	  bytea;
@@ -319,12 +356,10 @@ create or replace function user_add(t_fname text, t_lname text,
 			       values (t_fname, t_lname, t_email, t_phone, t_statut, t_id_labo, 
 			       t_login, t_passwd, t_salt)
 			       returning id into t_userid;
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-				'register',t_login,'User successfully registered');
+			perform append_log_login('register', t_login, 'User successfully registered',t_ipaddr);
 		else
 			-- should log ip address
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-				'register',t_login,'Attempt to register user multiple times');
+			perform append_log_login('register',t_login,'Attempt to register user multiple times',t_ipaddr);
 		end if;
 		t_rec := (t_userid, t_emailhash); 
 		return t_rec;
@@ -339,7 +374,7 @@ $$ language plpgsql security definer;
 -- uid if login successful
 -- account is locked out after 3 failures
 --
-create or replace function user_login(t_login text, t_password text) returns record as $$
+create or replace function user_login(t_login text, t_password text, t_ipaddr inet) returns record as $$
         declare
 		t_account	record;
 		t_temp  	bytea;
@@ -351,33 +386,28 @@ create or replace function user_login(t_login text, t_password text) returns rec
 		select * into t_account from users where login=t_login;
 		if found then
 		   	if (t_account.login_fails >= 3) then
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'login',t_login,'User attempted to login on locked account');
+				perform append_log_login ('login',t_login,'User attempted to login on locked account',t_ipaddr);
 			        t_rec := ( -1::bigint, 0::bigint );
 				return t_rec;
 			end if;
 			if (t_account.account_valid = false) then
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'login',t_login,'User attempted to login on not yet validated account');
+				perform append_log_login ('login',t_login,'User attempted to login on not yet validated account',t_ipaddr);
 			        t_rec := ( -2::bigint, 0::bigint );
 			        return t_rec;
 			end if;
 			t_passwd := hash_password ( t_password, t_account.salt ); 
 			if (t_passwd = t_account.passwd) then
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'login',t_login,'User successfully logged in');
+				perform append_log_login ('login',t_login,'User successfully logged in',t_ipaddr);
 			   	update users set login_fails = 0 where id=t_account.id;
 			        t_rec := ( t_account.id, t_account.m2_admin );
 				return t_rec;
 			else
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'login',t_login,'Login failed, invalid password');
+				perform append_log_login ('login',t_login,'Login failed, invalid password',t_ipaddr);
 				t_lf := t_account.login_fails + 1;
 				update users set login_fails = t_lf where id=t_account.id;
 			end if;
 		else
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-				'login',t_login,'Login failed, user unknown');
+			perform append_log_login ('login',t_login,'Login failed, user unknown',t_ipaddr);
 		end if;
 		t_rec := ( 0::bigint, 0::bigint );
 		return t_rec;
@@ -387,7 +417,7 @@ $$ language plpgsql security definer;
 -- 
 -- récupère le hash pour envoyer l'email de nouveau
 --
-create or replace function user_get_email_hash(t_login text, t_password text) returns record as $$
+create or replace function user_get_email_hash(t_login text, t_password text, t_ipaddr inet) returns record as $$
         declare
 		t_account	record;
 		t_passwd	text;
@@ -402,19 +432,16 @@ create or replace function user_get_email_hash(t_login text, t_password text) re
                         end if;
 			t_passwd := hash_password ( t_password, t_account.salt );
 			if (t_passwd = t_account.passwd) then
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'validation_email',t_login,'User requested validation email sent');
+			        perform append_log_login ('validation_email',t_login,'User requested validation email sent',t_ipaddr);
 			        t_emailh := hash_email(t_account.email, t_account.salt);
 				t_rec := ( t_account.id, t_account.email, t_emailh);
 				return t_rec;
 			end if;
 			-- fail
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-				'validation_email',t_login,'User failed password check');
+			perform append_log_login ('validation_email',t_login,'User failed password check',t_ipaddr);
 			update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
 		else
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-				'validation_email',t_login,'User does not exist');
+			perform append_log_login ('validation_email',t_login,'User does not exist',t_ipaddr);
 		end if;
 		t_rec := (0::bigint, null::text, null::text);
 		return t_rec;
@@ -425,7 +452,7 @@ $$ language plpgsql security definer;
 -- validate account
 -- 
 --
-create or replace function user_validate_account(t_login text, t_password text, t_hash text) returns bigint as $$
+create or replace function user_validate_account(t_login text, t_password text, t_hash text, t_ipaddr inet) returns bigint as $$
        declare
                t_account       record;
 	       t_passwd	       text;
@@ -435,8 +462,7 @@ create or replace function user_validate_account(t_login text, t_password text, 
 	       select * into t_account from users where login=t_login;
 	       if found then
 	       	       if (t_account.login_fails >= 3) then
-			       insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-					'account_validation',t_login,'User attempted validating locked account'); 	
+		       	       perform append_log_login ('account_validation',t_login,'User attempted validating locked account',t_ipaddr); 	
 		               return -1;
 		       end if;
 		       t_passwd := hash_password ( t_password, t_account.salt );
@@ -445,28 +471,23 @@ create or replace function user_validate_account(t_login text, t_password text, 
 			       t_emailh := hash_email(t_account.email, t_account.salt);
 			       if (t_emailh = t_hash) then
 			       	       	update users set login_fails=0, account_valid=true where id = t_account.id;
-					insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-                                        	'account_validation',t_login,'Validation succeeded');
+					perform append_log_login ('account_validation',t_login,'Validation succeeded',t_ipaddr);
 
 			               return t_account.id;
 				else
-	                                insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-        	                                'account_validation',t_login,'Validation failed, invalid hash');
+	                                perform append_log_login ('account_validation',t_login,'Validation failed, invalid hash',t_ipaddr);
 			       end if;
 			else
-				insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-                               		'account_validation',t_login,'Validation failed, invalid password');
+				perform append_log_login ('account_validation',t_login,'Validation failed, invalid password',t_ipaddr);
 			end if;
 		        -- fail
 		        update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;
 		else
-			insert into logs (date,function,login,message) values (CURRENT_TIMESTAMP,
-                		'account_validation',t_login,'Validation failed, user unknown');
+			perform append_log_login ('account_validation',t_login,'Validation failed, user unknown',t_ipaddr);
 		end if;  
 	       return 0;
        end;
 $$ language plpgsql security definer;
-
 
 -- 
 -- Nature des travaux a accomplir dans le stage
@@ -601,16 +622,3 @@ create table offres_m2 (
 );
     
 grant select, insert, delete, update on offres_m2 to stcollweb;
-
---
--- table des logs
---
-
-create table logs (
-	date			timestamp not null,
-	function		text not null,
-	login			text,
-	message			text
-);
-
-grant select, insert on logs to stcollweb;
