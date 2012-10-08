@@ -132,7 +132,8 @@ create table m2 (
        description	text not null,
        ville		text not null,
        from_value	char (8) not null,
-       url_logo		text
+       url_logo		text,
+       active		boolean default true
 );
 alter sequence seq__m2__id owned by m2.id;
 alter table m2 alter column id set default nextval('seq__m2__id');
