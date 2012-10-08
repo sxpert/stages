@@ -50,6 +50,7 @@ if (pg_num_rows($r)==0) {
     stc_fail(500,"Impossible de valider l'offre");
   }
   pg_free_result($r);
+  stc_append_log('validate_offer','user validated offer '.$offreid);
   pg_free_result(pg_query($db,"commit;"));
 }
 
