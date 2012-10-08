@@ -15,6 +15,17 @@ if (array_key_exists('from',$_REQUEST)) {
   $from=stc_from();
 } 
 
+if ($EN_TRAVAUX) {
+  stc_top();
+  $menu = stc_menu_init();
+  stc_menu_add_item($menu, "Accueil", "index.php");
+  stc_menu($menu);
+  echo "<h2>Site en travaux</h2>\n";
+  echo "<p>Le site revient bientôt, veuillez nous excuser pour le dérangement,</p>\n";
+  stc_footer();
+  exit(0);
+}
+
 stc_top();
 
 // menu
