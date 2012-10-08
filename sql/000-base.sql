@@ -25,7 +25,7 @@ drop role if exists stagesweb;
 --
 create role stagesadm with login encrypted password 'ea8Oonie';
 create role stagesweb with login noinherit encrypted password 'ieCh7yuK';
-create database stage-masters with owner stagesadm;
+create database stages with owner stagesadm;
 
 \c stages
 
