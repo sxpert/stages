@@ -15,7 +15,8 @@ if (array_key_exists('from',$_REQUEST)) {
   $from=stc_from();
 } 
 
-if ($EN_TRAVAUX) {
+if (($_SERVER['REMOTE_ADDR']=='193.107.127.8')&&($EN_TRAVAUX)) {
+  error_log("Travaux : ".$_SERVER['REMOTE_ADDR']);
   stc_top();
   $menu = stc_menu_init();
   stc_menu_add_item($menu, "Accueil", "index.php");
@@ -40,11 +41,11 @@ if (stc_is_logged()) {
     echo "<h2>Bienvenue $nom</h2>\n";
     echo "<p>Vous êtes responsable du M2R $m2r. Les propositions qui attendent votre ".
       "validation sont accessibles dans le menu correspondant à gauche.</p>\n";
-    echo "<p>Pour proposer vous même un nouveau stage, sélectionnez le menu \"Proposer un sujet ".
+    echo "<p>Pour proposer vous-même un nouveau stage, sélectionnez le menu \"Proposer un sujet ".
       "de stage\".<br/>\n".
-      "Remplir le formulaire en respectant la mise en page. Les descriptif du ".
-      "stage ne peut depasser $MAX_CHARS signes. Si vous souhaitez fournir plus ".
-      "d'informations et des images ou films, mettez les sur un site et indiquez son ".
+      "Remplir le formulaire en respectant la mise en page. Le descriptif du ".
+      "stage ne peut dépasser $MAX_CHARS signes. Si vous souhaitez fournir plus ".
+      "d'informations et des images ou films, mettez-les sur un site et indiquez son ".
       "URL.</p>\n";
     echo "<p>Cliquer à la fin sur \"Enregistrer la proposition\". La proposition sera ".
       "alors mise en attente de validation. Vous pouvez à tout moment la modifier via ".
@@ -73,7 +74,7 @@ if (stc_is_logged()) {
     echo "<p>Il y a $nbprop propositions de stage disponibles en tout. Vous ".
       "avez la possibilité de faire un filtrage par catégories scientifiques, ".
       "nature du travail proposé, laboratoire, ville et mots (ou noms propres). ".
-      "Si aucun filtrage n'est fait, toutes les propositions seront affichées. </p>";
+      "Si aucun filtrage n'est fait, toutes les propositions seront affichées.</p>";
     echo "<p>Cliquer sur le sujet du stage pour avoir le détail de celui-ci.</p>";
     echo "<p>Vous pouvez imprimer un ou plusieurs stages en les sélectionnant ".
       "(case à gauche) puis en cliquant sur le bouton \"Imprimer\". Utiliser ensuite ".

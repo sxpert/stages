@@ -214,7 +214,7 @@ if (((!$projmgr)&&($notvalid!=1))||($simulm2)) {
  */
 
 if (($user)&&(!$simulm2)) {
-  echo "<p>Un stage est validé par un M2R quand un <span class=\"symbol\">☑</span> apparait dans la colonne correspondante<br/>".
+  echo "<p>Un stage est validé par un M2R quand un <span class=\"symbol\">☑</span> apparaît dans la colonne correspondante<br/>".
     "Pour toute question concernant la validation de vos stages, prière de vous adresser ".
     "au(x) responsable(s) du M2 correspondant.</p>";
 }
@@ -251,7 +251,7 @@ if ((($user==0)||($admin))&&(!$projmgr)) {
 }
 if (($user!=0)&&(!$simulm2)) {
   /* lister les m2 */
-  $rh=pg_query($db, "select id, short_desc, ville from m2 order by id;");
+  $rh=pg_query($db, "select id, short_desc, ville from m2 where active=true order by id;");
   while ($row = pg_fetch_assoc($rh)) {
     array_push($m2, intval($row['id']));
     echo "<span class=\"m2\"><span class=\"m2hdr\">".$row['short_desc'].
