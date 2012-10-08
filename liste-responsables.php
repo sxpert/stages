@@ -19,7 +19,7 @@ stc_menu($menu);
 if ($user>0) {
   echo "<h1>Liste des responsables de M2R</h1>\n";
   /* boucler dans les M2 */
-  $sql = "select id, short_desc, description, ville from m2 where active=true order by ville, short_desc, description;";
+  $sql = "select id, short_desc, description, ville from m2 order by ville, short_desc, description;";
   $m2s = pg_query($db, $sql);
   while (True) {
     $m2 = pg_fetch_assoc ($m2s);

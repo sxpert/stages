@@ -251,7 +251,7 @@ if ((($user==0)||($admin))&&(!$projmgr)) {
 }
 if (($user!=0)&&(!$simulm2)) {
   /* lister les m2 */
-  $rh=pg_query($db, "select id, short_desc, ville from m2 where active=true order by id;");
+  $rh=pg_query($db, "select id, short_desc, ville from m2 order by id;");
   while ($row = pg_fetch_assoc($rh)) {
     array_push($m2, intval($row['id']));
     echo "<span class=\"m2\"><span class=\"m2hdr\">".$row['short_desc'].

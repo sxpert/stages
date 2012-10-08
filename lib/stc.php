@@ -1146,7 +1146,7 @@ function stc_offre_add($type, $categories,
    * tout s'est bien passé, on committe la transaction et on renvoie le 
    * numéro de l'offre nouvellement créée
    */
-  stc_append_log ('add_offer','['.$offreid.' -\''.$sujet.'\']');
+  stc_append_log ('add_offer','added offer ['.$offreid.' -\''.$sujet.'\']');
   pg_free_result(pg_query($db, 'commit;'));
   return $offreid;
 }
@@ -1223,7 +1223,7 @@ function stc_offre_update($offreid, $categories,
 			' - '.pg_last_error($db));
 
   /* sauvegarde des modifs */
-  stc_append_log ('modify_offer','['.$offreid.' -\''.$sujet.'\']');
+
   pg_free_result(pg_query($db, 'commit;'));
   return $offreid;
 }
