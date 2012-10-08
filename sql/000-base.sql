@@ -16,22 +16,22 @@
 --
 -- nettoyage
 --
-drop database if exists stcoll;
-drop role if exists stcolladm;
-drop role if exists stcollweb;
+drop database if exists stages;
+drop role if exists stagesadm;
+drop role if exists stagesweb;
 
 --
 -- création de la base de données
 --
-create role stcolladm with login encrypted password 'testadm';
-create role stcollweb with login noinherit encrypted password 'test';
-create database stcoll with owner stcolladm;
+create role stagesadm with login encrypted password 'ea8Oonie';
+create role stagesweb with login noinherit encrypted password 'ieCh7yuK';
+create database stage-masters with owner stagesadm;
 
-\c stcoll 
+\c stages
 
 create extension pgcrypto;
 
-\c stcoll stcolladm
+\c stages stagesadm
 
 create sequence seq_version minvalue 0;
 
@@ -55,8 +55,8 @@ alter table type_offre add primary key using index pk__type_offre__id;
 create unique index idx__type_offre__desc on type_offre ( description );
 alter table type_offre add unique using index idx__type_offre__desc;
 
-grant usage on sequence seq__type_offre__id to stcollweb;
-grant select on type_offre to stcollweb;
+grant usage on sequence seq__type_offre__id to stagesweb;
+grant select on type_offre to stagesweb;
 
 --insert into type_offre (code, description, denom_prop, denom_dir, has_year) values 
 --       ('TH', 'Thèse', 'Thèses', 'Directeur de Thèse', false);
@@ -93,7 +93,7 @@ create unique index pk__laboratoires__id on laboratoires ( id );
 alter table laboratoires add primary key using index pk__laboratoires__id;
 create index idx__laboratoires__from_value on laboratoires ( from_value );
 
-grant select on laboratoires to stcollweb;
+grant select on laboratoires to stagesweb;
 
 --
 -- trigger pour créer la from_value automatiquement
@@ -116,10 +116,10 @@ create trigger trig_laboratoires_set_from_value before insert on laboratoires fo
 create view liste_labos as select id as key, 
        case when ((sigle is not null) and (char_length(sigle)>0)) then sigle || ' - ' else '' end || description as value from laboratoires
        order by value;
-grant select on liste_labos to stcollweb;
+grant select on liste_labos to stagesweb;
 
 create view liste_villes as select distinct city as key, city as value from laboratoires order by city;
-grant select on liste_villes to stcollweb;
+grant select on liste_villes to stagesweb;
 
 --
 -- table des M2
@@ -141,8 +141,8 @@ create unique index pk__m2__id on m2 ( id );
 alter table m2 add primary key using index pk__m2__id;
 create index idx__m2__from_value on m2 ( from_value );
 
-grant usage on sequence seq__m2__id to stcollweb;
-grant select on m2 to stcollweb;
+grant usage on sequence seq__m2__id to stagesweb;
+grant select on m2 to stagesweb;
  
 --
 -- trigger pour créer la from_value automatiquement
@@ -186,11 +186,11 @@ alter table categories add primary key using index pk__categories__id;
 create unique index idx__categories__desc on categories ( description );
 alter table categories add unique using index idx__categories__desc;
 
-grant usage on sequence seq__categories__id to stcollweb;
-grant select on categories to stcollweb;
+grant usage on sequence seq__categories__id to stagesweb;
+grant select on categories to stagesweb;
 
 create view liste_categories as select id as key, description as value from categories;
-grant select on liste_categories to stcollweb;
+grant select on liste_categories to stagesweb;
 
 insert into categories(description) values 
        ('Cosmologie, Univers primordial, origine et évolution des grandes structures de l''Univers et des galaxies'),
@@ -217,10 +217,10 @@ create table statuts (
        primary key (id)
 );
 
-grant select on statuts to stcollweb;
+grant select on statuts to stagesweb;
 
 create view liste_statuts as select id as key, description as value from statuts;
-grant select on liste_statuts to stcollweb;
+grant select on liste_statuts to stagesweb;
 
 insert into statuts (description) values
        ('Chercheur ou enseignant-chercheur en poste'),
@@ -249,7 +249,7 @@ create table users (
 );
 
 create or replace view users_view as select id, f_name, l_name, email, phone, statut, id_laboratoire, m2_admin, super from users;
-grant select on users_view to stcollweb;
+grant select on users_view to stagesweb;
 
 --
 -- table des logs
@@ -263,7 +263,7 @@ create table logs (
 	message			text
 );
 
-grant select, insert on logs to stcollweb;
+grant select, insert on logs to stagesweb;
 
 create or replace function append_log_login(t_function text, t_login text, t_message text, t_ipaddr inet) returns void as $$
 	begin
@@ -498,10 +498,10 @@ create table nature_stage (
        description	  text unique
 );
 
-grant select on nature_stage to stcollweb;
+grant select on nature_stage to stagesweb;
 
 create view liste_nature_stage as select id as key, description as value from nature_stage;
-grant select on liste_nature_stage to stcollweb;
+grant select on liste_nature_stage to stagesweb;
 
 insert into nature_stage values 
        (1, 'Instrumentation'),
@@ -518,10 +518,10 @@ create table pay_states (
        id    		bigint primary key,
        description      text unique
 );
-grant select on pay_states to stcollweb;
+grant select on pay_states to stagesweb;
 
 create view liste_pay_states as select id as key, description as value from pay_states;
-grant select on liste_pay_states to stcollweb;
+grant select on liste_pay_states to stagesweb;
 
 insert into pay_states values
        ( 1, 'Acquise'),
@@ -590,8 +590,8 @@ $$ language plpgsql;
 
 create trigger trig_generate_fulltext before insert or update on offres for each row execute procedure offre_generate_fulltext ();
 
-grant select, insert, update on offres to stcollweb;
-grant usage on sequence seq__offres__id to stcollweb;
+grant select, insert, update on offres to stagesweb;
+grant usage on sequence seq__offres__id to stagesweb;
  
 --
 -- table de liaison offres <-> categories (n to n)
@@ -601,7 +601,7 @@ create table offres_categories (
        id_categorie	       bigint not null references categories ( id ),
        primary key (id_offre, id_categorie)
 );
-grant select, insert, delete, update on offres_categories to stcollweb;
+grant select, insert, delete, update on offres_categories to stagesweb;
 --
 -- table de liaison offres <-> nature_stage (n to n)
 --
@@ -611,7 +611,7 @@ create table offres_nature_stage (
        id_nature_stage		 bigint not null references nature_stage(id),
        primary key (id_offre, id_nature_stage)
 );
-grant select, insert, delete, update on offres_nature_stage to stcollweb;
+grant select, insert, delete, update on offres_nature_stage to stagesweb;
 
 --
 -- table des validations par les M2
@@ -622,4 +622,4 @@ create table offres_m2 (
        primary key (id_offre, id_m2)
 );
     
-grant select, insert, delete, update on offres_m2 to stcollweb;
+grant select, insert, delete, update on offres_m2 to stagesweb;
