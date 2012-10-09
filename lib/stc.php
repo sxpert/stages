@@ -42,7 +42,7 @@ function stc_check_referer () {
   $url = parse_url($ref);  
   if (array_key_exists('scheme', $url) and strcmp($url['scheme'],'http')!=0) return False;
   if (array_key_exists('host', $url) and strcmp($url['host'],$srv)!=0) return False;
-  error_log(print_r($url,1));
+  //error_log(print_r($url,1));
   $u='';
   if (array_key_exists('path',$url)) $u.=$url['path'];
   if (array_key_exists('query',$url)) $u.='?'.$url['query'];
@@ -1043,7 +1043,6 @@ function stc_user_login($login, $password) {
   $r = pg_get_result($db);
   $row = pg_fetch_assoc($r);
   pg_free_result($r);
-  error_log('stc_user_login: row = '.print_r($row,1));
   $id = intval($row['id']);
   return $id;
 }
