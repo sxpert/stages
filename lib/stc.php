@@ -171,7 +171,7 @@ function stc_top ($styles=null) {
   
   xhtml_header();
   echo "<head>\n";
-  echo "<title>Stages et Thèses</title>\n";
+  echo "<title>Stages de Master 2 en Astrophysique</title>\n";
   foreach ($_stc_styles as $style)
     echo "<link rel=\"stylesheet\" href=\"".$style."\" type=\"text/css\"/>\n";
   echo "</head>\n";
