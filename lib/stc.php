@@ -386,7 +386,7 @@ function stc_form_check_errors($form, $variable) {
 
 function stc_form_check_password($pass) {
   $p = trim ($pass);
-  if (strlen($p)==0)
+  if (strlen($p)<8)
     return False;
 }
 
@@ -611,13 +611,15 @@ function stc_form_date ($form, $label, $variable, $value="") {
   
 }
 
-function stc_form_password ($form, $label, $variable, $value="") {
+function stc_form_password ($form, $label, $variable, $value="", $help=null) {
   echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
   echo "<input type=\"password\" name=\"".$variable."\"";
   if (strlen($value)>0) echo " value=\"".stc_form_escape_value($value)."\"";
-  echo "></div>\n";
+  echo ">"; 
+  if (!is_null($help)) echo "<div class=\"formhelp\">".$help."</div>";  
+  echo "</div>\n";
 }
 
 function stc_form_textarea ($form, $label, $variable, $value="", $width=null, $height=null, $help=null) {

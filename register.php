@@ -130,7 +130,8 @@ stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos",
 		       "help" => "Si votre laboratoire n'apparaît pas ou si vous ne connaissez pas votre numéro d'unité, contactez l'assistance"));
 echo "<br/>\n";
 stc_form_text ($form, "Nom d'utilisateur", "login", $login);
-stc_form_password ($form, "Mot de passe", "pass1", $pass1);
+stc_form_password ($form, "Mot de passe", "pass1", $pass1, 
+		   "le mot de passe doit faire au moins 8 caractères de long, et ne pas contenir d'espaces");
 stc_form_password ($form, "Mot de passe", "pass2", $pass2);
 stc_form_button ($form, "Créer mon compte", "create_account");
 stc_form_end ();
