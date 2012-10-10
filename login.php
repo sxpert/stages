@@ -17,6 +17,7 @@ if ($referer == False) stc_reject();
 /* test des entrées */
 
 $login = stc_get_variable ($_POST, 'user');
+$login = trim($login);
 $passwd = stc_get_variable ($_POST, 'password');
 
 if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {

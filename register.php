@@ -24,6 +24,7 @@ $status    = stc_get_variable ($_POST, 'status');
 $umr       = stc_get_variable ($_POST, 'umr');
 $labo      = stc_get_variable ($_POST, 'labo');
 $login     = stc_get_variable ($_POST, 'login');
+$login     = trim($login);
 $pass1     = stc_get_variable ($_POST, 'pass1');
 $pass2     = stc_get_variable ($_POST, 'pass2');
 
@@ -58,7 +59,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	stc_form_add_error($errors, 'labo', "Incohérence entre numéro d'UMR et laboratoire");
       if (!stc_form_check_select($labo, 'liste_labos'))
 	stc_form_add_error($errors, 'labo', "Le laboratoire n'existe pas");
-      if (strlen(trim($login))==0) 
+      if (strlen($login)==0) 
 	stc_form_add_error($errors, 'login', "le nom d'utilisateur ne doit pas être vide et ne peut contenir d'espaces");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
