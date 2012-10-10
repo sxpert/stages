@@ -382,6 +382,14 @@ function stc_form_check_errors($form, $variable) {
  * Fonctions de vérification et de nettoyage
  */
 
+/* mot de passe */
+
+function stc_form_check_password($pass) {
+  $p = trim ($pass);
+  if (strlen($p)==0)
+    return False;
+}
+
 /* telephone */
 
 function stc_form_check_phone($phone) {

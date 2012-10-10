@@ -48,6 +48,7 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
   if (array_key_exists('action', $_POST)) {
     if (strcmp($_POST['action'],'create_account')==0) {
       /* vérifie la cohérence des données entrées */
+      /* 2012-10-10 vérification du login vide */
       if (!stc_form_check_phone($phone))
 	stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
       if (!stc_form_check_select($status, 'liste_statuts')) 
@@ -61,6 +62,9 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	stc_form_add_error($errors, 'login', "le nom d'utilisateur ne doit pas être vide et ne peut contenir d'espaces");
       if (strcmp($pass1,$pass2)!=0)
 	stc_form_add_error($errors, 'pass2', "Les deux mots de passe ne correspondent pas");
+      else 
+	if (!stc_form_check_password($pass1))
+	  stc_form_add_error($errors, 'pass1', "Le mot de passe est trop simple");
 
       if (count($errors)==0) {
 	$t_phone = stc_form_clean_phone ($phone);
