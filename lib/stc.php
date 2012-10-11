@@ -388,6 +388,8 @@ function stc_form_check_password($pass) {
   $p = trim ($pass);
   if (strlen($p)<8)
     return False;
+
+  return True;
 }
 
 /* telephone */

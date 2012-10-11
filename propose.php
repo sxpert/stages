@@ -11,6 +11,7 @@ require_once ('lib/stc.php');
 
 stc_must_be_logged();
 
+/* tableau des erreurs */
 $errors = array();
 
 $type         = stc_get_variable($_REQUEST, 'type');
@@ -25,9 +26,6 @@ $mode=NONE;
 if ($action=='propose_task') $mode=INSERT;
 if ($action=='update_task') $mode=UPDATE;
 if (($action=='edit')&&($offreid>0)) $mode=EDIT;
-
-/* tableau des erreurs */
-$errors = array();
 
 if ($mode==EDIT) {
   error_log ('edit mode, fetching offre_id '.$offreid);
