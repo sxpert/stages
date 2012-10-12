@@ -93,7 +93,7 @@ de passe. Il suffit de le faire une seule fois. Pour cela, cliquer sur le menu
 <p>La base envoie ensuite un email de confirmation à l'adresse que vous aurez 
 fourni. L'inscription ne sera effective qu'après validation, faite en cliquant 
 sur le lien inclus dans l'email. Le dépôt d'une proposition de stage ainsi que 
-la consultation et/ou modification ultèrieure seront alors disponibles après 
+la consultation et/ou modification ultérieure seront alors disponibles après 
 connexion.</p>
 
 <!--<p>Si vous avez oublié votre mot de passe, cliquer ici (BOUTON).</p>-->
