@@ -876,12 +876,6 @@ function stc_default_menu ($options=null) {
   stc_menu_add_item ($menu, 'Accueil', '/');
   stc_menu_add_separator ($menu);
   
-  // menu specifique super admin
-  if ($admin===true) {
-    stc_menu_add_section ($menu, 'Actions administrateur du site');
-    stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
-    stc_menu_add_separator ($menu);
-  }
 
   // listage des types de propositions
   $sql = "select code, denom_prop from type_offre order by code";
@@ -899,16 +893,6 @@ function stc_default_menu ($options=null) {
       if ($admin) {
         stc_menu_add_item($menu, 'Propositions en attente de validation', 'search.php?type='.$row['code'].'&notvalid=1');
 	stc_menu_add_item($menu, 'Voir les stages comme un étudiant', 'search.php?type='.$row['code'].'&simulm2=true');
-	// messagerie
-	if ($admin===true) 
-	  stc_menu_add_item ($menu, "Messages pour les admins de M2R", 'messages.php?type=m2');
-	else {
-	  $sql_m2 = "select short_desc, ville from m2 where id=$1";
-	  $rm2 = pg_query_params($db, $sql_m2, array($admin));
-	  $rowm2 = pg_fetch_assoc($rm2);
-	  stc_menu_add_item ($menu, "Messages pour ".$rowm2['short_desc']." (".$rowm2['ville'].")",
-			     'messages.php?type=m2&id='.$admin  );
-	}
 	stc_menu_add_separator($menu);
       }
       if ($admin) stc_menu_add_section ($menu, 'Actions responsable de stage :');
@@ -920,14 +904,7 @@ function stc_default_menu ($options=null) {
   }
   pg_free_result ($r);
   
-  /*
-  if (($logged)&&($admin)) {
-    stc_menu_add_section($menu, 'Options administratives');
-    stc_menu_add_item($menu, 'gestion des catégories', 'gere-categories.php');
-    stc_menu_add_separator($menu);
-  } 
-  */ 
-  if ($logged) { 
+   if ($logged) { 
     //stc_menu_add_item ($menu, 'Liste des Responsables', 'liste-responsables.php');
     stc_menu_add_item ($menu, 'Contacts', 'liste-contacts.php');
     stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
