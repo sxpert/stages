@@ -31,7 +31,12 @@
 
 .date {
     min-width: 100pt;
-    width: 140pt;
+    width: 100pt;
+    max-width: 100pt;
+}
+.m2 {
+    min-width: 100pt;
+    width: 100pt;
     max-width: 100pt;
 }
 .sender {
@@ -51,4 +56,16 @@
 }
 .header {
     display: block;
+}
+#mail {
+    text-decoration: none;
+}
+#subject {
+    padding-top: 12pt;
+    font-weight: bold;
+    width: 600pt;
+}
+#message {
+    padding-top: 12pt;
+    width: 600pt;
 }
