@@ -122,7 +122,7 @@ $form = stc_form ("post", "register.php", $errors);
 stc_form_text ($form, "Prénom", "f_name", $f_name);
 stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
 stc_form_text ($form, "Adresse email", "email", $email);
-stc_form_text ($form, "Téléphone", "phone", $phone);
+stc_form_text ($form, "Téléphone", "phone", $phone, null, null, "exemple: '+33 1 23 45 67 89'");
 stc_form_select ($form, "Statut", "status", $status, "liste_statuts");
 stc_form_text ($form, "Numéro d'unité", "umr", $umr);
 stc_form_select ($form, "Laboratoire", "labo", $labo, "liste_labos", 
