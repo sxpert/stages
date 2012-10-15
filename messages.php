@@ -108,6 +108,13 @@ if (($user>0)&&($admin)) {
     echo "</h1>\n";
     break;
   }
+  
+  if (pg_num_rows($rlist)==0) {
+    echo "<div id=\"empty\">Aucun message</div>\n";
+    stc_footer();
+    exit(0);
+  }
+
   /* en-têtes */
   echo "<div id=\"list\">\n";
 
