@@ -19,7 +19,7 @@ stc_menu($menu);
 if ($user>0) {
   echo "<h2>Contacter l'administrateur de la base</h2>\n";
   echo "<div><a href=\"contact.php?type=admin\">Cliquez ici</a></div>\n";
-  echo "<h2>Contacter les M2R</h2>\n";
+  echo "<h2>Contacter les responsables des formations</h2>\n";
   /* boucler dans les M2 */
   $sql = "select id, short_desc, description, ville from m2 where active=true order by ville, short_desc, description;";
   $m2s = pg_query($db, $sql);
