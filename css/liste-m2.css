@@ -1,0 +1,75 @@
+/*******************************************************************************
+ *
+ * Gestion des offres de stage de M2 en Astro
+ * (c) Raphaël Jacquot 2011
+ * Fichier sous licence GPL-3
+ *
+ ******************************************************************************/
+.header > span  {
+    font-size: 12pt;
+    padding-bottom: 18pt;
+    font-weight: bold;
+    vertical-align: top;
+    display: table-cell;
+}
+.list > a {
+    display: table-cell;
+    color: black;
+    height: 16pt;
+    line-height: 14pt;
+    text-decoration: none;
+}
+.list > a > span {
+    line-height: 16pt;
+    vertical-align: middle;
+}
+.list > span, .list > * > span {
+    display: table-cell;
+    height: 16pt;
+    vertical-align: top;
+}
+.odd > span, .odd > * > span {
+    background-color: #e7e7e7;
+}
+.active {
+    font-weight: bold;
+}
+
+.short {
+    min-width: 100pt;
+    width: 100pt;
+    max-width: 100pt;
+}
+.desc {
+    min-width: 400pt;
+    width: 400pt;
+    max-width: 400pt;
+}
+.ville {
+    min-width: 150pt;
+    width: 150pt;
+    max-width: 150pt;
+}
+
+#list {
+    display: block;
+    padding-bottom: 6pt;
+}
+.header {
+    display: block;
+}
+#mail {
+    text-decoration: none;
+}
+#subject {
+    padding-top: 12pt;
+    font-weight: bold;
+    width: 600pt;
+}
+#message {
+    padding-top: 12pt;
+    width: 600pt;
+}
+#empty {
+    font-style: italic;
+}
