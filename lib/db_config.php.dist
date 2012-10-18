@@ -23,4 +23,8 @@ $MAIL_SRV="stcoll.sxpert.org";
 $JQUERY_VER="1.7.1";
 $JQUERYUI_VER="1.8.16";
 $JQUERYUI_THEME="base";
+
+$HTTP_OPTS=array(
+		 'timeout'=>5,
+		 );
 ?>

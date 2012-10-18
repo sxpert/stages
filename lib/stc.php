@@ -455,6 +455,7 @@ function stc_form_clean_url($url) {
 }
 
 function stc_form_check_url($url,&$e) {
+  global $HTTP_CONFIG;
   $u = parse_url($url);
   if (is_bool($u)&&!$u) {
     $e = 'Adresse mal formée';
@@ -514,7 +515,7 @@ function stc_form_check_url($url,&$e) {
     return false; /* si on a pas de host, c'est compromis... */
   }
   /* timeout a 5 secondes */
-  $r = http_head($url,array('timeout'=>5),$info);
+  $r = http_head($url,$HTTP_CONFIG,$info);
   if ($info['response_code']>=400) {
     $e = 'Accès au document impossible';
     return false;
@@ -880,6 +881,7 @@ function stc_default_menu ($options=null) {
   if ($admin===true) {
     stc_menu_add_section ($menu, 'Actions administrateur du site');
     stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
+    stc_menu_add_item ($menu, 'Liste des M2R', 'liste-m2.php');
     stc_menu_add_separator ($menu);
   }
 
