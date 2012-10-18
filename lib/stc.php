@@ -455,12 +455,15 @@ function stc_form_clean_url($url) {
 }
 
 function stc_form_check_url($url,&$e) {
-  global $HTTP_CONFIG;
+  GLOBAL $HTTP_OPTS;
+  error_log('HTTP_OPTS : '.print_r($HTTP_OPTS,1));
+  error_log('checking '.$url); 
   $u = parse_url($url);
   if (is_bool($u)&&!$u) {
     $e = 'Adresse mal formée';
     return false;
   }
+  error_log('url could be parsed');
   if (array_key_exists('scheme',$u)) {
     if (array_key_exists('port',$u)) $port = $u['port'];
     else $port = 0;
@@ -480,31 +483,39 @@ function stc_form_check_url($url,&$e) {
     $e = 'Type de protocole manquant (\'http\' ou \'https\' attendu)';
     return false; /* force http ?? better not */
   }
+  error_log('scheme ok');
   if (array_key_exists('host',$u)) {
     $ips = dns_get_record($u['host']);
     if ((is_bool($ips)&&!$ips)||(count($ips)==0)) {
       $e = 'Serveur \''.$u['host'].'\' introuvable';
       return false;
     }
-    /* trouve si une des adresses réponds */
-    $ok = false;
-    foreach ($ips as $ip) {
-      switch ($ip['type']) {
-      case 'A':
-	$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
-	$ok |= @socket_connect($s,$ip['ip'],$u['port']);
-	error_log($ip['type'].' - '.$ip['ip'].':'.$u['port'].' '.($ok?'ok':'nok'));
-	socket_close($s);
-	break;
-      case 'AAAA':
-	$s=socket_create(AF_INET6,SOCK_STREAM,SOL_TCP);
-	$ok |= @socket_connect($s,$ip['ipv6'],$u['port']);
-	error_log($ip['type'].' - ['.$ip['ipv6'].']:'.$u['port'].' '.($ok?'ok':'nok'));
-	socket_close($s);
-	break;
-      default:
-	continue;
+    error_log('dns ok');
+    error_log(print_r($ips,1));
+    if (!array_key_exists('proxyhost',$HTTP_OPTS)) {
+      /* trouve si une des adresses réponds */
+      $ok = false;
+      foreach ($ips as $ip) {
+        switch ($ip['type']) {
+        case 'A':
+  	  $s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
+	  $ok |= @socket_connect($s,$ip['ip'],$u['port']);
+	  error_log($ip['type'].' - '.$ip['ip'].':'.$u['port'].' '.($ok?'ok':'nok'));
+	  socket_close($s);
+	  break;
+        case 'AAAA':
+ 	  $s=socket_create(AF_INET6,SOCK_STREAM,SOL_TCP);
+	  $ok |= @socket_connect($s,$ip['ipv6'],$u['port']);
+	  error_log($ip['type'].' - ['.$ip['ipv6'].']:'.$u['port'].' '.($ok?'ok':'nok'));
+	  socket_close($s);
+	  break;
+        default:
+  	  continue;
+        }
       }
+    } else {
+      error_log('we have a proxy, can\'t check direct connexion');
+      $ok = true;
     }
     if (!$ok) {
       $e = 'Connection au serveur impossible';
@@ -516,6 +527,8 @@ function stc_form_check_url($url,&$e) {
   }
   /* timeout a 5 secondes */
   $r = http_head($url,$HTTP_CONFIG,$info);
+  error_log($r);  
+  error_log(print_r($info,1));
   if ($info['response_code']>=400) {
     $e = 'Accès au document impossible';
     return false;

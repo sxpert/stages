@@ -114,7 +114,7 @@ function stc_affiche_offre($id, $multi=false) {
   $url = trim($offre['project_url']);
   if (strlen($url)>0) {
     stc_detail_subsection ("Plus d'informations");
-    stc_detail_display ($url);
+    stc_detail_display ("<a href=\"".$url."\">".$url."</a>");
   }
 
   /* nature du travail */
