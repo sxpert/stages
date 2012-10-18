@@ -5,7 +5,13 @@
  * Fichier sous licence GPL-3
  *
  ******************************************************************************/
-
+.header > span  {
+    font-size: 12pt;
+    padding-bottom: 18pt;
+    font-weight: bold;
+    vertical-align: top;
+    display: table-cell;
+}
 .message > a {
     display: table-cell;
     color: black;

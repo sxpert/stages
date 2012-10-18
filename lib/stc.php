@@ -526,7 +526,11 @@ function stc_form_check_url($url,&$e) {
     return false; /* si on a pas de host, c'est compromis... */
   }
   /* timeout a 5 secondes */
+<<<<<<< HEAD
   $r = http_head($url,$HTTP_CONFIG,$info);
+=======
+  $r = http_head($url,$HTTP_OPTS,$info);
+>>>>>>> 3f01fa4104047e29fd1dd53e97e82be4afdc91f8
   error_log($r);  
   error_log(print_r($info,1));
   if ($info['response_code']>=400) {

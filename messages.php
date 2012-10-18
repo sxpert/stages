@@ -116,7 +116,12 @@ if (($user>0)&&($admin)) {
   }
 
   /* en-têtes */
-  echo "<div id=\"list\">\n";
+  echo "<div class=\"header\">";
+  echo "<span class=\"date\">Date</span>";
+  if ($showm2) echo "<span class=\"m2\">Formation destination</span>";
+  echo "<span class=\"sender\">Expéditeur</span>";
+  echo "<span class=\"subject\">Sujet</span>";
+  echo "</div>\n";
 
   /* messages */
   $odd = 1;
@@ -134,7 +139,6 @@ if (($user>0)&&($admin)) {
     echo "</div>";
     $odd = ($odd+1)%2;
   }
-  echo "</div>\n";
   
 } else
   echo 'Affichage interdit';
