@@ -501,7 +501,7 @@ create table offres (
        pay_state	bigint not null references pay_states (id),
        pers_found	boolean,
 
-       deleted		boolean,       
+       deleted		boolean default false,       
 
        create_date	timestamp,
        last_update	timestamp,
