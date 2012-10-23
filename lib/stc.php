@@ -1064,6 +1064,7 @@ function stc_user_resend_email($login, $password) {
   $r = pg_get_result ($db);
   $row = pg_fetch_assoc($r);
   if ($row['id']>0) stc_send_check_email($row['email'], $row['mhash']);
+  stc_append_log('resend_email','User with email'.$row['email'].' requested check email resent');
   return $row['id'];
 }
 
