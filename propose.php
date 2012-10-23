@@ -113,7 +113,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
     elseif (!stc_form_check_multi($categories, 'liste_categories'))
       stc_form_add_error($errors, 'categories', 'Problème de cohérence dans les catégories');
     
-    if (mb_strlen($description, 'UTF-8')>$MAX_CHARS) {
+    if (mb_strlen($description, 'UTF-8')>($MAX_CHARS*1.03)) {
       stc_form_add_error($errors, 'description', 'Texte trop long, la taille maximale autorisée est '.$MAX_CHARS.' signes');
     }
     
