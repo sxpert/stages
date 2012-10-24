@@ -364,17 +364,22 @@ function stc_form_add_error(&$errors, $variable, $message) {
   $errors[$variable] = $ve;
 }
 
+function stc_form_display_errors($msg) {
+  echo "<div class=\"error\">";
+  echo $msg;
+  echo "</div>\n";
+}
+
 function stc_form_check_errors($form, $variable) {
   if (is_null($form)) return;
   if (array_key_exists($variable, $form)) {
-    echo "<div class=\"error\">";
-    $first = True;
+    $msg = '';
     foreach ($form[$variable] as $error) {
-      if ($first) $first=False;
-      else echo "<br/>\n";
-      echo "$error";
+      if (mb_strlen($msg)>0) 
+	echo $msg.="<br/>\n";
+      $msg.="$error";
     }
-    echo "</div>\n";
+    stc_form_display_errors($msg);
   }
 }
 
@@ -581,6 +586,8 @@ function stc_form_check_multi ($values, $table) {
  */
 
 function stc_form ($method, $action, $errors, $id=null, $style=null) {
+  if ($id!==null)
+    stc_form_check_errors ($errors, $id);
   echo "<form method=\"".$method. "\" action=\"".$action."\"";
   if (!is_null($id)) echo " id=\"".$id."\"";
   if (!is_null($style)) echo " style=\"".$style."\"";
@@ -1066,6 +1073,17 @@ function stc_user_resend_email($login, $password) {
   if ($row['id']>0) stc_send_check_email($row['email'], $row['mhash']);
   stc_append_log ('resend_email','User requested email resent to '.$row['email']);
   return $row['id'];
+}
+
+function stc_send_lost_password_email($login, $email) {
+  GLOBAL $db;
+  
+  $sql = 'select * from user_gen_email_hash ($1) as (mhash text);';
+  $arr = array($login);
+  pg_send_query_params($db, $sql, $arr);
+  $r = pg_get_result ($db);
+  $row = pg_fetch_assoc($r);
+  stc_append_log('lost_password','User '.$login.' lost password. Mail sent to '.$email.' mhash='.$row['mhash']);
 }
 
 function stc_user_validate_account($login, $password, $hash) {

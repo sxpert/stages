@@ -132,6 +132,10 @@
 	padding-left:182pt;
 	min-height: 300pt;
     }
+    #content > div.error {
+	margin-bottom: 3px;
+    }
+    #content > div.error,
     #content > form > div.error {
 	color: red;
 	background-color: #FFFFC0;

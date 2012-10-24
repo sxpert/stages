@@ -1,3 +1,15 @@
+--******************************************************************************
+--
+-- Gestion des offres de stage de M2 en Astro
+-- (c) Raphaël Jacquot 2011
+-- Fichier sous licence GPL-3
+--
+--*****************************************************************************/
+
+--
+-- Ajout de fonctionnalités de messagerie
+-- 
+
 \c stages stagesadm
 
 drop table if exists messages;
