@@ -200,7 +200,7 @@ create table users (
        email	      text,
        phone	      text,
        statut	      bigint not null references statuts ( id ),
-       id_laboratoire bigint not null references laboratoires ( id ),
+       id_laboratoire bigint not null references laboratoires ( id ) on update cascade,
        login	      text not null unique,
        passwd	      text,
        salt	      bytea,
