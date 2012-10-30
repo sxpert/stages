@@ -23,6 +23,31 @@ create or replace view users_view as select id, f_name, l_name, login, email, ph
 grant select on users_view to stagesweb;
 
 --
+-- comptes multiples
+--
+drop view if exists multiple_accounts;
+create or replace view multiple_accounts as 
+    select id, f_name, l_name, users.email, login, account_valid, m2_admin, super 
+        from 
+            (select count(id) as nb_comptes, email from users group by email) as counter , 
+	    users 
+	where 
+	    nb_comptes > 1 and 
+	    counter.email = users.email 
+	order by email, login;
+grant select on multiple_accounts to stagesweb;
+
+--
+-- comptes inactifs
+--
+drop view if exists inactive_accounts;
+create or replace view inactive_accounts as
+    select id, f_name, l_name, users.email, login, account_valid, m2_admin, super 
+        from users
+        where account_valid = false;
+grant select on inactive_accounts to stagesweb;
+
+--
 -- modifier la table users au besoin
 -- 
 
@@ -34,8 +59,20 @@ do $$
 	    raise notice 'table has email_token field';
 	else
 	    raise notice 'need to add email_token field';
+	    -- add email_token
 	    alter table users add column email_token text;
 	end if;
+
+	-- vérifier si la table a un champ token_timestamp
+	perform pa.attname from pg_type as pt, pg_attribute as pa where pt.typrelid = pa.attrelid and pt.typname='users' and pa.attname='token_timestamp';
+	if found then
+	    raise notice 'table has token_timestamp field';
+	else
+	    raise notice 'need to add token_timestamp field';
+	    -- add token_timestamp
+	    alter table users add column token_timestamp timestamp default null;
+	end if;
+
     end;
 $$;
 
@@ -66,6 +103,7 @@ $$ language plpgsql;
 --
 -- génère un nouveau token d'email
 -- 
+drop function if exists gen_email_token (text);
 create or replace function gen_email_token (t_email text) returns text as $$
     declare
         t_salt bytea;
@@ -80,7 +118,7 @@ $$ language plpgsql;
 --
 -- no need to store salt anymore
 --
-
+drop function if exists user_add (text, text, text, text, bigint, bigint, text, text, inet);
 create or replace function user_add(t_fname text, t_lname text, 
        	                 t_email text, t_phone text,
 			 t_statut bigint, t_id_labo bigint, 
@@ -164,6 +202,7 @@ $$ language plpgsql security definer;
 --
 -- user validation
 --
+drop function if exists user_validate_account (text, text, text, inet);
 create or replace function user_validate_account(t_login text, t_password text, t_hash text, t_ipaddr inet) returns bigint as $$
        declare
                t_account       record;
@@ -203,39 +242,121 @@ $$ language plpgsql security definer;
 --
 -- generates a new user email token if user requested one
 --
-create or replace function user_get_email_hash(t_login text, t_password text, t_ipaddr inet) returns record as $$
-        declare
-		t_account	record;
-		t_passwd	text;
-		t_email_token	text;
-		t_rec		record;
-        begin
-	        select * into t_account from users where login=t_login;
-		if found then
-		        if (t_account.login_fails >= 3) then
-			        t_rec := (-1::bigint, null::text, null::text);
-				return t_rec;
-                        end if;
-			t_passwd := hash_password ( t_password, extract_salt (t_account.passwd));
-			if (t_passwd = t_account.passwd) then
-			        perform append_log_login ('validation_email',t_login,'User requested validation email sent',t_ipaddr);
-				-- generate new token
-				t_email_token := gen_email_token (t_account.email);
-				-- store new token
-				update users set email_token = t_email_token where id=t_account.id;
-				t_rec := ( t_account.id, t_account.email, t_email_token);
-				return t_rec;
-			end if;
-			-- fail
-			perform append_log_login ('validation_email',t_login,'User failed password check',t_ipaddr);
-			update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
-		else
-			perform append_log_login ('validation_email',t_login,'User does not exist',t_ipaddr);
+drop function if exists user_update_token (bigint, inet);
+create or replace function user_update_token (l_userid bigint, l_ipaddr inet) returns text as $$
+    declare
+        t_account record;
+        t_token   text;
+	t_msg     text;
+    begin
+        select * into t_account from users where id = l_userid;
+	if found then
+	    -- check if token_timestamp is at least 30 mn old
+	    if t_account.token_timestamp is not null then
+	        if ( t_account.token_timestamp + interval '30 minutes' ) > CURRENT_TIMESTAMP then
+		    -- add some logging
+		    t_msg := 'Attempt to abuse user ' || t_account.login || ' requesting new email token (dt < 30mn)';
+		    perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
+		    return null;
 		end if;
-		t_rec := (0::bigint, null::text, null::text);
-		return t_rec;
-        end;
+            end if;
+	    t_token := gen_email_token (t_account.email);
+	    
+	    update users set email_token = t_token, token_timestamp = CURRENT_TIMESTAMP where id=t_account.id;
+	    return t_token;
+	end if;
+    end;
 $$ language plpgsql security definer;
+
+drop function if exists user_get_email_hash (text, text, inet);
+create or replace function user_get_email_hash(l_login text, l_password text, l_ipaddr inet) returns record as $$
+    declare
+        t_account record;
+        t_passwd  text;
+        t_token	  text;
+        t_rec	  record;
+	t_msg     text;
+    begin
+        select * into t_account from users where login=l_login;
+	if found then
+            if (t_account.login_fails >= 3) then
+	        t_rec := (-1::bigint, null::text, null::text);
+		return t_rec;
+            end if;
+    	    t_passwd := hash_password ( l_password, extract_salt (t_account.passwd));
+	    if (t_passwd = t_account.passwd) then
+		-- generate new token
+		t_token := user_update_token (t_account.id, l_ipaddr);
+		if t_token is null then
+		    raise notice 'User % requested new token too early', l_login;
+		    t_rec := (0::bigint, null::text, null::text);
+		    return t_rec;
+		end if;
+		t_msg := 'User ' || t_account.login || ' email validation. Mail sent to ' || t_account.email || ' token=' || t_token;
+		perform append_log ('validation_email', t_account.id, t_msg, l_ipaddr);
+		t_rec := ( t_account.id, t_account.email, t_token);
+		return t_rec;
+	    end if;
+	    -- fail
+	    perform append_log_login ('validation_email',l_login,'User failed password check',l_ipaddr);
+	    update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
+	else
+	    perform append_log_login ('validation_email',l_login,'User does not exist',l_ipaddr);
+	end if;
+	t_rec := (0::bigint, null::text, null::text);
+	return t_rec;
+    end;
+$$ language plpgsql security definer;
+
+--
+-- new email token when user lost password
+--
+drop function if exists user_new_email_token (text, text, inet);
+create or replace function user_new_email_token (l_login text, l_email text, l_ipaddr inet) returns record as $$
+    declare
+	t_login   text;
+	t_email   text;
+	t_token   text;
+        t_account record;
+	t_msg     text;
+	t_rec     record;
+    begin
+        if l_login = '' then
+	    l_login = null;
+	end if;
+        select * into t_account from users where login=l_login;
+	if found then
+	    t_login := l_login;
+	    t_email := t_account.email;
+        else
+	    if l_email = '' then
+	        l_email = null;
+	    end if;
+	    select * into t_account from users where email=l_email;
+	    if found then
+	        t_login = t_account.login;
+		t_email = l_email;
+            else
+	        t_msg := 'Unable to find user with login ''' || l_login || ''' or email ''' || l_email || '''';
+	        perform append_log('lost_password', null, t_msg, l_ipaddr);
+		t_rec := (0::bigint, null::text, null::text);
+		return t_rec; 
+	    end if;
+	end if;    
+	-- if we got there, we have both login and email
+	t_token := user_update_token (t_account.id, l_ipaddr);
+	if t_token is null then
+	    raise notice 'User % requested new token too early', l_login;
+	    t_rec := (0::bigint, null::text, null::text);
+	    return t_rec; 
+	end if;
+	t_msg := 'User ' || t_login || ' lost password. Mail sent to ' || t_email || ' token=' || t_token;
+	perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
+	t_rec := ( t_account.id, t_account.email, t_token);
+	return t_rec;
+    end;
+$$ language plpgsql security definer;
+
 
 
 --
@@ -279,10 +400,23 @@ do $$
 
 	-- test generating new email token
 	select * into t_token from user_get_email_hash('_user', '_pass', '127.0.0.1') as ss (id bigint, email text, token text);
-	raise notice 'retrieve new token id % email % token %', t_token.id, t_token.email, t_token.token;
+	raise notice 'validation retrieve new token id % email % token %', t_token.id, t_token.email, t_token.token;
 	
-	delete from users where login='_user';
+	update users set token_timestamp = null where id = t_user_id;
+	select * into t_token from user_new_email_token ('_user', '', '127.0.0.1') as ss (id bigint, email text, token text);
+	raise notice 'lost pass retrieve new token id % email % token %', t_token.id, t_token.email, t_token.token;
+
+	update users set token_timestamp = null where id = t_user_id;
+	select * into t_token from user_new_email_token ('', 'test.user@example.com', '127.0.0.1') as ss (id bigint, email text, token text);
+	raise notice 'lost pass retrieve new token id % email % token %', t_token.id, t_token.email, t_token.token;
+
+	select * into t_token from user_new_email_token ('_user', '', '127.0.0.1') as ss (id bigint, email text, token text);
+	
+        delete from users where login='_user';
+
     end;
 $$;
+
+
 
 \set VERBOSITY default

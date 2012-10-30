@@ -1,1 +1,7 @@
-Implementer la suppression dans delete-offer.php
+IMPORTANT
+
+  Implementer la suppression dans delete-offer.php
+
+BOF
+
+  sauvegarder les selections pour chaque personne

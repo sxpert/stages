@@ -1078,12 +1078,12 @@ function stc_user_resend_email($login, $password) {
 function stc_send_lost_password_email($login, $email) {
   GLOBAL $db;
   
-  $sql = 'select * from user_gen_email_hash ($1) as (mhash text);';
-  $arr = array($login);
+  $ip = stc_get_remote_ip();
+  $sql = 'select * from user_gen_email_hash ($1, $2, $3) as (mhash text);';
+  $arr = array($login, $email, $ip);
   pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result ($db);
   $row = pg_fetch_assoc($r);
-  stc_append_log('lost_password','User '.$login.' lost password. Mail sent to '.$email.' mhash='.$row['mhash']);
 }
 
 function stc_user_validate_account($login, $password, $hash) {
