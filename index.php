@@ -15,15 +15,17 @@ if (array_key_exists('from',$_REQUEST)) {
   $from=stc_from();
 } 
 
-if (($_SERVER['REMOTE_ADDR']=='193.107.127.8')&&($EN_TRAVAUX)) {
+if (($_SERVER['REMOTE_ADDR']=='193.107.127.8')&&
+		($EN_TRAVAUX)) {
   error_log("Travaux : ".$_SERVER['REMOTE_ADDR']);
   stc_top();
   $menu = stc_menu_init();
   stc_menu_add_item($menu, "Accueil", "index.php");
   stc_menu($menu);
   echo "<h2>Site en travaux</h2>\n";
-  echo "<p>Le site revient bientôt, veuillez nous excuser pour le dérangement,</p>\n";
-  stc_footer();
+  echo "<p>Le site revient bientôt, veuillez nous excuser pour le dérangement, 1</p>\n";
+	echo "<pre>".print_r($_SERVER,1)."</pre>\n";
+	stc_footer();
   exit(0);
 }
 

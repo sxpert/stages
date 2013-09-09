@@ -24,6 +24,9 @@ $JQUERY_VER="1.7.1";
 $JQUERYUI_VER="1.8.16";
 $JQUERYUI_THEME="base";
 
+// mois / jour
+$BLACKOUT_DATE= [10, 20];
+
 $HTTP_OPTS=array(
 		 'timeout'=>5,
 		 );

@@ -22,6 +22,9 @@ if ($admin!==true) {
   exit(0);
 }  
 
+echo "<h1>Détails sur un Master 2 Recherche</h1>\n";
+
+// aller pêcher les infos dans la bdd
 
 
 stc_footer();

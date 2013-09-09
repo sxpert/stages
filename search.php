@@ -10,11 +10,16 @@
 require_once('lib/stc.php');
 
 $user = stc_user_id();
+
 $admin = stc_is_admin();
 $from = stc_from();
+
 $projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
+// TODO: projmgr doit etre egal a $user, sinon, ca va pas...
+
 $type = stc_get_variable ($_GET,'type');
 $notvalid = intval(stc_get_variable($_REQUEST,'notvalid'));
+
 $simulm2 = stc_get_variable($_REQUEST,'simulm2');
 if ($simulm2=='true') {
   $simulm2=true;
@@ -36,6 +41,8 @@ stc_menu($menu);
 $outer_select=false;
 $outer_where = array();
 
+$date_valid = True;
+
 if (($user==0)||($simulm2)) {
   /* utilisateur non loggué */
   if ($from==0) { 
@@ -44,6 +51,15 @@ if (($user==0)||($simulm2)) {
     stc_footer();
     exit(0);
   } else {
+		// étudiant ou simulation de M2
+
+		// entre le yyyy-09-01 et le yyyy-10-20, blackout pour les étudiants
+		date_default_timezone_set("Europe/Paris");
+		$d = getdate();
+		$m = $d['mon'];
+		$d = $d['mday'];
+		$date_valid = (($m<9)||(($m>=$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1])));
+
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","offres_m2","users_view","laboratoires");
@@ -53,6 +69,7 @@ if (($user==0)||($simulm2)) {
   }
 } else {
   if ($admin&&(!$projmgr)) {
+		// l'administrateur de site voit tout
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","users_view","laboratoires");
@@ -60,9 +77,11 @@ if (($user==0)||($simulm2)) {
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
     $arr    = array(stc_calc_year());
   } else {
+		// il s'agit d'un utilisateur enregistré, on affiche donc uniquement ses propositions
     $select = array("offres.id","offres.sujet","offres.pers_found");
     $tables = array("offres");
     $where  = "offres.deleted=false and offres.year_value=$1 and offres.id_project_mgr = $2";
+		// on limite aux propositions de l'utilisateur
     $arr    = array(stc_calc_year(), $user);
   }
 }
@@ -166,6 +185,16 @@ if ($notvalid==1) {
   echo "<h1>Liste des stages";
   if ($from) echo " validés par le M2R ".stc_get_m2_name($from);
   echo "</h1>\n";
+}
+
+// étudiant dans la période de blackout
+if (!$date_valid) {
+	$months = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+	echo "<p>Les stages seront visibles à partir du ".$BLACKOUT_DATE[1]." ".
+		$months[$BLACKOUT_DATE[0]-1]." de l'année en cours</p>\n";
+	stc_footer();
+	pg_free_result($r);
+	exit (0);
 }
 
 /****
