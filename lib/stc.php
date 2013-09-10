@@ -1001,7 +1001,14 @@ function stc_dump_sql_error ($res) {
 }
 
 function stc_get_remote_ip() {
-  return $_SERVER['REMOTE_ADDR'];
+	if (array_key_exists('HTTP_VIA',$_SERVER)) {
+		if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER))
+			return $_SERVER['HTTP_X_FORWARDED_FOR'];
+		else { 
+			// proxy problem...
+		}
+	} else 
+	  return $_SERVER['REMOTE_ADDR'];
 }
 
 function stc_append_log ($function, $message) {
@@ -1422,10 +1429,11 @@ function stc_calc_year () {
 session_start();
 $db = stc_connect_db();
 
-if (($_SERVER['REMOTE_ADDR']!='193.107.127.8')&&
-    ($_SERVER['REMOTE_ADDR']!='127.0.0.1')&&
+$remote_addr = stc_get_remote_ip();
+if (($remote_addr!='193.107.127.8')&&
+    ($remote_addr!='127.0.0.1')&&
     ($EN_TRAVAUX)) {
-  error_log("Travaux : ".$_SERVER['REMOTE_ADDR']);
+  error_log("Travaux : ".$remote_addr);
   stc_top();
   $menu = stc_menu_init();
   stc_menu_add_item($menu, "Accueil", "index.php");

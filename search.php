@@ -193,7 +193,6 @@ if (!$date_valid) {
 	echo "<p>Les stages seront visibles à partir du ".$BLACKOUT_DATE[1]." ".
 		$months[$BLACKOUT_DATE[0]-1]." de l'année en cours</p>\n";
 	stc_footer();
-	pg_free_result($r);
 	exit (0);
 }
 
