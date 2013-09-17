@@ -89,7 +89,7 @@ if (($user>0)&&($admin)) {
     $sql.="and m.sender=u.id and u.id_laboratoire = l.id order by ";
     if ($showm2) $sql.="m2.short_desc, ";
     $sql.="datepub desc;";
-    error_log ($sql);
+    //error_log ($sql);
     if ($showm2) $rlist = pg_query ($db, $sql);
     else $rlist = pg_query_params($db, $sql, array($m2));
   }
