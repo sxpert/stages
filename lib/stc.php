@@ -1008,7 +1008,7 @@ function stc_dump_sql_error ($res) {
 //----
 // gets the ip address of the remote party. handles the case of a proxy server
 
-$RFC1918_BLOCKS=['192.168.0.0/16','172.16.0.0/12','10.0.0.0/8'];
+$RFC1918_BLOCKS=array('192.168.0.0/16','172.16.0.0/12','10.0.0.0/8');
 
 function stc_get_remote_ip() {
 	GLOBAL $db, $RFC1918_BLOCKS;
