@@ -836,7 +836,7 @@ function _append_scripts($scripts=null) {
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
-  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2012<br/>\n";
+  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2013<br/>\n";
   echo "<a href=\"http://ipag.obs.ujf-grenoble.fr/?lang=fr\">";
   echo "<img src=\"/images/logo-ipag-small.png\"/>";
   echo "</a><br/>\n";
