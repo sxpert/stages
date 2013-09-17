@@ -189,7 +189,7 @@ if ($notvalid==1) {
 
 // étudiant dans la période de blackout
 if (!$date_valid) {
-	$months = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+	$months = array("Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre");
 	echo "<p>Les stages seront visibles à partir du ".$BLACKOUT_DATE[1]." ".
 		$months[$BLACKOUT_DATE[0]-1]." de l'année en cours</p>\n";
 	stc_footer();
