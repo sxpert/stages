@@ -1000,16 +1000,142 @@ function stc_dump_sql_error ($res) {
   echo "</pre></div>\n";
 }
 
+//-----------------------------------------------------------------------------
+// Ip address management functions
+// TODO; only handles IPv4 for now
+//
+
+//----
+// gets the ip address of the remote party. handles the case of a proxy server
+
+$RFC1918_BLOCKS=['192.168.0.0/16','172.16.0.0/12','10.0.0.0/8'];
+
 function stc_get_remote_ip() {
+	GLOBAL $db, $RFC1918_BLOCKS;
 	if (array_key_exists('HTTP_VIA',$_SERVER)) {
-		if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER))
-			return $_SERVER['HTTP_X_FORWARDED_FOR'];
-		else { 
+		if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
+			// should check for RFC1918 blocks
+			$proxy_ip=$_SERVER['REMOTE_ADDR'];
+			$original_ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+			// log proxy only if ip is RFC1918 style
+			if (stc_ip_in_blocks($original_ip,$RFC1918_BLOCKS)) {
+				$sql = "select * from append_log ($1,$2,$3,$4);";
+				$userid = stc_user_id();
+				pg_query_params($db,$sql,array("get_remote_ip",$userid,"Proxy using user, proxy address ".$proxy_ip,$original_ip));
+				// TODO: do we keep the user's ip or the proxy's ?
+			}
+			return $original_ip;
+		} else { 
 			// proxy problem...
 		}
 	} else 
 	  return $_SERVER['REMOTE_ADDR'];
 }
+
+//----
+// finds if $ip is within any of $blocks
+
+function stc_ipv4_addr_to_binary ($ip) {
+	preg_match('/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/',$ip,$matches);
+	if (count($matches)!=5) {
+		error_log('Invalid IPv4 format '.$ip);
+		return null;
+	}
+	$b = '';
+	for ($i=1;$i<=4;$i++) {
+		$v = intval($matches[$i]);
+		$j=7;
+		while($j>=0) {
+			$b.=((($v/pow(2,$j--))&1)?'1':'0');
+		}
+	}
+	return $b;
+}
+
+function stc_ipv4_mask_to_binary ($mask) {
+	$mask = intval($mask);
+	if (($mask<1)&&($mask>32)) {
+		error_log("invalid mask ".$mask);
+		return null;
+	}
+	$m = '';
+	$i=1;
+	while ($i<=32)
+		$m.=(($i++<=$mask)?'1':'0');
+	return $m;
+}
+
+function stc_ipv4_apply_mask ($ip, $mask) {
+	$li = strlen($ip);
+	if ($li!=32) {
+		error_log('Invalid binary IP representation ('.$li.' chars) '.$ip);
+		return null;
+	}
+	$lm = strlen($mask);
+	if ($lm!=32) {
+		error_log('Invalid binary mask representation ('.$lm.' chars) '.$mask);
+		return null;
+	}
+	$m = '';
+	$i=0;
+	while ($i++<32) 
+		$m.=(($mask[$i-1]=='1')?$ip[$i-1]:'0');
+	return $m;
+}
+
+function stc_ipv4_in_block($ip, $block) {
+	// get mask length
+	preg_match ('/^(\d{1,3}+\.\d{1,3}\.\d{1,3}\.\d{1,3})\/(\d{1,2})$/',$block,$matches);	
+	// should have 3 values in $matches
+	if (count($matches)!=3) {
+		error_log('Invalid IPv4 block definition '.$block.' (match 1 fail)');
+		return null;
+	}
+	$block_ip=$matches[1];
+	$block_mask=$matches[2];
+
+	// generate binary representation of block, ip and mask
+	$block_ip_binary = stc_ipv4_addr_to_binary($block_ip);
+	if (is_null($block_ip_binary)) {
+		error_log ('Invalid IPv4 block definition '.$block.' (block_ip_binary fail)');
+		return null;
+	}
+	$block_mask_binary = stc_ipv4_mask_to_binary($block_mask);
+	if (is_null($block_mask_binary)) {
+		error_log ('Invalid IPv4 block definition '.$block.' (block_mask_binary fail)');
+		return null;
+	}
+	$ip_binary = stc_ipv4_addr_to_binary($ip);
+	if (is_null($ip_binary)) {
+		error_log ('Invalid IPv4 address '.$ip.' (ip_binary fail)');
+		return null;
+	}
+
+	// apply mask to block and ip
+	$masked_block = stc_ipv4_apply_mask ($block_ip_binary, $block_mask_binary);
+	$masked_ip = stc_ipv4_apply_mask ($ip_binary, $block_mask_binary);
+
+	// if $masked_block and $masked_ip are identical, $ip is within $block
+	if (strcmp($masked_block,$masked_ip)==0) return true;
+	return false;
+}
+
+// TODO: handle IPv6
+
+function stc_ip_in_blocks($ip, $blocks) {
+	$s = false;
+	foreach ($blocks as $b) {
+		$v = stc_ipv4_in_block($ip, $b);
+		if (!is_null($v)) {
+			$s|=$v;
+		}
+	}
+	return $s;
+}
+
+//-----------------------------------------------------------------------------
+// appends to the log table
+// 
 
 function stc_append_log ($function, $message) {
   GLOBAL $db;
@@ -1430,9 +1556,8 @@ session_start();
 $db = stc_connect_db();
 
 $remote_addr = stc_get_remote_ip();
-if (($remote_addr!='193.107.127.8')&&
-    ($remote_addr!='127.0.0.1')&&
-    ($EN_TRAVAUX)) {
+if (!stc_ip_in_blocks($remote_addr,$DEBUG_IPS)&&
+    $EN_TRAVAUX) {
   error_log("Travaux : ".$remote_addr);
   stc_top();
   $menu = stc_menu_init();
