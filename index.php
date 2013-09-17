@@ -39,7 +39,9 @@ if (stc_is_logged()) {
       "alors mise en attente de validation. Vous pouvez à tout moment la modifier via ".
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
-
+		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
+			"lundi 21 octobre 2013".
+			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
   } else {
     $nom = stc_get_user_name(stc_user_id());
     echo "<h2>Bienvenue $nom</h2>\n";
@@ -53,7 +55,10 @@ if (stc_is_logged()) {
       "alors mise en attente de validation. Vous pouvez à tout moment la modifier via ".
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
-  }
+		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
+			"lundi 21 octobre 2013".
+			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
+	}
 } else {
   if (stc_from()>0) {
     $m2r = stc_get_m2_name(stc_from());
