@@ -12,6 +12,7 @@ require_once('lib/stc.php');
 $user = stc_user_id();
 
 $admin = stc_is_admin();
+
 $from = stc_from();
 
 $projmgr = intval(stc_get_variable($_REQUEST,'projmgr'));
@@ -150,7 +151,7 @@ if (strlen($ville)>0) {
   $where.=" and users_view.id_laboratoire=laboratoires.id and laboratoires.city=$".append_value($arr, $ville);
 }
 
-if (($notvalid!=0)&&($admin>0)) {
+if (($notvalid!=0)&&(!$admin===true)&&($admin>0)) {
   $where.=' and offres.id not in (select id_offre from offres_m2 where offres_m2.id_m2=$'.append_value($arr, $admin).")";
 }
 
@@ -270,7 +271,7 @@ echo "<p>Il y a $nb_offres stage(s) répondant à ces critères</p>\n";
 
 $m2 = array();
 echo "<div class=\"header\">";
-if ((!$projmgr)||($simulm2)) echo "<span class=\"checkbox\"></span>";
+if ((!$projmgr)||($simulm2)) echo "<span class=\"print checkbox\"></span>";
 echo "<span class=\"sujet\">Sujet du stage</span>";
 if ((($user==0)||($admin))&&(!$projmgr)) {
   echo "<span class=\"labo\">Labo</span>";
@@ -301,12 +302,13 @@ while ($row = pg_fetch_assoc($r)) {
   else if ($odd) echo " odd";
   echo "\">";
   if (!$projmgr) {
-    echo "<span class=\"checkbox";
+    echo "<span class=\"print checkbox";
     if ($odd) echo " odd";
     echo "\"><input type=\"checkbox\" name=\"multisel[]\" ";
     echo "value=\"".$row['id']."\"></span>";
   }
-  echo "<a href=\"/detail.php?offreid=".$row['id']."\"";
+	$current_offer=$row['id'];
+  echo "<a href=\"/detail.php?offreid=".$current_offer."\"";
   echo ">";
   echo "<span class=\"sujet\">".$row['sujet']."</span>";
   if (array_key_exists('labo', $row))
@@ -315,24 +317,28 @@ while ($row = pg_fetch_assoc($r)) {
     echo "<span class=\"ville\">".$row['ville']."</span>";
   if (array_key_exists('user', $row))
     echo "<span class=\"user\">".$row['user']."</span>";
+	echo "</a>";
   /* si on a un utilisateur loggué, on montre les M2 */
   if (($user!=0)&&(!$simulm2)) {
     $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($row['id']));
     $cur = 0;
     for($i=0;$i<count($m2);$i++) {   
       if ($cur==0) {
-	$row = pg_fetch_assoc($rm2);
-	$cur = intval($row['id_m2']);
+				$row = pg_fetch_assoc($rm2);
+				$cur = intval($row['id_m2']);
       }
       
       if ($cur==$m2[$i]) {
-	echo "<span class=\"m2\">☑</span>";
-	$cur=0;
+				if (($admin===true)||($admin==intval($row['id_m2'])))
+					echo "<span class=\"m2 checkbox\"><input class=\"m2-checkbox\" type=\"checkbox\" checked value=\"".$current_offer.",".$row['id_m2']."\"/></span>";
+				else
+					echo "<span class=\"m2\">☑</span>";
+				$cur=0;
       } else echo "<span class=\"m2\">&nbsp;</span>";
     }
     pg_free_result($rm2);
   }
-  echo "</a></div>";
+  echo "</div>";
   $odd = ($odd+1)%2;
 }
 echo "\n";
@@ -347,6 +353,7 @@ if (!$projmgr) {
   echo "<span style=\"float:right;\"><button id=\"print\" name=\"action\" value=\"print\">Impression</button></span>";
   echo "</div>";
   stc_form_end();
+	stc_script_add('/js/confirm-dialog.js',-1);
   stc_script_add('/js/search.js',-1);
   stc_script_add( "search_init();",'window.onload');
 }

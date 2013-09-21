@@ -158,8 +158,8 @@ function stc_add_jquery() {
 function stc_add_jqueryui() {
   GLOBAL $JQUERYUI_VER, $JQUERYUI_THEME;
   stc_add_jquery ();
-  stc_script_add ("/lib/jquery/ui/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
-  stc_style_add ("/lib/jquery/ui/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.css");
+  stc_script_add ("/lib/jquery/ui/".$JQUERYUI_VER."/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
+  stc_style_add ("/lib/jquery/ui/".$JQUERYUI_VER."/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.min.css");
 }
 
 function stc_top ($styles=null) {

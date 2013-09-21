@@ -51,6 +51,7 @@ label {
 .offre > span, .offre > * > span {
     display: table-cell;
     height: 16pt;
+		line-height: 14pt;
     vertical-align: top;
 }
 .odd > span, .odd > * > span {
@@ -64,8 +65,16 @@ label {
     width: 18pt;
     max-width: 18pt;
 }
-.checkbox > [type="checkbox"] {
+.print {
+    min-width: 25pt;
+    width: 25pt;
+    max-width: 25pt;
+    text-align: center;
+}
+[type="checkbox"] {
     height: 14pt;
+		margin-top: 0;
+		margin-bottom: 0;
 }
 .sujet {
     min-width: 350pt;
@@ -134,3 +143,6 @@ label {
 .header {
     display: block;
 }
+//.ui-dialog {
+//	font-size: 10pt;
+//}
