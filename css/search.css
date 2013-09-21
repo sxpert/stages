@@ -46,13 +46,13 @@ label {
 }
 .offre > a > span {
     line-height: 16pt;
-    vertical-align: top;
+    vertical-align: middle;
 }
 .offre > span, .offre > * > span {
     display: table-cell;
     height: 16pt;
 		line-height: 14pt;
-    vertical-align: top;
+    vertical-align: middle;
 }
 .odd > span, .odd > * > span {
     background-color: #e7e7e7;
