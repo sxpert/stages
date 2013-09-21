@@ -46,7 +46,7 @@ label {
 }
 .offre > a > span {
     line-height: 16pt;
-    vertical-align: middle;
+    vertical-align: top;
 }
 .offre > span, .offre > * > span {
     display: table-cell;
