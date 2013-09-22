@@ -41,7 +41,7 @@ if ($super||($admin==$m2_id)) {
 	switch ($n) {
 		case 0: stc_append_log('invalidate_offer','offer '.$offre_id.' was not valid for M2R '.$m2_id);
 			error('L\'offre n\'était pas validée pour cette M2R'); break;
-		case 1: stc_append_log('invalidate_offer','offer '.$offre_id.' was removed for M2R '.$m2_id-; ok (); break;
+		case 1: stc_append_log('invalidate_offer','offer '.$offre_id.' was removed for M2R '.$m2_id); ok (); break;
 		default: stc_append_log('invalidate_offer','case should not have happended, '.$n.' lines affected by query '.$offre_id.' '.$m2_id);
 			// should not happen
 	}
