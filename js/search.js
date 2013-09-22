@@ -59,7 +59,7 @@ $(".m2-checkbox").click( function (event) {
 	var $span_m2 = $t.parents('span.m2');
 	var $offre = $t.parents('div.offre');
 	var idx = $offre.children('span.m2').index($span_m2);
-	var sujet = $offre.children('a').children('span.sujet')[0].innerText;
+	var sujet = $offre.children('a').children('span.sujet')[0].textContent;
 	var $f = $t.parents('form#list').children('div.header').children('span.m2');
 	var $m2 = $($f[idx]).children('span').contents().filter(function () { return this.nodeType === 3; });
 	var shortdesc = $m2[0].textContent;
