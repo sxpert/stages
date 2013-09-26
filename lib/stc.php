@@ -1021,11 +1021,15 @@ function stc_get_remote_ip() {
 			// log proxy only if ip is RFC1918 style
 			error_log('proxy detected');
 			error_log($original_ip);
-			$original_ip = explode($original_ip,',');
+			$original_ip = explode(',', $original_ip);
 			if (count($original_ip)>1) {
 				error_log("proxy crade ".print_r($original_ip,1));
+			} else {
+				error_log("wtf ".print_r($original_ip, 1));
 			}
+
 			$original_ip = trim($original_ip[0]);
+			error_log("orig_ip ".$original_ip);
 			if (stc_ip_in_blocks($original_ip,$RFC1918_BLOCKS)) {
 				$sql = "select * from append_log ($1,$2,$3,$4);";
 				$userid = stc_user_id();
@@ -1038,7 +1042,7 @@ function stc_get_remote_ip() {
 		}
 	} else {
 		// les proxy sales ajoutent leur ip a la fin "a.b.c.d, e.f.g.h"
-		$remip = explode($_SERVER['REMOTE_ADDR'],',');
+		$remip = explode(',',$_SERVER['REMOTE_ADDR']);
 		if (count($remip)>1) {
 			error_log("proxy crade ".print_r($remip,1));
 		} 
