@@ -1028,8 +1028,16 @@ function stc_get_remote_ip() {
 		} else { 
 			// proxy problem...
 		}
-	} else 
-	  return $_SERVER['REMOTE_ADDR'];
+	} else {
+		// les proxy sales ajoutent leur ip a la fin "a.b.c.d, e.f.g.h"
+		$remip = explode($_SERVER['REMOTE_ADDR'],',');
+		if (count($remip)>1) {
+			error_log("proxy crade ".print_r($remip,1));
+		} 
+		$remip = trim($remip[0]);
+		error_log('remote ip : '.$remip);
+	  return $remip;
+	}
 }
 
 //----
