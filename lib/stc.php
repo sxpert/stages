@@ -1018,6 +1018,8 @@ function stc_get_remote_ip() {
 			$proxy_ip=$_SERVER['REMOTE_ADDR'];
 			$original_ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
 			// log proxy only if ip is RFC1918 style
+			error_log('proxy detected');
+			error_log($original_ip);
 			if (stc_ip_in_blocks($original_ip,$RFC1918_BLOCKS)) {
 				$sql = "select * from append_log ($1,$2,$3,$4);";
 				$userid = stc_user_id();
