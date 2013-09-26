@@ -1013,6 +1013,7 @@ $RFC1918_BLOCKS=array('192.168.0.0/16','172.16.0.0/12','10.0.0.0/8');
 function stc_get_remote_ip() {
 	GLOBAL $db, $RFC1918_BLOCKS;
 	if (array_key_exists('HTTP_VIA',$_SERVER)) {
+		error_log(print_r($_SERVER,1));
 		if (array_key_exists('HTTP_X_FORWARDED_FOR',$_SERVER)) {
 			// should check for RFC1918 blocks
 			$proxy_ip=$_SERVER['REMOTE_ADDR'];
@@ -1020,6 +1021,11 @@ function stc_get_remote_ip() {
 			// log proxy only if ip is RFC1918 style
 			error_log('proxy detected');
 			error_log($original_ip);
+			$original_ip = explode($original_ip,',');
+			if (count($original_ip)>1) {
+				error_log("proxy crade ".print_r($original_ip,1));
+			}
+			$original_ip = trim($original_ip[0]);
 			if (stc_ip_in_blocks($original_ip,$RFC1918_BLOCKS)) {
 				$sql = "select * from append_log ($1,$2,$3,$4);";
 				$userid = stc_user_id();
