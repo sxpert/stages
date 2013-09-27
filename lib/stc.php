@@ -27,7 +27,7 @@ function stc_get_variable ($array, $varname) {
   }
 }
 
-function stc_log_referrer_issue ($proc) {
+function stc_log_referer_issue ($proc) {
 	stc_append_log ($proc,'referrer problem '.$_SERVER['HTTP_REFERER']);
 	return False;
 }
