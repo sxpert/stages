@@ -27,21 +27,28 @@ function stc_get_variable ($array, $varname) {
   }
 }
 
+function stc_log_referrer_issue ($proc) {
+	stc_append_log ($proc,'referrer problem '.$_SERVER['HTTP_REFERER']);
+	return False;
+}
+
 /*
  * retourne le chemin d'ou on vient si le host == le host de la machine sur 
  * laquelle on tourne. False sinon
  */
-function stc_check_referer () {
+function stc_check_referer ($proc) {
   $ref = '';
   if (array_key_exists('HTTP_REFERER',$_SERVER)) $ref = $_SERVER['HTTP_REFERER'];
   $srv = $_SERVER['SERVER_NAME'];
   $port = $_SERVER['SERVER_PORT'];
   
-  if (strlen(trim($ref))==0) return False;
+  if (strlen(trim($ref))==0) return stc_log_referer_issue($proc);
 
   $url = parse_url($ref);  
-  if (array_key_exists('scheme', $url) and strcmp($url['scheme'],'http')!=0) return False;
-  if (array_key_exists('host', $url) and strcmp($url['host'],$srv)!=0) return False;
+  if (array_key_exists('scheme', $url) and strcmp($url['scheme'],'http')!=0) 
+		return stc_log_referer_issue($proc);
+  if (array_key_exists('host', $url) and strcmp($url['host'],$srv)!=0) 
+		return stc_log_referer_issue($proc);
   //error_log(print_r($url,1));
   $u='';
   if (array_key_exists('path',$url)) $u.=$url['path'];

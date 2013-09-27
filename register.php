@@ -42,9 +42,11 @@ function stc_clean_umr ($umr) {
 }
 
 if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
-  $referer = stc_check_referer();
+  $referer = stc_check_referer('register_post');
   if ($referer == False) stc_reject();
-  if (strcmp($referer, $_SERVER['PHP_SELF'])!=0) stc_reject();
+  if (strcmp($referer, $_SERVER['PHP_SELF'])!=0) {
+		stc_reject();
+	}
 
   if (array_key_exists('action', $_POST)) {
     if (strcmp($_POST['action'],'create_account')==0) {
