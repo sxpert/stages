@@ -16,6 +16,7 @@ stc_user_logout();
  * test des entrées (si on en a)
  *
  */
+$token     = stc_get_variable ($_GET,  'token');
 $f_name    = stc_get_variable ($_POST, 'f_name');
 $l_name    = stc_get_variable ($_POST, 'l_name');
 $email     = stc_get_variable ($_POST, 'email');
@@ -42,10 +43,10 @@ function stc_clean_umr ($umr) {
 }
 
 if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
-  $referer = stc_check_referer('register_post');
-  if ($referer == False) stc_reject();
-  if (strcmp($referer, $_SERVER['PHP_SELF'])!=0) {
-		stc_reject();
+	error_log(print_r($_SESSION,1));
+	if ($_SESSION['token']!=$token) {
+		error_log ('session token invalid');
+		stc_reject('tentative de vol de session');
 	}
 
   if (array_key_exists('action', $_POST)) {
@@ -116,11 +117,17 @@ $options['register']=false;
 $options['home']=true;
 $menu = stc_default_menu($options);
 
+// crées un token de sécurité
+$token = bin2hex(openssl_random_pseudo_bytes (32, $strong));
+if (!$strong) 
+	error_log('register: warning, unable to generate crypto strong random token');
+$_SESSION['token'] = $token;
+
 stc_menu($menu);
 
 // formulaire d'enregistrement
 
-$form = stc_form ("post", "register.php", $errors);
+$form = stc_form ("post", "register.php?token=".$token, $errors);
 stc_form_text ($form, "Prénom", "f_name", $f_name);
 stc_form_text ($form, "Nom de Famille", "l_name", $l_name);
 stc_form_text ($form, "Adresse email", "email", $email);

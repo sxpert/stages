@@ -29,6 +29,7 @@ function stc_get_variable ($array, $varname) {
 
 function stc_log_referer_issue ($proc) {
 	stc_append_log ($proc,'referrer problem '.$_SERVER['HTTP_REFERER']);
+	error_log(print_r($_SERVER));
 	return False;
 }
 
@@ -87,7 +88,7 @@ function stc_reject () {
   stc_menu($menu);
   
   // contenu
-  echo "Vous provenez d'un serveur non reconnu, Connexion refusée";
+  echo "Vous provenez d'un serveur non reconnu, Connexion refusée<br/>";
 
   stc_footer();
   exit(1);
