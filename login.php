@@ -9,10 +9,11 @@
 
 require_once('lib/stc.php');
 
+// le referer c'est pas fiable, trouver autre chose
 /* nettoyage du referer */
 
-$referer = stc_check_referer();
-if ($referer == False) stc_reject();
+//$referer = stc_check_referer();
+//if ($referer == False) stc_reject();
 
 /* test des entrées */
 
