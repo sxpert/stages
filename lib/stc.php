@@ -1268,6 +1268,7 @@ function stc_send_lost_password_email($login, $email) {
   pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result ($db);
   $row = pg_fetch_assoc($r);
+	error_log (print_r($row,1));
 	switch ($row['status']) {
 		case -1:
 			error_log (print_r($row,1));
