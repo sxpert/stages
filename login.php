@@ -12,7 +12,7 @@ require_once('lib/stc.php');
 // le referer c'est pas fiable, trouver autre chose
 /* nettoyage du referer */
 
-$referer = stc_check_referer();
+$referer = stc_check_referer('login');
 //if ($referer == False) stc_reject();
 error_log ('login - ref='.$referer);
 
@@ -36,12 +36,11 @@ if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
     break;
   default: 
     unset($_SESSION['loginerr']); 
-    error_log(print_r($user,1));
     $_SESSION['userid'] = $user; 
   }
 }
 if ($referer===false)
-	hader ('Location: /index.php');
+	header ('Location: /index.php');
 else
 	header('Location: '.$referer);
 
