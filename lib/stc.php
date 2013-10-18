@@ -1051,7 +1051,7 @@ function stc_get_remote_ip() {
 			error_log("proxy crade ".print_r($remip,1));
 		} 
 		$remip = trim($remip[0]);
-		error_log('remote ip : '.$remip);
+		#error_log('remote ip : '.$remip);
 	  return $remip;
 	}
 }
