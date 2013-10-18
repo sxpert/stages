@@ -1242,6 +1242,7 @@ function stc_user_resend_email($login, $password) {
 }
 
 function stc_send_lost_pass_email($email, $token) {
+	error_log ('sending lost password email');
   // send verification email
   $message = "
 Vous avez indiqué avoir perdu votre mot de passe de connexion
