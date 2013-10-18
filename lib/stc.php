@@ -1276,7 +1276,7 @@ function stc_send_lost_password_email($login, $email) {
 		case 0:
 			error_log (print_r($row,1));
 			break;
-		case 1:
+		default: # status == userid si ca se passe bien
 			error_log ('sending email to user '.$row['email'].' with token '.$row['token']);
 			stc_send_lost_pass_email ($row['email'],$row['token']);
 			break;
