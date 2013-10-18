@@ -625,7 +625,8 @@ function stc_form_text ($form, $label, $variable, $value="", $width=null, $lengt
 
 // TODO: mettre un sélecteur de date
 function stc_form_date ($form, $label, $variable, $value="") {
-  echo stc_form_check_errors ($form, $variable);
+	GLOBAL $JQUERYUI_VER;
+	echo stc_form_check_errors ($form, $variable);
   echo "<div>";
   echo "<label for=\"".$variable."\">".$label."</label>";
   echo "<input type=\"text\" id=\"".$variable."\" name=\"".$variable."\"";
@@ -633,9 +634,10 @@ function stc_form_date ($form, $label, $variable, $value="") {
   echo "/></div>\n";
 
   // https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js
-  
+  // stc_style_add ("/lib/jquery/ui/".$JQUERYUI_VER."/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.min.css");
+
   stc_script_add("$(function() { $(\"#".$variable."\").datepicker({showOn:\"button\",".
-		 "buttonImage: \"/lib/jquery/ui/development-bundle/demos/datepicker/images/calendar.gif\"".
+		 "buttonImage: \"/lib/jquery/ui/".$JQUERYUI_VER."/development-bundle/demos/datepicker/images/calendar.gif\"".
 		 ",buttonImageOnly: true,".
 		 "dateFormat: \"yy-mm-dd\"".
 		 "});});","_begin");
