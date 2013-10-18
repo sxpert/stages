@@ -7,6 +7,8 @@
  *
  ******************************************************************************/
 $EN_TRAVAUX=False;
+$SERVER_EMAIL='user@server.com';
+$TZ='Europe/Paris';
 
 $MAX_CHARS=2500;
 

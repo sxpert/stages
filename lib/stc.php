@@ -1201,6 +1201,7 @@ function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $la
 }
 
 function stc_send_check_email($email, $hash) {
+	Global $SERVER_EMAIL, $TZ;
   // send verification email
   $message = "
 Une personne a demandé la création d'un compte sur le site des stages 
@@ -1215,7 +1216,8 @@ Cordialement,
 
 L'administrateur du site
 ";
-  mail($email, "[stages M2R] Validez votre compte", $message, 'From: Serveur Stages M2 <www-data@stcoll.sxpert.org>'."\r\n");
+	date_default_timezone_set ($TZ);
+  mail($email, "[stages M2R] Validez votre compte", $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.'>'."\r\n");
 }
 
 function stc_user_resend_email($login, $password) {
@@ -1232,15 +1234,67 @@ function stc_user_resend_email($login, $password) {
   return $row['id'];
 }
 
+function stc_send_lost_pass_email($email, $token) {
+	Global $SERVER_EMAIL, $TZ;
+  // send verification email
+  $message = "
+Vous avez indiqué avoir perdu votre mot de passe de connexion
+au serveur des stages de M2R.
+
+Cliquez sur le lien ci-dessous pour changer votre mot de passe
+
+http://".$_SERVER['SERVER_NAME']."/lost-password.php?token=".$token."
+
+Cordialement,
+
+L'administrateur du site
+";
+  date_default_timezone_set($TZ);
+	mail($email, "[stages M2R] Perte de mot de passe", $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.'>'."\r\n");
+}
+
 function stc_send_lost_password_email($login, $email) {
   GLOBAL $db;
   
   $ip = stc_get_remote_ip();
-  $sql = 'select * from user_gen_email_hash ($1, $2, $3) as (mhash text);';
+  $sql = 'select * from user_new_email_token ($1, $2, $3) as (status bigint, email text, token text);';
   $arr = array($login, $email, $ip);
   pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result ($db);
   $row = pg_fetch_assoc($r);
+	switch ($row['status']) {
+		case -1:
+			error_log (print_r($row,1));
+			break;
+		case 0:
+			error_log (print_r($row,1));
+			break;
+		case 1:
+			error_log ('sending email to user '.$row['email'].' with token '.$row['token']);
+			stc_send_lost_pass_email ($row['email'],$row['token']);
+			break;
+	}
+}
+
+function stc_user_change_lost_password ($login, $password, $token) {
+	GLOBAL $db;
+
+	$ip = stc_get_remote_ip ();
+	$sql = 'select * from user_change_lost_password ($1, $2, $3, $4) as status;';
+	$arr = array ($login, $password, $token, $ip);
+	pg_send_query_params ($db, $sql, $arr);
+	$r = pg_get_result ($db);
+	$row = pg_fetch_assoc ($r);
+	error_log (print_r($row,1));
+	switch ($row['status']) {
+		case -1:
+			break;
+		case 0:
+			break;
+		case 1:
+			break;
+	}
+	return $row['status'];
 }
 
 function stc_user_validate_account($login, $password, $hash) {

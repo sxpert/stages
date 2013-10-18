@@ -275,36 +275,39 @@ create or replace function user_get_email_hash(l_login text, l_password text, l_
         t_passwd  text;
         t_token	  text;
         t_rec	  record;
-	t_msg     text;
+				t_msg     text;
     begin
-        select * into t_account from users where login=l_login;
-	if found then
-            if (t_account.login_fails >= 3) then
-	        t_rec := (-1::bigint, null::text, null::text);
-		return t_rec;
-            end if;
-    	    t_passwd := hash_password ( l_password, extract_salt (t_account.passwd));
-	    if (t_passwd = t_account.passwd) then
-		-- generate new token
-		t_token := user_update_token (t_account.id, l_ipaddr);
-		if t_token is null then
-		    raise notice 'User % requested new token too early', l_login;
-		    t_rec := (0::bigint, null::text, null::text);
-		    return t_rec;
-		end if;
-		t_msg := 'User ' || t_account.login || ' email validation. Mail sent to ' || t_account.email || ' token=' || t_token;
-		perform append_log ('validation_email', t_account.id, t_msg, l_ipaddr);
-		t_rec := ( t_account.id, t_account.email, t_token);
-		return t_rec;
-	    end if;
-	    -- fail
-	    perform append_log_login ('validation_email',l_login,'User failed password check',l_ipaddr);
-	    update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
-	else
-	    perform append_log_login ('validation_email',l_login,'User does not exist',l_ipaddr);
-	end if;
-	t_rec := (0::bigint, null::text, null::text);
-	return t_rec;
+      select * into t_account from users where login = l_login;
+			if found then
+				raise notice 'User % found', l_login;
+        if (t_account.login_fails >= 3) then
+					raise notice 'User account % locked', l_login;
+	       	t_rec := (-1::bigint, null::text, null::text);
+					return t_rec;
+        end if;
+    	  t_passwd := hash_password ( l_password, extract_salt (t_account.passwd));
+			  if (t_passwd = t_account.passwd) then
+					-- generate new token
+					t_token := user_update_token (t_account.id, l_ipaddr);
+					if t_token is null then
+				    raise notice 'User % requested new token too early', l_login;
+		  		  t_rec := (0::bigint, null::text, null::text);
+		   			return t_rec;
+					end if;
+					t_msg := 'User ' || t_account.login || ' email validation. Mail sent to ' || t_account.email || ' token=' || t_token;
+					perform append_log ('validation_email', t_account.id, t_msg, l_ipaddr);
+					t_rec := ( t_account.id, t_account.email, t_token);
+					return t_rec;
+			   end if;
+	  	  -- fail
+	   		 perform append_log_login ('validation_email',l_login,'User failed password check',l_ipaddr);
+			   update users set login_fails = (t_account.login_fails + 1) where id = t_account.id;		
+			else
+	    	perform append_log_login ('validation_email',l_login,'User does not exist',l_ipaddr);
+			end if;
+			raise notice 'User % not found', l_login;
+			t_rec := (0::bigint, null::text, null::text);
+			return t_rec;
     end;
 $$ language plpgsql security definer;
 
@@ -357,7 +360,40 @@ create or replace function user_new_email_token (l_login text, l_email text, l_i
     end;
 $$ language plpgsql security definer;
 
+--
+-- change lost user password
+-- 
 
+drop function if exists user_change_lost_password (text, text, text, inet);
+create or replace function user_change_lost_password (l_login text, l_password text, l_token text, l_ipaddr inet) returns integer as $$
+	declare
+		t_account 	record;
+    t_salt      bytea;
+	  t_passwd    text;
+		t_msg				text;
+	begin
+		select * into t_account from users where login=l_login;
+		if found then
+			if t_account.email_token = l_token then
+				-- genereate new salt
+	      t_salt := generate_salt ();
+	      t_passwd := hash_password ( l_password, t_salt );
+				update users set passwd=t_passwd where id=t_account.id;
+				t_msg := 'User successfully changed password token=' || l_token;
+				perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
+				return 1;
+			else
+				t_msg := 'User ' || l_login || ' attempted to change password with bogus token ' || l_token;
+				perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
+				return -1;
+			end if;
+		else
+			t_msg := 'Attempt to change password of unknown user ' || l_login;
+			perform append_log ('lost_password', null, t_msg, l_ipaddr);
+			return 0;
+		end if;
+	end;
+$$ language plpgsql security definer;
 
 --
 -- test procedure !
