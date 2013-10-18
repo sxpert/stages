@@ -1200,8 +1200,15 @@ function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $la
   return $r;
 }
 
-function stc_send_check_email($email, $hash) {
+function stc_send_email ($email, $title, $message) {
 	Global $SERVER_EMAIL, $TZ;
+
+	date_default_timezone_set ($TZ);
+	error_log('sending email to '.$email);
+	mail ($email, $title, $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.">\r\n");
+}
+
+function stc_send_check_email($email, $hash) {
   // send verification email
   $message = "
 Une personne a demandé la création d'un compte sur le site des stages 
@@ -1216,8 +1223,7 @@ Cordialement,
 
 L'administrateur du site
 ";
-	date_default_timezone_set ($TZ);
-  mail($email, "[stages M2R] Validez votre compte", $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.'>'."\r\n");
+  stc_send_mail($email, "[stages M2R] Validez votre compte", $message);
 }
 
 function stc_user_resend_email($login, $password) {
@@ -1235,7 +1241,6 @@ function stc_user_resend_email($login, $password) {
 }
 
 function stc_send_lost_pass_email($email, $token) {
-	Global $SERVER_EMAIL, $TZ;
   // send verification email
   $message = "
 Vous avez indiqué avoir perdu votre mot de passe de connexion
@@ -1249,8 +1254,7 @@ Cordialement,
 
 L'administrateur du site
 ";
-  date_default_timezone_set($TZ);
-	mail($email, "[stages M2R] Perte de mot de passe", $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.'>'."\r\n");
+	stc_send_mail($email, "[stages M2R] Perte de mot de passe", $message);
 }
 
 function stc_send_lost_password_email($login, $email) {

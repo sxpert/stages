@@ -313,51 +313,52 @@ $$ language plpgsql security definer;
 
 --
 -- new email token when user lost password
+-- either email or login is used
 --
 drop function if exists user_new_email_token (text, text, inet);
 create or replace function user_new_email_token (l_login text, l_email text, l_ipaddr inet) returns record as $$
-    declare
-	t_login   text;
-	t_email   text;
-	t_token   text;
-        t_account record;
-	t_msg     text;
-	t_rec     record;
-    begin
-        if l_login = '' then
+  declare
+		t_login   text;
+		t_email   text;
+		t_token   text;
+    t_account record;
+		t_msg     text;
+		t_rec     record;
+  begin
+    if l_login = '' then
 	    l_login = null;
-	end if;
-        select * into t_account from users where login=l_login;
-	if found then
+		end if;
+    select * into t_account from users where login=l_login;
+		if found then
 	    t_login := l_login;
 	    t_email := t_account.email;
-        else
-	    if l_email = '' then
+    else
+		  if l_email = '' then
 	        l_email = null;
 	    end if;
 	    select * into t_account from users where email=l_email;
 	    if found then
-	        t_login = t_account.login;
-		t_email = l_email;
-            else
-	        t_msg := 'Unable to find user with login ''' || l_login || ''' or email ''' || l_email || '''';
-	        perform append_log('lost_password', null, t_msg, l_ipaddr);
-		t_rec := (0::bigint, null::text, null::text);
-		return t_rec; 
+	      t_login = t_account.login;
+				t_email = l_email;
+      else
+	      t_msg := 'Unable to find user with login ''' || l_login || ''' or email ''' || l_email || '''';
+	      perform append_log('lost_password', null, t_msg, l_ipaddr);
+				t_rec := (0::bigint, null::text, null::text);
+				return t_rec; 
 	    end if;
-	end if;    
-	-- if we got there, we have both login and email
-	t_token := user_update_token (t_account.id, l_ipaddr);
-	if t_token is null then
+		end if;    
+		-- if we got there, we have both login and email
+		t_token := user_update_token (t_account.id, l_ipaddr);
+		if t_token is null then
 	    raise notice 'User % requested new token too early', l_login;
 	    t_rec := (0::bigint, null::text, null::text);
 	    return t_rec; 
-	end if;
-	t_msg := 'User ' || t_login || ' lost password. Mail sent to ' || t_email || ' token=' || t_token;
-	perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
-	t_rec := ( t_account.id, t_account.email, t_token);
-	return t_rec;
-    end;
+		end if;
+		t_msg := 'User ' || t_login || ' lost password. Mail sent to ' || t_email || ' token=' || t_token;
+		perform append_log ('lost_password', t_account.id, t_msg, l_ipaddr);
+		t_rec := ( t_account.id, t_account.email, t_token);
+		return t_rec;
+  end;
 $$ language plpgsql security definer;
 
 --
