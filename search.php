@@ -59,7 +59,7 @@ if (($user==0)||($simulm2)) {
 		$d = getdate();
 		$m = $d['mon'];
 		$d = $d['mday'];
-		error_log($m.' '.$d.' '.($m>=$BLACKOUT_DATE[0]?"true":"false")." ".($d>=$BLACKOUT_DATE[1]?"true":"false"));
+		//error_log($m.' '.$d.' '.($m>=$BLACKOUT_DATE[0]?"true":"false")." ".($d>=$BLACKOUT_DATE[1]?"true":"false"));
 		$date_valid = (($m<9)||(($m==$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1]))||($m>$BLACKOUT_DATE[0]));
 
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
