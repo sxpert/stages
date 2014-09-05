@@ -21,22 +21,29 @@ $menu = stc_default_menu();
 stc_menu($menu);
 
 if ($user>0) {
-	$id = stc_get_variable ($_REQUEST, 'id');
-	if (!(is_numeric($id)&&(intval($id)==floatval($id)))) {
-		// not an integer, get out
-		stc_footer();
-		exit (0);
-	}
-	$id = intval($id);
+	
+	if (array_key_exists ('action', $_REQUEST))
+		$action = stc_get_variable ($_REQUEST, 'action');
+
+	if (strcmp($action, 'new_labo')==0) 
+		$id = '';
+	else {
+		$id = stc_get_variable ($_REQUEST, 'id');
+		if (!(is_numeric($id)&&(intval($id)==floatval($id)))) {
+			// not an integer, get out
+			stc_footer();
+			exit (0);
+		}
+		$id = intval($id);
+	} 
 	
 	$errors = array();
 
-	if (array_key_exists ('action', $_POST)) {
+	if (isset($action)) {
 		/******** 
 		 * actions de modification et de création 
 		 */
-		$action = stc_get_variable ($_POST, 'action');
-		echo $action." ".$id;
+		echo '<b>'.$action." ".$id.'</b>';
 
 		switch ($action) {
 		case "edit-labo" :
@@ -51,17 +58,38 @@ if ($user>0) {
 			$post_addr = $row->post_addr;
 			$post_code = $row->post_code;
 			$city = $row->city;
-			$new_button = "Modifier le laboratoire";
-			$new_action = "modify-labo";
-			break;
-		case "new-labo" :
-			// variables vides...
-			$new_button = "Créer le laboratoire";
-			$new_action = "create-labo";
 			break;
 		case "create-labo" :
 		case "modify-labo" :
 			// presque pareil, seule la requete a la fin change
+			// id est déjà disponible
+			$type_unite = 	stc_get_variable ($_POST, 'type_unite');
+			$id_section = 	stc_get_variable ($_POST, 'id_section');
+			$sigle = 		stc_get_variable ($_POST, 'sigle');
+			$description = 	stc_get_variable ($_POST, 'description');
+			$univ_city = 	stc_get_variable ($_POST, 'univ_city');
+			$post_addr = 	stc_get_variable ($_POST, 'post_addr');
+			$post_code = 	stc_get_variable ($_POST, 'post_code');
+			$city =			stc_get_variable ($_POST, 'city');
+
+			// error check
+
+			if (strcmp($action, 'create-labo')==0) {
+			} else {
+			}
+			break;
+		}
+
+		switch ($action) {
+		case 'new-labo' :
+		case 'create-labo' :
+			$new_button = "Créer le laboratoire";
+			$new_action = "create-labo";
+			break;
+		case 'edit-labo' :	
+		case 'modify-labo' :
+			$new_button = "Modifier le laboratoire";
+			$new_action = "modify-labo";
 			break;
 		}
 
