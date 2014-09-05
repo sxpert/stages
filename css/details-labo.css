@@ -1,0 +1,15 @@
+#content div {
+	min-height: 20pt;
+}
+label {
+	display: inline-block;
+	width: 100pt;
+	vertical-align: top;
+	font-weight: bold;
+}
+#logo > div {
+	display: inline-block;
+}
+#address > span {
+	display: inline-block;
+}

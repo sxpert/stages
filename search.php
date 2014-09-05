@@ -62,7 +62,8 @@ if (($user==0)||($simulm2)) {
 		//error_log($m.' '.$d.' '.($m>=$BLACKOUT_DATE[0]?"true":"false")." ".($d>=$BLACKOUT_DATE[1]?"true":"false"));
 		$date_valid = (($m<9)||(($m==$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1]))||($m>$BLACKOUT_DATE[0]));
 
-    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
+    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo",
+			"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","offres_m2","users_view","laboratoires");
     $where  = "offres.deleted=false and offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
@@ -72,7 +73,8 @@ if (($user==0)||($simulm2)) {
 } else {
   if ($admin&&(!$projmgr)) {
 		// l'administrateur de site voit tout
-    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo","laboratoires.city as ville",
+    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo",
+			"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville",
 		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
     $tables = array("offres","users_view","laboratoires");
     $where  ="offres.deleted=false and offres.year_value=$1 and ".
@@ -144,12 +146,13 @@ if ($labo>0) {
 
 $ville=trim($ville);
 if (strlen($ville)>0) {
-  if ($labo==0) { 
-    if (!in_array('users_view', $tables)) array_push($tables, 'users_view');
-    $where.=" and offres.id_project_mgr=users_view.id";
-  }
-  if (!in_array('laboratoires', $tables)) array_push($tables, 'laboratoires');
-  $where.=" and users_view.id_laboratoire=laboratoires.id and laboratoires.city=$".append_value($arr, $ville);
+	if ($labo==0) { 
+		if (!in_array('users_view', $tables)) array_push($tables, 'users_view');
+		$where.=" and offres.id_project_mgr=users_view.id";
+	}
+	if (!in_array('laboratoires', $tables)) array_push($tables, 'laboratoires');
+	$where.=" and users_view.id_laboratoire=laboratoires.id and ".
+		"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end ) =$".append_value($arr, $ville);
 }
 
 if (($notvalid!=0)&&(!$admin===true)&&($admin>0)) {
