@@ -879,106 +879,106 @@ function stc_footer($scripts=null) {
  */
 
 function stc_default_menu ($options=null) {
-  GLOBAL $db;
+	GLOBAL $db;
 
-  $menu = stc_menu_init();
+	$menu = stc_menu_init();
   
-  $user = stc_user_id();
-  $logged = stc_is_logged();
-  $admin  = stc_is_admin();
-  $opt_login = True;
-  $opt_register = True;
-  $opt_access = True;
-  $opt_home = False;
-  $loginerr = False;
-  $from = stc_from();
+	$user = stc_user_id();
+	$logged = stc_is_logged();
+	$admin  = stc_is_admin();
+	$opt_login = True;
+	$opt_register = True;
+	$opt_access = True;
+	$opt_home = False;
+	$loginerr = False;
+	$from = stc_from();
 
-  if (is_array($options)) {
-    if (array_key_exists('login', $options)) $opt_login=$options['login'];
-    if (array_key_exists('register', $options)) $opt_register=$options['register'];
-    if (array_key_exists('access', $options)) $opt_access=$options['access'];
-    if (array_key_exists('home', $options)) $opt_home=$options['home'];
-  }
-  if (array_key_exists('loginerr', $_SESSION)) {
-    $loginerr = $_SESSION['loginerr'];
-    unset($_SESSION['loginerr']);
-  }
-
-  stc_menu_add_item ($menu, 'Accueil', '/');
-  stc_menu_add_separator ($menu);
-  
-  // menu specifique super admin
-  if ($admin===true) {
-    stc_menu_add_section ($menu, 'Actions administrateur du site');
-    stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
-    stc_menu_add_item ($menu, 'Liste des M2R', 'liste-m2.php');
-    stc_menu_add_item ($menu, 'Liste des Laboratoires', 'liste-laboratoires.php');
-    stc_menu_add_separator ($menu);
-  }
-
-  // listage des types de propositions
-  $sql = "select code, denom_prop from type_offre order by code";
-  pg_send_query($db, $sql);
-  $r = pg_get_result($db);
-  while ($row = pg_fetch_assoc($r)) {
-    if ($logged) {
-      if ($admin) stc_menu_add_section ($menu, 'Actions gestionnaire de M2 :');
-      else stc_menu_add_section ($menu, 'Vous désirez :');
-    }
-    
-    if (($logged&&$admin)||(stc_from()>0)) 
-      stc_menu_add_item($menu, 'Rechercher un stage de M2R', 'search.php?type='.$row['code']); 
-    if ($logged){
-      if ($admin) {
-        stc_menu_add_item($menu, 'Propositions en attente de validation', 'search.php?type='.$row['code'].'&notvalid=1');
-	stc_menu_add_item($menu, 'Voir les stages comme un étudiant', 'search.php?type='.$row['code'].'&simulm2=true');
-	// messagerie
-	if ($admin===true) 
-	  stc_menu_add_item ($menu, "Messages pour les admins de M2R", 'messages.php?type=m2');
-	else {
-	  $sql_m2 = "select short_desc, ville from m2 where id=$1";
-	  $rm2 = pg_query_params($db, $sql_m2, array($admin));
-	  $rowm2 = pg_fetch_assoc($rm2);
-	  stc_menu_add_item ($menu, "Messages pour ".$rowm2['short_desc']." (".$rowm2['ville'].")",
-			     'messages.php?type=m2&id='.$admin  );
+	if (is_array($options)) {
+		if (array_key_exists('login', $options)) $opt_login=$options['login'];
+		if (array_key_exists('register', $options)) $opt_register=$options['register'];
+		if (array_key_exists('access', $options)) $opt_access=$options['access'];
+		if (array_key_exists('home', $options)) $opt_home=$options['home'];
+	}	
+	if (array_key_exists('loginerr', $_SESSION)) {
+		$loginerr = $_SESSION['loginerr'];
+		unset($_SESSION['loginerr']);
 	}
-	stc_menu_add_separator($menu);
-      }
-      if ($admin) stc_menu_add_section ($menu, 'Actions responsable de stage :');
-      stc_menu_add_item($menu, 'Proposer un sujet de stage', 'propose.php?type='.$row['code']);
-      stc_menu_add_item($menu, 'Mes propositions de stage', 'search.php?type='.$row['code'].'&projmgr='.$user);
-      stc_menu_add_separator($menu);
-      
-    } 
-  }
-  pg_free_result ($r);
+
+	stc_menu_add_item ($menu, 'Accueil', '/');
+	stc_menu_add_separator ($menu);
   
-  /*
-  if (($logged)&&($admin)) {
-    stc_menu_add_section($menu, 'Options administratives');
-    stc_menu_add_item($menu, 'gestion des catégories', 'gere-categories.php');
-    stc_menu_add_separator($menu);
-  } 
-  */ 
-  if ($logged) { 
-    //stc_menu_add_item ($menu, 'Liste des Responsables', 'liste-responsables.php');
-    stc_menu_add_item ($menu, 'Contacts', 'liste-contacts.php');
-    stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
-  } else {
-    if (($opt_login)&&stc_from()==0) {
-      stc_menu_add_section($menu, 'Connexion à l\'application');
-      stc_menu_add_form($menu,"post", "login.php", "loginform");
-      if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
-      stc_menu_form_add_text($menu,"Utilisateur","user");
-      stc_menu_form_add_password($menu,"Mot de Passe","password");
-      stc_menu_form_add_button($menu,"Se connecter");
-      stc_menu_form_end($menu);
-    }
-    if (($opt_register)&&(stc_from()==0)) stc_menu_add_item($menu, "Créer un compte", "register.php");
-    if (($opt_access)&&(stc_from()==0)) stc_menu_add_item($menu, "Problèmes d'accès", "account-access.php");
-    if ($opt_home) stc_menu_add_item($menu, "Accueil", "index.php");
-  }
-  return $menu;
+	// menu specifique super admin
+	if ($admin===true) {
+		stc_menu_add_section ($menu, 'Actions administrateur du site');
+		stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
+		stc_menu_add_item ($menu, 'Liste des M2R', 'liste-m2.php');
+		stc_menu_add_item ($menu, 'Liste des Laboratoires', 'liste-laboratoires.php');
+		stc_menu_add_separator ($menu);
+	}
+
+	// listage des types de propositions
+	$sql = "select code, denom_prop from type_offre order by code";
+	pg_send_query($db, $sql);
+	$r = pg_get_result($db);
+	while ($row = pg_fetch_assoc($r)) {
+		if ($logged) {
+			if ($admin) stc_menu_add_section ($menu, 'Actions gestionnaire de M2 :');
+			else stc_menu_add_section ($menu, 'Vous désirez :');
+		}
+    
+		if (($logged&&$admin)||(stc_from()>0)) 
+			stc_menu_add_item($menu, 'Rechercher un stage de M2R', 'search.php?type='.$row['code']); 
+		if ($logged){
+			if ($admin) {
+				stc_menu_add_item($menu, 'Propositions en attente de validation', 'search.php?type='.$row['code'].'&notvalid=1');
+				stc_menu_add_item($menu, 'Voir la liste des proposants', 'liste-proposants.php');
+				stc_menu_add_item($menu, 'Voir les stages comme un étudiant', 'search.php?type='.$row['code'].'&simulm2=true');
+				// messagerie
+				if ($admin===true) 
+					stc_menu_add_item ($menu, "Messages pour les admins de M2R", 'messages.php?type=m2');
+				else {
+					$sql_m2 = "select short_desc, ville from m2 where id=$1";
+					$rm2 = pg_query_params($db, $sql_m2, array($admin));
+					$rowm2 = pg_fetch_assoc($rm2);
+					stc_menu_add_item ($menu, "Messages pour ".$rowm2['short_desc']." (".$rowm2['ville'].")",
+						'messages.php?type=m2&id='.$admin  );
+				}
+				stc_menu_add_separator($menu);
+			}
+			if ($admin) stc_menu_add_section ($menu, 'Actions responsable de stage :');
+			stc_menu_add_item($menu, 'Proposer un sujet de stage', 'propose.php?type='.$row['code']);
+			stc_menu_add_item($menu, 'Mes propositions de stage', 'search.php?type='.$row['code'].'&projmgr='.$user);
+			stc_menu_add_separator($menu);
+		} 
+	}
+	pg_free_result ($r);
+  
+	/*
+	if (($logged)&&($admin)) {
+		stc_menu_add_section($menu, 'Options administratives');
+		stc_menu_add_item($menu, 'gestion des catégories', 'gere-categories.php');
+		stc_menu_add_separator($menu);
+	} 
+	*/ 
+	if ($logged) { 
+		//stc_menu_add_item ($menu, 'Liste des Responsables', 'liste-responsables.php');
+		stc_menu_add_item ($menu, 'Contacts', 'liste-contacts.php');
+		stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
+	} else {
+		if (($opt_login)&&stc_from()==0) {
+			stc_menu_add_section($menu, 'Connexion à l\'application');
+			stc_menu_add_form($menu,"post", "login.php", "loginform");
+			if ($loginerr!=null) stc_menu_form_add_error($menu,$loginerr);
+			stc_menu_form_add_text($menu,"Utilisateur","user");
+			stc_menu_form_add_password($menu,"Mot de Passe","password");
+			stc_menu_form_add_button($menu,"Se connecter");
+			stc_menu_form_end($menu);
+		}
+		if (($opt_register)&&(stc_from()==0)) stc_menu_add_item($menu, "Créer un compte", "register.php");
+		if (($opt_access)&&(stc_from()==0)) stc_menu_add_item($menu, "Problèmes d'accès", "account-access.php");
+		if ($opt_home) stc_menu_add_item($menu, "Accueil", "index.php");
+	}
+	return $menu;
 }
 
 

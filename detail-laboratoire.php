@@ -8,7 +8,7 @@
  ******************************************************************************/
 
 /****
- * listage des laboratoires existants
+ * création / modification d'un laboratoire
  */
 
 require_once('lib/stc.php');
@@ -20,14 +20,16 @@ stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
-if ($user>0) {
+$admin = stc_is_admin();
+if ($admin===true) {
 	
 	if (array_key_exists ('action', $_REQUEST))
 		$action = stc_get_variable ($_REQUEST, 'action');
 
-	if (strcmp($action, 'new_labo')==0) 
+	if (isset($action) and strcmp($action, 'new-labo')==0) {
 		$id = '';
-	else {
+		$oldid = '';
+	} else {
 		$id = stc_get_variable ($_REQUEST, 'id');
 		if (!(is_numeric($id)&&(intval($id)==floatval($id)))) {
 			// not an integer, get out
@@ -35,6 +37,9 @@ if ($user>0) {
 			exit (0);
 		}
 		$id = intval($id);
+		$oldid = stc_get_variable ($_POST, 'oldid');
+		if ($oldid=='') $oldid=$id;
+		else $oldid = intval($oldid);
 	} 
 	
 	$errors = array();
@@ -47,7 +52,7 @@ if ($user>0) {
 
 		switch ($action) {
 		case "edit-labo" :
-			$lab = pg_query_params ($db, 'select * from laboratoires where id=$1', [$id]);
+			$lab = pg_query_params ($db, 'select * from laboratoires where id=$1', [$oldid]);
 			$row = pg_fetch_object ($lab);
 			$type_unite = $row->type_unite;
 			// id est déjà disponible
@@ -73,10 +78,57 @@ if ($user>0) {
 			$city =			stc_get_variable ($_POST, 'city');
 
 			// error check
+			
+			if (strlen($univ_city)==0) $univ_city=null;
+
+			$val = array(
+				$type_unite, 
+				$id,
+				$id_section, 
+				$sigle, 
+				$description, 
+				$univ_city, 
+				$post_addr, 
+				$post_code, 
+				$city, 
+				$oldid);
 
 			if (strcmp($action, 'create-labo')==0) {
+				// we get an insult if we attempt to create a lab with duplicate id
+				$sql = 'insert into laboratoires (';
+				$sql .= 'type_unite, ';
+				$sql .= 'id, ';
+				$sql .= 'id_section, ';
+				$sql .= 'sigle, ';
+				$sql .= 'description, ';
+				$sql .= 'univ_city, ';
+				$sql .= 'post_addr, ';
+				$sql .= 'post_code, ';
+				$sql .= 'city) ';
+				$sql .= 'values ($1,$2,$3,$4,$5,$6,$7,$8,$9);';
 			} else {
+				$sql = 'update laboratoires set ';
+				$sql .= 'type_unite=$1, ';
+				$sql .= 'id=$2, ';
+				$sql .= 'id_section=$3, ';
+				$sql .= 'sigle=$4, ';
+				$sql .= 'description=$5, ';
+				$sql .= 'univ_city=$6, ';
+				$sql .= 'post_addr=$7, ';
+				$sql .= 'post_code=$8, ';
+				$sql .= 'city=$9 ';
+				$sql .= 'where id=$10;';
 			}
+			$dba = db_connect_adm ();
+			pg_send_query_params ($dba, $sql, $val); 
+			$res = pg_get_result ($dba);
+			$err = pg_result_error_field ($res, PGSQL_DIAG_SQLSTATE);
+			if ($err=='23505') {
+				stc_form_add_error ($errors, 'id', 'Un laboratoire avec un numéro identique existe déjà');
+			} else {
+				error_log ("PSQL_DIAG_SQLSTATE :".$err);		
+			}
+		
 			break;
 		}
 
@@ -95,6 +147,7 @@ if ($user>0) {
 
 		// formulaire de modification / creation
 		$form = stc_form ('post', 'detail-laboratoire.php', $errors) ;
+		stc_form_hidden ($form, 'oldid', $oldid);
 		stc_form_text ($form, "Type d'unité", "type_unite", $type_unite);
 		stc_form_text ($form, "Numero d'unité", "id", $id);
 		stc_form_text ($form, "Section CNRS", "id_section", $id_section);
