@@ -1444,75 +1444,152 @@ function stc_offre_update($offreid, $categories,
 		       $infoscmpl, $start_date, $length,
 		       $co_encadrant, $co_enc_email,
 			  $pay_state/*, $thesis*/) {
-  GLOBAL $db;
+	GLOBAL $db;
   
-  //$thesis = ($thesis?'true':'false');
+	//$thesis = ($thesis?'true':'false');
 
-  /* début de transaction */
-  pg_free_result(pg_query($db, 'begin;'));
+	/* début de transaction */
+	pg_free_result(pg_query($db, 'begin;'));
 
-  /* mise à jour de l'offre elle meme */
+	/* récupérer les données existantes */
+	
+	pg_send_query_params ($db, 'select * from offres where id=$1;', array($offreid));
+	$old_offer_res = pg_get_result ($db);
+	if (pg_result_status($old_offer_res)!=PGSQL_TUPLES_OK)
+		return stc_rollback('offre_update[check offre] '.$offreid.' => '.pg_result_error_field($old_offer_res,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+	$old_offer = pg_fetch_object ($old_offer_res);
+	pg_free_result ($old_offer_res);
+
+	/* comparer */
+	$diff = False;
+	if (strcmp($sujet, $old_offer->sujet)!=0) 				$diff=True;
+	if (strcmp($description, $old_offer->description)!=0) 	$diff=True;
+	if (strcmp($url, $old_offer->project_url)!=0)			$diff=True; 
+	if (strcmp($prerequis, $old_offer->prerequis)!=0) 		$diff=True;
+	if (strcmp($infoscmpl, $old_offer->infoscmpl)!=0) 		$diff=True;
+	if (strcmp($start_date, $old_offer->start_date)!=0) 	$diff=True;
+	if (strcmp($length, $old_offer->duree)!=0)				$diff=True; 
+	if (strcmp($co_encadrant, $old_offer->co_enc_email)!=0)	$diff=True;
+
+	// check categories and nature_stage
+	pg_send_query_params ($db, 'select id_categorie from offres_categories where id_offre=$1 order by id_categorie;', array($offreid));
+	$old_cat_res = pg_get_result ($db);
+	if (pg_result_status($old_cat_res)!=PGSQL_TUPLES_OK)
+		return stc_rollback('offre_update[check categories] '.$offreid.' => '.pg_result_error_field($old_cat_res,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+	$old_cat = pg_fetch_all($old_cat_res);
+	pg_free_result ($old_cat_res);
+	$o = array();
+	foreach ($old_cat as $c) 
+		array_push($o, $c['id_categorie']);
+	$old_cat = $o;
+	if (count($old_cat)!=count($categories)) $diff=True;
+	else {
+		// comparer le contenu des 2 tableau
+		for ($i=0; $i<count($old_cat); $i++) 
+			if (strcmp($old_cat[$i],$categories[$i])!=0) $diff=True;
+	}	
+		
+	pg_send_query_params ($db, 'select id_nature_stage from offres_nature_stage where id_offre=$1 order by id_nature_stage;', array($offreid));
+	$old_nat_res = pg_get_result ($db);
+	if (pg_result_status($old_nat_res)!=PGSQL_TUPLES_OK)
+		return stc_rollback('offre_update[check nature stage] '.$offreid.' => '.pg_result_error_field($old_nat_res,PGSQL_DIAG_SQLSTATE).
+			' - '.pg_last_error($db));
+	$old_nat = pg_fetch_all($old_nat_res);
+	pg_free_result ($old_nat_res);
+	$o = array();
+	foreach ($old_nat as $c) 
+		array_push($o, $c['id_nature_stage']);
+	$old_nat = $o;
+	if (count($old_nat)!=count($nature_stage)) $diff=True;
+	else {
+		// comparer le contenu des 2 tableau
+		for ($i=0; $i<count($old_nat); $i++) 
+			if (strcmp($old_nat[$i],$nature_stage[$i])!=0) $diff=True;
+	}	
+
+	if ($diff===False) {
+		// pay_state est identique ? sortir de la
+		if (strcmp($pay_state, $old_offer->pay_state)==0) {
+			error_log ('no change');
+			return $offreid;
+		}
+
+		// mise a jour du pay_state uniquement
+		$sql = 'update offres set pay_state=$1, last_update=CURRENT_TIMESTAMP where id=$2';
+		$arr = array($pay_state, $offreid);
+		pg_send_query_params ($db, $sql, $arr);
+		$r = pg_get_result ($db); //
+		if (pg_result_status($r) != PGSQL_COMMAND_OK)
+			return stc_rollback('offre_update[update offre] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+				' - '.pg_last_error($db));
+		pg_free_result(pg_query($db, 'commit;'));
+		return $offreid;
+	}
+	
+	/* mise à jour de l'offre elle meme */
   
-  $sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, '.
-    'infoscmpl=$5, start_date=$6, duree=$7, co_encadrant=$8, co_enc_email=$9, pay_state=$10, '.
-    //'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
-    'last_update=CURRENT_TIMESTAMP where id=$11;';
-  $arr = array($sujet, $description, $url, $prerequis, $infoscmpl, $start_date, $length,
-	       $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/, $offreid);
-  $r = pg_send_query_params($db, $sql, $arr);
-  $r = pg_get_result($db);
-  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
-    return stc_rollback('offre_update[update offre] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+	$sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, '.
+		'infoscmpl=$5, start_date=$6, duree=$7, co_encadrant=$8, co_enc_email=$9, pay_state=$10, '.
+		//'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
+		'last_update=CURRENT_TIMESTAMP where id=$11;';
+	$arr = array($sujet, $description, $url, $prerequis, $infoscmpl, $start_date, $length,
+		$co_encadrant, $co_enc_email, $pay_state/*, $thesis*/, $offreid);
+	$r = pg_send_query_params($db, $sql, $arr);
+	$r = pg_get_result($db);
+	if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+		return stc_rollback('offre_update[update offre] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
 			' - '.pg_last_error($db));
 
-  /* remplacement des catégories */
-  $sql = 'delete from offres_categories where id_offre = $1';
-  $arr = array($offreid);
-  $r = pg_send_query_params($db, $sql, $arr);
-  $r = pg_get_result($db);
-  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
-    return stc_rollback('offre_update[remove categories] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+	/* remplacement des catégories */
+	$sql = 'delete from offres_categories where id_offre = $1';
+	$arr = array($offreid);
+	$r = pg_send_query_params($db, $sql, $arr);
+	$r = pg_get_result($db);
+	if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+		return stc_rollback('offre_update[remove categories] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
 			' - '.pg_last_error($db));
-  $sql = "insert into offres_categories (id_offre, id_categorie) values ($1, $2);";
-  foreach($categories as $categorie) {
-    $r = pg_send_query_params($db, $sql, array($offreid, $categorie));
-    $r = pg_get_result($db);
-    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
-      return stc_rollback('offre_update[add categorie] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
-		      ' - '.pg_last_error($db));
-  }  
+	$sql = "insert into offres_categories (id_offre, id_categorie) values ($1, $2);";
+	foreach($categories as $categorie) {
+		$r = pg_send_query_params($db, $sql, array($offreid, $categorie));
+		$r = pg_get_result($db);
+		if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+			return stc_rollback('offre_update[add categorie] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+				' - '.pg_last_error($db));
+	}  
 
-  /* remplacement des nature_stage */
-  $sql = 'delete from offres_nature_stage where id_offre = $1';
-  $arr = array($offreid);
-  $r = pg_send_query_params($db, $sql, $arr);
-  $r = pg_get_result($db);
-  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
-    return stc_rollback('offre_update[remove nature stage] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+	/* remplacement des nature_stage */
+	$sql = 'delete from offres_nature_stage where id_offre = $1';
+	$arr = array($offreid);
+	$r = pg_send_query_params($db, $sql, $arr);
+	$r = pg_get_result($db);
+	if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+		return stc_rollback('offre_update[remove nature stage] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
 			' - '.pg_last_error($db));
-  $sql = "insert into offres_nature_stage (id_offre, id_nature_stage) values ($1, $2);";
-  foreach($nature_stage as $ns) {
-    $r = pg_send_query_params($db, $sql, array($offreid, $ns));
-    $r = pg_get_result($db);
-    if (pg_result_status($r)!=PGSQL_COMMAND_OK)
-      return stc_rollback('offre_update[add nature_stage] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
-		      ' - '.pg_last_error($db));
-  }
+	$sql = "insert into offres_nature_stage (id_offre, id_nature_stage) values ($1, $2);";
+	foreach($nature_stage as $ns) {
+		$r = pg_send_query_params($db, $sql, array($offreid, $ns));
+		$r = pg_get_result($db);
+		if (pg_result_status($r)!=PGSQL_COMMAND_OK)
+			return stc_rollback('offre_update[add nature_stage] => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+				' - '.pg_last_error($db));
+	}
 
-  /* suppression des validations */
+	/* suppression des validations */
   
-  $sql = 'delete from offres_m2 where id_offre = $1;';
-  $arr = array($offreid);
-  $r = pg_send_query_params($db, $sql, $arr);
-  $r = pg_get_result($db);
-  if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
-    return stc_rollback('offre_update[remove m2 validations] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
+	$sql = 'delete from offres_m2 where id_offre = $1;';
+	$arr = array($offreid);
+	$r = pg_send_query_params($db, $sql, $arr);
+	$r = pg_get_result($db);
+	if (pg_result_status($r)!=PGSQL_COMMAND_OK) 
+		return stc_rollback('offre_update[remove m2 validations] '.$offreid.' => '.pg_result_error_field($r,PGSQL_DIAG_SQLSTATE).
 			' - '.pg_last_error($db));
 
-  /* sauvegarde des modifs */
+	/* sauvegarde des modifs */
 
-  pg_free_result(pg_query($db, 'commit;'));
-  return $offreid;
+	pg_free_result(pg_query($db, 'commit;'));
+	return $offreid;
 }
 
 /****
