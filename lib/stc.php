@@ -164,10 +164,11 @@ function stc_add_jquery() {
 }
 
 function stc_add_jqueryui() {
-  GLOBAL $JQUERYUI_VER, $JQUERYUI_THEME;
-  stc_add_jquery ();
-  stc_script_add ("/lib/jquery/ui/".$JQUERYUI_VER."/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
-  stc_style_add ("/lib/jquery/ui/".$JQUERYUI_VER."/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.min.css");
+	GLOBAL $JQUERYUI_VER, $JQUERYUI_THEME;
+	stc_add_jquery ();
+#  stc_script_add ("/lib/jquery/ui/".$JQUERYUI_VER."/js/jquery-ui-".$JQUERYUI_VER.".custom.min.js", -1);
+	stc_script_add ("/lib/jquery/ui/".$JQUERYUI_VER."/jquery-ui.min.js", -1);
+ 	stc_style_add ("/lib/jquery/ui/".$JQUERYUI_VER."/jquery-ui.min.css");
 }
 
 function stc_top ($styles=null) {
@@ -637,7 +638,7 @@ function stc_form_date ($form, $label, $variable, $value="") {
   // stc_style_add ("/lib/jquery/ui/".$JQUERYUI_VER."/css/".$JQUERYUI_THEME."/jquery-ui-".$JQUERYUI_VER.".custom.min.css");
 
   stc_script_add("$(function() { $(\"#".$variable."\").datepicker({showOn:\"button\",".
-		 "buttonImage: \"/lib/jquery/ui/".$JQUERYUI_VER."/development-bundle/demos/datepicker/images/calendar.gif\"".
+		 "buttonImage: \"/lib/images/calendar.gif\"".
 		 ",buttonImageOnly: true,".
 		 "dateFormat: \"yy-mm-dd\"".
 		 "});});","_begin");
