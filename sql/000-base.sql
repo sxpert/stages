@@ -29,7 +29,7 @@
 
 --\c stages
 
-create extension pgcrypto;
+--create extension pgcrypto;
 
 --\c stages stagesadm
 
