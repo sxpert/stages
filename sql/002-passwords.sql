@@ -12,8 +12,8 @@
 -- vu qu'il est stocké a la fin (mais pourquoi j'ai pas fait comme ca dès le début ?)
 --
 
-\c stages stagesadm
-\set VERBOSITY terse
+--\c stages stagesadm
+--\set VERBOSITY terse
 
 --
 -- changer la vue pour ajouter le login, pas utile de le cacher

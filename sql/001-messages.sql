@@ -10,7 +10,7 @@
 -- Ajout de fonctionnalités de messagerie
 -- 
 
-\c stages stagesadm
+--\c stages stagesadm
 
 drop table if exists messages;
 drop sequence if exists seq__messages__id;
