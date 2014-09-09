@@ -16,7 +16,7 @@ do $$
 						else laboratoires.univ_city end 
 						as city 
 					from laboratoires) 
-				as cities;
+				as cities order by cities.city;
 		grant select (id, email) on users to stagesweb;
 	end;
 $$;
