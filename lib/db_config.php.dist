@@ -22,14 +22,21 @@ $DB_ADMIN_PASS="testadm";
 
 $MAIL_SRV="stcoll.sxpert.org";
 
-$JQUERY_VER="1.7.1";
-$JQUERYUI_VER="1.8.16";
-$JQUERYUI_THEME="base";
+$JQUERY_VER="1.11.1";
+$JQUERYUI_VER="1.11.1";
+$JQUERYUI_THEME="smoothness";
 
 // mois / jour
-$BLACKOUT_DATE= [10, 20];
+$BLACKOUT_DATE= [10,21];
 
 $HTTP_OPTS=array(
 		 'timeout'=>5,
+#        'proxyhost'=>'www-cache.ujf-grenoble.fr',
+#        'proxyport'=>3128,
+#        'proxytype'=>HTTP_PROXY_HTTP
 		 );
+
+$DEBUG=false;
+$DEBUG_IPS=array();
+
 ?>
