@@ -16,22 +16,22 @@
 --
 -- nettoyage
 --
-drop database if exists stages;
-drop role if exists stagesadm;
-drop role if exists stagesweb;
+--drop database if exists stages;
+--drop role if exists stagesadm;
+--drop role if exists stagesweb;
 
 --
 -- création de la base de données
 --
-create role stagesadm with login encrypted password 'ea8Oonie';
-create role stagesweb with login noinherit encrypted password 'ieCh7yuK';
-create database stages with owner stagesadm;
+--create role stagesadm with login encrypted password 'ea8Oonie';
+--reate role stagesweb with login noinherit encrypted password 'ieCh7yuK';
+--create database stages with owner stagesadm;
 
-\c stages
+--\c stages
 
 create extension pgcrypto;
 
-\c stages stagesadm
+--\c stages stagesadm
 
 create sequence seq_version minvalue 0;
 
