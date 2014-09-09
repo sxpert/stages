@@ -24,7 +24,7 @@
 -- création de la base de données
 --
 --create role stagesadm with login encrypted password 'ea8Oonie';
---reate role stagesweb with login noinherit encrypted password 'ieCh7yuK';
+--create role stagesweb with login noinherit encrypted password 'ieCh7yuK';
 --create database stages with owner stagesadm;
 
 --\c stages
