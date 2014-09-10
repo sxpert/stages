@@ -42,6 +42,7 @@ if ($mode==EDIT) {
   $description  = $offre['description'];
   $url          = $offre['project_url'];
   $prerequis    = $offre['prerequis'];
+  $lieu_stage   = $offre['lieu_stage'];
   $infoscmpl    = $offre['infoscmpl'];
   $start_date   = $offre['start_date'];
   $length       = $offre['duree'];
@@ -84,6 +85,7 @@ if ($mode==EDIT) {
   if (!is_array($nature_stage)) $nature_stage = null;
   $prerequis    = stc_get_variable($_POST, 'prerequis');
   
+  $lieu_stage   = stc_get_variable($_POST, 'lieu_stage');
   $infoscmpl    = stc_get_variable($_POST, 'infoscmpl');
   
   $start_date   = stc_get_variable($_POST, 'start_date');
@@ -150,6 +152,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       if ($mode==INSERT) {
 	/* insertion dans la base de données */
 	$offre = stc_offre_add($type, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
+				   $lieu_stage,
 			       $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/);
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de l\'ajout de l\'offre');
@@ -159,6 +162,7 @@ if (($mode==INSERT)||($mode==UPDATE)) {
       if ($mode==UPDATE) {
 	stc_form_add_error($errors, 'type', 'mise à jour des offres en cours d\'implémentation');
 	$offre = stc_offre_update($offreid, $categories, $sujet, $description, $url, $nature_stage, $prerequis,
+				  $lieu_stage,
 				  $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email, $pay_state/*, $thesis*/);
 	if (is_bool($offre)&&(!$offre))
 	  stc_form_add_error($errors, 'type', 'Erreur lors de la mise à jour de l\'offre');
@@ -209,6 +213,8 @@ echo "<br/>\n";
 stc_form_text ($form, "Prérequis", "prerequis", $prerequis, $width, null,
 	       "Compétences ou connaissances spécifiques nécessaires");
 echo "<br/>\n";
+
+stc_form_text ($form, "Lieu du stage", "lieu_stage", $lieu_stage, $width);
 
 stc_form_text ($form, "Informations complémentaires", "infoscmpl", $infoscmpl, $width, null,
 	       "Déplacement prévu en conférence ou dans d'autres laboratoires, stage en co-direction (...)");

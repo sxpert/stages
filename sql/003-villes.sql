@@ -15,6 +15,12 @@ do $$
 			alter table laboratoires add column country char(2);
 		end if;
 
+		-- 
+		perform column_name from information_schema.columns where table_name='offres' and column_name='lieu_stage';
+		if not found then
+			alter table offres add column lieu_stage text;
+		end if;
+
 		-- modifies la vue liste_villes
 		create or replace view liste_villes as
 			select distinct cities.city as key, cities.city as value 

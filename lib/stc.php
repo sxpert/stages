@@ -1354,6 +1354,7 @@ function stc_rollback($message=null) {
 function stc_offre_add($type, $categories, 
 		       $sujet, $description, $url,
 		       $nature_stage, $prerequis,
+               $lieu_stage,
 		       $infoscmpl, $start_date, $length,
 		       $co_encadrant, $co_enc_email,
 		       $pay_state/*, $thesis*/) {
@@ -1386,11 +1387,11 @@ function stc_offre_add($type, $categories,
   $year_value = stc_calc_year();
   /* insertion des infos de l'offre */
   $sql = "insert into offres (id_type_offre, id_project_mgr, year_value, sujet, ".
-    "description, project_url, prerequis, infoscmpl, start_date, duree, co_encadrant, ".
+    "description, project_url, prerequis, lieu_stage, infoscmpl, start_date, duree, co_encadrant, ".
     "co_enc_email, pay_state, create_date) values ".
-    "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,CURRENT_TIMESTAMP) returning id;";
+    "($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,CURRENT_TIMESTAMP) returning id;";
   $arr = array(intval($id_type_offre), intval($id_project_mgr), $year_value, $sujet, $description, $url,
-	       $prerequis, $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email,
+	       $prerequis, $lieu_stage, $infoscmpl, $start_date, $length, $co_encadrant, $co_enc_email,
 	       intval($pay_state)/*, $thesis*/);
   $r = pg_send_query_params($db, $sql, $arr);
   $r = pg_get_result($db);
@@ -1443,6 +1444,7 @@ function stc_offre_add($type, $categories,
 function stc_offre_update($offreid, $categories, 
 		       $sujet, $description, $url,
 		       $nature_stage, $prerequis,
+			   $lieu_stage,
 		       $infoscmpl, $start_date, $length,
 		       $co_encadrant, $co_enc_email,
 			  $pay_state/*, $thesis*/) {
@@ -1469,6 +1471,7 @@ function stc_offre_update($offreid, $categories,
 	if (strcmp($description, $old_offer->description)!=0) 	$diff=True;
 	if (strcmp($url, $old_offer->project_url)!=0)			$diff=True; 
 	if (strcmp($prerequis, $old_offer->prerequis)!=0) 		$diff=True;
+	if (strcmp($lieu_stage, $old_offer->lieu_stage)!=0)		$diff=True;
 	if (strcmp($infoscmpl, $old_offer->infoscmpl)!=0) 		$diff=True;
 	if (strcmp($start_date, $old_offer->start_date)!=0) 	$diff=True;
 	if (strcmp($length, $old_offer->duree)!=0)				$diff=True; 
@@ -1532,11 +1535,11 @@ function stc_offre_update($offreid, $categories,
 	
 	/* mise à jour de l'offre elle meme */
   
-	$sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, '.
-		'infoscmpl=$5, start_date=$6, duree=$7, co_encadrant=$8, co_enc_email=$9, pay_state=$10, '.
+	$sql = 'update offres set sujet=$1, description=$2, project_url=$3, prerequis=$4, lieu_stage=$5, '.
+		'infoscmpl=$6, start_date=$7, duree=$8, co_encadrant=$9, co_enc_email=$10, pay_state=$11, '.
 		//'thesis=$11, last_update=CURRENT_TIMESTAMP where id=$12;';
-		'last_update=CURRENT_TIMESTAMP where id=$11;';
-	$arr = array($sujet, $description, $url, $prerequis, $infoscmpl, $start_date, $length,
+		'last_update=CURRENT_TIMESTAMP where id=$12;';
+	$arr = array($sujet, $description, $url, $prerequis, $lieu_stage, $infoscmpl, $start_date, $length,
 		$co_encadrant, $co_enc_email, $pay_state/*, $thesis*/, $offreid);
 	$r = pg_send_query_params($db, $sql, $arr);
 	$r = pg_get_result($db);

@@ -140,7 +140,10 @@ function stc_affiche_offre($id, $multi=false) {
    *
    */
   stc_detail_section ("Informations complémentaires");
-  
+ 
+  stc_detail_display ($offre['lieu_stage']);
+  stc_detail_display ($offre['infoscmpl']);
+ 
   /* récupération des informations sur l'utilisateur */
   $sql = "select * from users_view where id = $1;";
   $r = pg_query_params ($db, $sql, array($offre['id_project_mgr']));

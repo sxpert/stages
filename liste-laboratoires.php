@@ -35,7 +35,7 @@ if (($admin===true)||(is_numeric($admin))) {
 	echo '<span class="unit-id">numéro</span>';
 	echo '<span class="sigle">sigle</span>';
 	echo '<span class="desc">nom</span>';
-	echo '<span class="city">ville</span>';
+	echo '<span class="city">ville universitaire</span>';
 	echo '<span class="country">pays</span>';
 	echo '<span class="type-unite">type</span>';
 	echo "</div>\n";
