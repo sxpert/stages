@@ -27,4 +27,13 @@
 	display: inline-block;
 	width: 50em;
 }
+.city {
+	display: inline-block;
+	width: 10em;
+}
+.country {
+	display: inline-block;
+	width: 10em;
+}
+
 

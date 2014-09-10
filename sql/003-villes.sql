@@ -7,6 +7,11 @@ do $$
 		if not found then
 			alter table laboratoires add column univ_city text;
 		end if;
+		-- 
+		perform column_name from information_schema.columns where table_name='laboratoires' and column_name='country';
+		if not found then
+			alter table laboratoires add column country char(2);
+		end if;
 		-- modifies la vue liste_villes
 		create or replace view liste_villes as
 			select distinct cities.city as key, cities.city as value 

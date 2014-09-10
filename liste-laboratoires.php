@@ -26,17 +26,23 @@ if ($admin===true) {
 	echo '<a id="add-labo" href="detail-laboratoire.php?action=new-labo">+</a>';
 	echo "</h2>\n";
 	/* boucler dans les laboratoires */
-	$sql = "select type_unite, id, sigle, description, city from laboratoires order by id;";
+	$sql = 'select type_unite, id, sigle, description, '.
+		'( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville, '.
+		'country '.
+		'from laboratoires order by id;';
 	$labos = pg_query($db, $sql);
 	while (True) {
 		$labo = pg_fetch_assoc ($labos);
 		if ($labo) {
-			echo "<div><a href=\"detail-laboratoire.php?id=".$labo['id']."\">";
-			echo '<span class="type-unite">'.$labo['type_unite'].'</span>';
+			echo '<div><a href="detail-laboratoire.php?id='.$labo['id'].'">';
 			echo '<span class="unit-id">'.$labo['id'].'</span>';
-			echo "</a> ";
+			echo '</a>';
 			echo '<span class="sigle">'.$labo['sigle'].'</span>';
-			echo '<span class="desc">'.$labo['description']."</span></div>\n";
+			echo '<span class="desc">'.$labo['description'].'</span>';
+			echo '<span class="city">'.$labo['ville'].'</span>';
+			echo '<span class="country">'.$labo['country'].'</span>';
+			echo '<span class="type-unite">'.$labo['type_unite'].'</span>';
+			echo "</div>\n";
 		} else break;
 	}
 } else {

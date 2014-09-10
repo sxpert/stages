@@ -214,7 +214,7 @@ stc_form_text ($form, "Informations complémentaires", "infoscmpl", $infoscmpl, 
 	       "Déplacement prévu en conférence ou dans d'autres laboratoires, stage en co-direction (...)");
 echo "<br/>\n";
 
-stc_form_date ($form, "Date indicative de début", "start_date", $start_date);
+stc_form_date ($form, "Date indicative de début <span class=\"symbol dot\">●</span>", "start_date", $start_date);
 stc_form_text ($form, "Durée du stage", "length", $length, $width);
 echo "<br/>\n";
 
