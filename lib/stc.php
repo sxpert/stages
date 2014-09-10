@@ -914,6 +914,7 @@ function stc_default_menu ($options=null) {
 		stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
 		stc_menu_add_item ($menu, 'Liste des M2R', 'liste-m2.php');
 		stc_menu_add_item ($menu, 'Liste des Laboratoires', 'liste-laboratoires.php');
+		stc_menu_add_item ($menu, 'Liste des Utilisateurs', 'liste-users.php');
 		stc_menu_add_separator ($menu);
 	}
 
