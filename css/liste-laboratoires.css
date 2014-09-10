@@ -11,29 +11,46 @@
 	line-height: 22pt;
 	border-radius: 3px;
 }
+.header {
+	background-color: #CCC;
+	font-weight: bold;
+	display: table-cell;
+}
+.header > span {
+	display: table-cell;
+	line-height: 2em;
+}
+.odd > span, .odd > * > span {
+    background-color: #e7e7e7;
+}
+.labo > a, .labo > a > span, .labo > span {
+	display: table-cell;
+	overflow: hidden;
+	line-height: 1.5em;
+}
 .type-unite {
-	display: inline-block;
-	width: 5em;
+	min-width: 5em;
+	max-width: 5em;
 }
 .unit-id {
-	display: inline-block;
-	width: 5em;
+	min-width: 5em;
+	max-width: 5em;
 }
 .sigle {
-	display: inline-block;
-	width: 10em;
+	min-width: 10em;
+	max-width: 10em;
 }
 .desc {
-	display: inline-block;
-	width: 50em;
+	min-width: 45em;
+	min-width: 45em;
 }
 .city {
-	display: inline-block;
-	width: 10em;
+	min-width: 12em;
+	max-width: 12em;
 }
 .country {
-	display: inline-block;
-	width: 10em;
+	min-width: 10em;
+	max-width: 10em;
 }
 
 

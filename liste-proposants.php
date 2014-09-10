@@ -22,7 +22,7 @@ stc_menu($menu);
 
 $admin=stc_is_admin();
 if ($admin===true||is_numeric($admin)) {
-	echo "<h2>Liste des proposants</h2>\n";
+	echo "<h2>Liste des emails des proposants dont un stage au moins a été validé pour votre filière</h2>\n";
 	/* boucler dans les proposants */
 	$sql = "select distinct o.id, u.email from users as u, offres as o, offres_m2 as om2 where u.id = o.id_project_mgr ";
 	if (is_numeric($admin)) 

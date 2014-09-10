@@ -16,8 +16,7 @@ insert into m2 (short_desc, description, ville, url_logo) values ('Planeto',	'Pl
 insert into m2 (short_desc, description, ville, url_logo) values ('SAE',		'Sciences de l''Atmosphere et de l''Espace',									'Orléans',		'');
 insert into m2 (short_desc, description, ville, url_logo) values ('Astro67',	'Astrophysique UNISTRA',														'Strasbourg',	'/images/logos-m2/unistra-obs-h86.png');
 insert into m2 (short_desc, description, ville, url_logo) values ('ASEP',		'Astrophysique, Sciences de l''Espace, Planétologie',							'Toulouse',		'/images/logos-m2/uni-tls-paul-sabatier-h86.2013.jpg');
---insert into m2 (short_desc, description, ville, url_logo) values ('TSI',		'Techniques Spatiales et Instrumentation',										'Toulouse',		'');
-insert into m2 (short_desc, description, ville, url_logo) values ('IMAG2E',		'Ingénierie et Modélisation Géophysique Espace et Environnement',				'Nice',			'/images/logos-m2/unice-lagrange-imag2e-oca-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('IMAG2E',		'Imagerie et Modélisation Astrophysique Géophysique Espace et Environnement',	'Nice',			'/images/logos-m2/unice-lagrange-imag2e-oca-h86.png');
 insert into m2 (short_desc, description, ville, url_logo) values ('P3TMA',		'Physique Théorique et Mathématique, Physique des Particules et Astrophyque',	'Marseille',	'/images/logos-m2/aix-marseille-fac-sciences-h86.png');
 insert into m2 (short_desc, description, ville, url_logo) values ('APC',		'Astrophysique et Physique Corpusculaire',										'Bordeaux',		'/images/logos-m2/lab-h86.png');
 insert into m2 (short_desc, description, ville, url_logo) values ('PF',			'Physique Fondamentale',														'Lyon',			'/images/logos-m2/CRA-ENSLyon-UCL_L1-ObsLyon-h86.png');
@@ -34,9 +33,10 @@ insert into categories(description) values
        ('Physique du soleil et de l''héliosphere'),
        ('Planétologie : physique, dynamique et chimie des atmosphères planétaires'),
        ('Géophysique : Terre, atmosphère, ionosphère, magnétosphère'),
-       ('Processus physiques en astrophysique'),
-       ('Systèmes de référence spatio-temporels'),
+       ('Processus physiques en astrophysique, physique fondamentale et expérimentale'),
        ('Instrumentation pour les grands observatoires au sol et dans l''espace'),
+       ('Géodésie et géodésie spatiale'),
+       ('Astrométrie et mécanique céleste, systèmes dynamiques'),
        ('Autres');
 
 insert into statuts (description) values

@@ -912,8 +912,7 @@ function stc_default_menu ($options=null) {
 	if ($admin===true) {
 		stc_menu_add_section ($menu, 'Actions administrateur du site');
 		stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
-		stc_menu_add_item ($menu, 'Liste des M2R', 'liste-m2.php');
-		stc_menu_add_item ($menu, 'Liste des Laboratoires', 'liste-laboratoires.php');
+		stc_menu_add_item ($menu, 'Liste des M2', 'liste-m2.php');
 		stc_menu_add_item ($menu, 'Liste des Utilisateurs', 'liste-users.php');
 		stc_menu_add_separator ($menu);
 	}
@@ -936,6 +935,7 @@ function stc_default_menu ($options=null) {
 				stc_menu_add_item($menu, 'Voir la liste des proposants', 'liste-proposants.php');
 				stc_menu_add_item($menu, 'Voir les stages comme un étudiant', 'search.php?type='.$row['code'].'&simulm2=true');
 				// messagerie
+				stc_menu_add_item ($menu, 'Liste des Laboratoires', 'liste-laboratoires.php');
 				if ($admin===true) 
 					stc_menu_add_item ($menu, "Messages pour les admins de M2R", 'messages.php?type=m2');
 				else {
