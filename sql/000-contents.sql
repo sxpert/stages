@@ -10,17 +10,19 @@
 insert into type_offre (code, description, denom_prop, denom_dir, has_year) values 
        ('MR', 'Master Recherche', 'Stages', 'Directeur de Stage', true);
 
-insert into m2 (short_desc, description, ville, url_logo) values ('A2P',		'Astrophysique, Plasmas et Planètes',					'Grenoble',		'ujf-phitem-ipag-h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('Astro75',	'Astrophysique',										'Paris',		'aphi-dsg.h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('DSG',		'Dynamique des Systèmes Gravitationnels',				'Paris',		'');
-insert into m2 (short_desc, description, ville, url_logo) values ('OSAE',		'Outils et Systèmes de l''Astronomie de de l''Espace',	'Paris',		'');
-insert into m2 (short_desc, description, ville, url_logo) values ('Astro67',	'Astrophysique UNISTRA',								'Strasbourg',	'unistra-obs-h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('ASEP',		'Astrophysique, Sciences de l''Espace, Planétologie',	'Toulouse',		'uni-tls-paul-sabatier-h86.2013.jpg');
-insert into m2 (short_desc, description, ville, url_logo) values ('TSI',		'Techniques Spatiales et Instrumentation',				'Toulouse',		'');
-insert into m2 (short_desc, description, ville, url_logo) values ('OMEGA',		'Optique, Dynamique, Images, Astrophysique',			'Nice',			'unice-lagrange-imag2e-oca-h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('AER',		'Astrophysique, Energie, Rayonnement',					'Marseille',	'aix-marseille-fac-sciences-h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('APC',		'Astrophysique et Physique Corpusculaire',				'Bordeaux',		'lab-h86.png');
-insert into m2 (short_desc, description, ville, url_logo) values ('PF',			'Physique Fondamentale',								'Lyon',			'CRA-ENSLyon-UCL_L1-ObsLyon-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('A2P',		'Astrophysique, Plasmas et Planètes',											'Grenoble',		'/images/logos-m2/ujf-phitem-ipag-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('DSG&Aphi',	'Astronomie et Astrophysique',													'Paris',		'/images/logos-m2/aphi-dsg.h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('Planeto',	'Planétologie IDF',																'Paris',		'');
+insert into m2 (short_desc, description, ville, url_logo) values ('SAE',		'Sciences de l''Atmosphere et de l''Espace',									'Orléans',		'');
+insert into m2 (short_desc, description, ville, url_logo) values ('Astro67',	'Astrophysique UNISTRA',														'Strasbourg',	'/images/logos-m2/unistra-obs-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('ASEP',		'Astrophysique, Sciences de l''Espace, Planétologie',							'Toulouse',		'/images/logos-m2/uni-tls-paul-sabatier-h86.2013.jpg');
+--insert into m2 (short_desc, description, ville, url_logo) values ('TSI',		'Techniques Spatiales et Instrumentation',										'Toulouse',		'');
+insert into m2 (short_desc, description, ville, url_logo) values ('IMAG2E',		'Ingénierie et Modélisation Géophysique Espace et Environnement',				'Nice',			'/images/logos-m2/unice-lagrange-imag2e-oca-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('P3TMA',		'Physique Théorique et Mathématique, Physique des Particules et Astrophyque',	'Marseille',	'/images/logos-m2/aix-marseille-fac-sciences-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('APC',		'Astrophysique et Physique Corpusculaire',										'Bordeaux',		'/images/logos-m2/lab-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('PF',			'Physique Fondamentale',														'Lyon',			'/images/logos-m2/CRA-ENSLyon-UCL_L1-ObsLyon-h86.png');
+insert into m2 (short_desc, description, ville, url_logo) values ('CCP',		'Cosmos, Champs et Particules',													'Montpellier',	'/images/logos-m2/montpellier-ccp-h86.png');
+
 
 insert into categories(description) values 
        ('Cosmologie, Univers primordial, origine et évolution des grandes structures de l''Univers et des galaxies'),
