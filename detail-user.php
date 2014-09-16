@@ -166,6 +166,7 @@ if ($admin===true) {
 	stc_form_button ($form, "Modifier l'utilisateur", "edit-user");
 	stc_form_end();
 } else {
+	top();
 	echo "Affichage interdit";
 }
 
