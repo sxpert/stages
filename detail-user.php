@@ -143,12 +143,16 @@ if ($admin===true) {
 	/********
 	 * affichage simple des données 
 	 */
+
 	
 	// obtention des données sur le laboratoire
 	$usr = pg_query_params ($dba, 'select * from users where id=$1', [$id] );
 	$row = pg_fetch_object ($usr);
 	
 	top();
+	if ($DEBUG) {
+		var_dump($id);
+	}
 	echo "<h2>".$row->f_name." ".$row->l_name."</h2>\n";
 
 	// type d'administrateur

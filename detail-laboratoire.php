@@ -64,12 +64,24 @@ if ($admin===true) {
 			$post_code = $row->post_code;
 			$city = $row->city;
 			break;
+		case "new-labo" :
+			$type_unite 	= '';
+			$id_section 	= '';
+			$sigle 			= '';
+			$description	= '';
+			$univ_city		= '';
+			$post_addr		= '';
+			$post_code		= '';
+			$city			= '';
+			break;
 		case "create-labo" :
 		case "modify-labo" :
 			// presque pareil, seule la requete a la fin change
 			// id est déjà disponible
 			$type_unite = 	stc_get_variable ($_POST, 'type_unite');
 			$id_section = 	stc_get_variable ($_POST, 'id_section');
+			if (strlen($id_section)==0) $id_section=NULL;
+			elseif (is_numeric($id_section)) $id_section=intval($id_section);
 			$sigle = 		stc_get_variable ($_POST, 'sigle');
 			$description = 	stc_get_variable ($_POST, 'description');
 			$univ_city = 	stc_get_variable ($_POST, 'univ_city');
@@ -90,8 +102,7 @@ if ($admin===true) {
 				$univ_city, 
 				$post_addr, 
 				$post_code, 
-				$city, 
-				$oldid);
+				$city);
 
 			if (strcmp($action, 'create-labo')==0) {
 				// we get an insult if we attempt to create a lab with duplicate id
@@ -107,6 +118,7 @@ if ($admin===true) {
 				$sql .= 'city) ';
 				$sql .= 'values ($1,$2,$3,$4,$5,$6,$7,$8,$9);';
 			} else {
+				array_push ($val, $oldid);
 				$sql = 'update laboratoires set ';
 				$sql .= 'type_unite=$1, ';
 				$sql .= 'id=$2, ';
@@ -123,10 +135,14 @@ if ($admin===true) {
 			pg_send_query_params ($dba, $sql, $val); 
 			$res = pg_get_result ($dba);
 			$err = pg_result_error_field ($res, PGSQL_DIAG_SQLSTATE);
-			if ($err=='23505') {
-				stc_form_add_error ($errors, 'id', 'Un laboratoire avec un numéro identique existe déjà');
+			if (!is_null($err)) {
+				if ($err=='23505') {
+					stc_form_add_error ($errors, 'id', 'Un laboratoire avec un numéro identique existe déjà');
+				} else {
+					error_log ("PSQL_DIAG_SQLSTATE :".$err);		
+				}
 			} else {
-				error_log ("PSQL_DIAG_SQLSTATE :".$err);		
+				header('Location: liste-laboratoires.php');
 			}
 		
 			break;
@@ -143,6 +159,14 @@ if ($admin===true) {
 			$new_button = "Modifier le laboratoire";
 			$new_action = "modify-labo";
 			break;
+		}
+
+		if ($DEBUG) {
+			echo '<pre>';
+			var_dump ($sql);
+			var_dump ($val);
+			var_dump ($err);
+			echo '</pre>';		
 		}
 
 		// formulaire de modification / creation
