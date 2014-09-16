@@ -15,10 +15,13 @@ require_once('lib/stc.php');
 
 $user = stc_user_id();
 
-stc_style_add("/css/detail-user.css");
-stc_top();
-$menu = stc_default_menu();
-stc_menu($menu);
+
+function top () {
+	stc_style_add("/css/detail-user.css");
+	stc_top();
+	$menu = stc_default_menu();
+	stc_menu($menu);
+}
 
 $admin = stc_is_admin();
 if ($admin===true) {
@@ -46,13 +49,12 @@ if ($admin===true) {
 		/******** 
 		 * actions de modification et de création 
 		 */
-		echo '<b>'.$action." ".$id.'</b>';
 
 		switch ($action) {
 		case "edit-user" :
-			$usr = pg_query_params ($dba, 'select * from users where id=$1', [$oldid]);
+			$usr = pg_query_params ($dba, 'select * from users where id=$1', [$id]);
 			$row = pg_fetch_object ($usr);
-			$super = (strcmp($row->super,'t')!=0);
+			$super = (strcmp($row->super,'t')==0);
 			$m2_admin = $row->m2_admin;
 			break;
 		case "create-user" :
@@ -61,14 +63,14 @@ if ($admin===true) {
 			// id est déjà disponible
 			$super =	 	stc_form_clean_checkbox(stc_get_variable ($_POST, 'super'));
 			$m2_admin = 	stc_get_variable ($_POST, 'm2_admin');
-			if (!is_numeric($m2_admin)) $m2_admin='null';
+			if (!is_numeric($m2_admin)) $m2_admin=NULL;
 			else $m2_admin=intval($m2_admin);
 
 			// error check
 			
 			$val = array(
 				$m2_admin,
-				$super,
+				($super?'t':'f'),
 				$id);
 
 			if (strcmp($action, 'create-user')==0) {
@@ -86,12 +88,17 @@ if ($admin===true) {
 			$res = pg_get_result ($dba);
 			$err = pg_result_error_field ($res, PGSQL_DIAG_SQLSTATE);
 			// should not happen
-			if ($err=='23505') {
-				stc_form_add_error ($errors, 'id', 'Un laboratoire avec un numéro identique existe déjà');
+			if (!is_null($err)) {
+				if ($err=='23505') {
+					stc_form_add_error ($errors, 'id', 'Un laboratoire avec un numéro identique existe déjà');
+				} else {
+					error_log ("PSQL_DIAG_SQLSTATE :'".$err."'");		
+				}
 			} else {
-				error_log ("PSQL_DIAG_SQLSTATE :".$err);		
+				header ('Location: /detail-user.php?id='.$id);
+				exit (0);
 			}
-		
+			
 			break;
 		}
 
@@ -106,6 +113,19 @@ if ($admin===true) {
 			$new_button = "Modifier l'utilisateur";
 			$new_action = "modify-user";
 			break;
+		}
+
+		top ();
+		if ($DEBUG) {
+			echo "<pre>";
+			var_dump ($dba);
+			var_dump ($sql);
+			var_dump ($val);
+			var_dump ($err);
+			var_dump ($row);
+			var_dump ($super);
+			var_dump ($m2_admin);
+			echo "</pre>";
 		}
 
 		// formulaire de modification / creation
@@ -128,6 +148,7 @@ if ($admin===true) {
 	$usr = pg_query_params ($dba, 'select * from users where id=$1', [$id] );
 	$row = pg_fetch_object ($usr);
 	
+	top();
 	echo "<h2>".$row->f_name." ".$row->l_name."</h2>\n";
 
 	// type d'administrateur
