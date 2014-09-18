@@ -4,7 +4,7 @@ do $$
 		-- upgrade 1 :
 		-- table des pays
 		-- 
-		perform table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' and table_name='coutries';
+		perform table_name from information_schema.tables where table_schema='public' and table_type='BASE TABLE' and table_name='countries';
 		if not found then
 			-- create the table
 			create table countries (
