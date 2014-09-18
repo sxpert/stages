@@ -1,7 +1,11 @@
-[
-	[ "AB", null,	null,	null,	"UN" ],
-	[ "AC",	null,	null,	null,	"ER/UPU", 
-		{ "en":"Ascension Island" } ],
+{
+	"AB": { 
+		"status": { "code":"UN" },
+	},
+	"AC": { 
+		"status": 	{ "code":"ER", "reason":"UPU" }, 
+		"names":	{ "en":"Ascension Island" } 
+	},
 	[ "AD",	"AND",	null,	"020",	"OA", 
 		{ "en":"Andorra" },
 		{ "en":"The Principality of Andorra" } ],
