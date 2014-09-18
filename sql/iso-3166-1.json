@@ -381,7 +381,7 @@
 		"names":	{
 			"short": { "en":"Bonaire, Sint Eustatius and Saba" }
 		},
-		"history": {
+		"history":	{
 			"1":	{ 
 				"status":	{ "code":"FU" },
 				"codes":	{
@@ -504,71 +504,231 @@
 		}
 	},
 	
-	[ "CA", "CAN",	null,	"124",	"OA", 
-		{ "en":"Canada" } ],
-	[ "CB", null,	null,	null,	"UN" ],
-	[ "CC", "CCK",	null,	"166",	"OA", 
-		{ "en":"Cocos (Keeling) Islands (the)" } ],
-	[ "CD", "COD",	null,	"180",	"OA", 
-		{ "en":"Congo (the Democratic Republic of the)" },
-		{ "en":"the Democratic Republic of the Congo" } ],
-	[ "CE", null,	null,	null,	"UN" ],
-	[ "CF", "CAR",	null,	"140",	"OA", 
-		{ "en":"Central African Republic (the)" },
-		{ "en":"the Central African Republic" } ],
-	[ "CG", "COG",	null,	"178",	"OA", 
-		{ "en":"Congo" },
-		{ "en":"the Republic of the Congo" } ],
-	[ "CH", "CHE",	null,	"756",	"OA", 
-		{ "en":"Switzerland",
-		  "fr":"Suisse (la)" },
-		{ "en":"the Swiss Confederation",
-		  "fr":"la Confédération Suisse" } ],
-	[ "CI", "CIV",	null,	"384",	"OA", 
-		{ "en":"Côte d'Ivoire" },
-		{ "en":"the Republic of Côte d'Ivoire" } ],
-	[ "CJ", null,	null,	null,	"UN" ],
-	[ "CK", "COK",	null,	"184",	"OA", 
-		{ "en":"Cook Islands (the)" } ],
-	[ "CL", "CHL",	null,	"152",	"OA", 
-		{ "en":"Chile" },
-		{ "en":"the Republic of Chile" } ],
-	[ "CM", "CMR",	null,	"120",	"OA", 
-		{ "en":"Cameroon" },
-		{ "en":"the Republic of Cameroon" } ],
-	[ "CN", "CHN",	null,	"156",	"OA", 
-		{ "en":"China" },
-		{ "en":"the People's Republic of China" } ],
-	[ "CO", "COL",	null,	"170",	"OA", 
-		{ "en":"Colombia" },
-		{ "en":"the Republic of Colombia" } ],
-	[ "CP", null,	null,	null,	"ER/ITU",
-		{ "en":"Clipperton Island" } ],
-	[ "CQ", null,	null,	null,	"UN" ],
-	[ "CR", "CRI",	null,	"188",	"OA", 
-		{ "en":"Costa Rica" },
-		{ "en":"the Republic of Costa Rica" } ],
-	[ "CS", "CSK",	"CSHH",	"200",	"FU", 
-		{ "en":"Czechoslovakia" } ],
-	[ "CS", "SCG",	"CSXX",	"891",	"TR/2006-09/2056-09", 
-		{ "en":"Serbia and Montenegro" } ],
-	[ "CT", null,	null,	null,	"UN" ],
-	[ "CT", "CTE",	"CTKI",	"128",	"FU", 
-		{ "en":"Canton and Enderbury Islands" } ],
-	[ "CU", "CUB",	null,	"192",	"OA", 
+	"CA": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CAN",
+			"num":	124
+		}, 
+		"names":	{
+			"short":	{ "en":"Canada" }
+		}
+	},
+	"CB": {
+		"status":	{ "code":"UN" }
+	},
+	"CC": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3": "CCK",
+			"num":	166
+		},
+		"names":	{ 
+			"short":	{ "en":"Cocos (Keeling) Islands (the)" } 
+		}
+	},
+	"CD": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"COD",
+			"num":	180 
+		},
+		"names":	{
+			"short":	{ "en":"Congo (the Democratic Republic of the)" },
+			"long":		{ "en":"the Democratic Republic of the Congo" } 
+		}
+	},
+	"CE": {
+		"status":	{ "code":"UN" }
+	},
+	"CF": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CAR",
+			"num":	140
+		}, 
+		"names":	{
+			"short":	{ "en":"Central African Republic (the)" },
+			"long":		{ "en":"the Central African Republic" } 
+		}
+	},
+	"CG": {
+		"status":	{ "codes":"OA" },
+		"codes":	{
+			"iso3":	"COG",
+			"num":	178
+		}, 
+		"names":	{
+			"short":	{ "en":"Congo" },
+			"long":		{ "en":"the Republic of the Congo" } 
+		}
+	},
+	"CH": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CHE",
+			"num":	756
+		},
+		"names":	{
+			"short":	{ 
+				"en":"Switzerland",
+		  		"fr":"Suisse (la)" 
+			},
+			"long":		{ 
+				"en":"the Swiss Confederation",
+		  		"fr":"la Confédération Suisse" 
+			} 
+		}
+	},
+	"CI": {
+		"status":	{ "code":"OA" },
+		"codes": {
+			"iso3":	"CIV",
+			"num":	384
+		}, 
+		"names":	{
+			"short":	{ "en":"Côte d'Ivoire" },
+			"long":		{ "en":"the Republic of Côte d'Ivoire" } 
+		}
+	},
+	"CJ": { 
+		"status":	{ "code":"UN" }
+	},
+	"CK": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3": "COK",
+			"num":	184
+		}, 
+		"names":	{
+			"short":	{ "en":"Cook Islands (the)" } 
+		}
+	},
+	"CL": {
+		"status": 	{ "code":"OA" },
+		"codes": 	{
+			"iso3":	"CHL",	
+			"num":	152 
+		},
+		"names":	{
+			"short":	{ "en":"Chile" },
+			"long":		{ "en":"the Republic of Chile" } 
+		}
+	},
+	"CM": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CMR",	
+			"num":	120
+		}, 
+		"names":	{
+			"short":	{ "en":"Cameroon" },
+			"long":		{ "en":"the Republic of Cameroon" } 
+		}
+	},
+	"CN": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CHN",	
+			"num":	156
+		}, 
+		"names": 	{
+			"short":	{ "en":"China" },
+			"long":		{ "en":"the People's Republic of China" } 
+		}
+	},
+	"CO": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"COL",
+			"num":	170	
+		},
+		"names":	{ 
+			"short":	{ "en":"Colombia" },
+			"long":		{ "en":"the Republic of Colombia" } 
+		}
+	},
+	"CP": {
+		"status": 	{
+			"code":		"ER",
+			"agency":	"ITU"
+		},
+		"names": {
+			"short":	{ "en":"Clipperton Island" } 
+		}
+	},
+	"CQ": {
+		"status":	{ "code":"UN" }
+	},
+	"CR": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CRI",
+			"num":	188
+		}, 
+		"names":	{
+			"short":	{ "en":"Costa Rica" },
+			"long":		{ "en":"the Republic of Costa Rica" } 
+		}
+	},
+	"CS": {
+		"status":	{
+			"code":			"TR",
+			"start-date":	"2006-09",
+			"end-date":		"2056-09"
+		},
+		"codes":	{
+			"iso3":	"SCG",	
+			"iso4":	"CSXX",	
+			"num":	891
+		}, 
+		"names":	{
+			"short":	{ "en":"Serbia and Montenegro" }
+		},
+		"history":	{
+			"1":	{
+				"status":	{ "code":"FU" },
+				"codes":	{
+					"iso3":	"CSK",	
+					"iso4":	"CSHH",	
+					"num":	200
+				}, 
+				"names":	{
+					"short":	{ "en":"Czechoslovakia" } 
+				}
+			}
+		}
+	},
+	"CT": {
+		"status":	{ "code":"UN" },
+		"history":	{
+			"1":	{ 
+				"status":	{ "code":"FU" },
+				"codes":	{
+					"iso3":	"CTE",	
+					"iso4":	"CTKI",	
+					"num":	128
+				},
+				"names":	{
+					"short":	{ "en":"Canton and Enderbury Islands" } 
+				}
+			}
+		}
+	},
+	"CU", "CUB",	null,	"192",	"OA", 
 		{ "en":"Cuba" },
 		{ "en":"the Republic of Cuba" } ],
-	[ "CV", "CPV",	null,	"132",	"OA", 
+	"CV", "CPV",	null,	"132",	"OA", 
 		{ "en":"Cabo Verde" },
 		{ "en":"the Republic of Cabo Verde" } ],
-	[ "CW", "CUW",	null,	"531",	"OA", 
+	"CW", "CUW",	null,	"531",	"OA", 
 		{ "en":"Curaçao" } ],
-	[ "CX", "CXR",	null,	"162",	"OA", 
+	"CX", "CXR",	null,	"162",	"OA", 
 		{ "en":"Christmas Island" } ],
-	[ "CY", "CYP",	null,	"196",	"OA", 
+	"CY", "CYP",	null,	"196",	"OA", 
 		{ "en":"Cyprus" },
 		{ "en":"the Republic of Cyprus" } ],	
-	[ "CZ", "CZE",	null,	"203",	"OA", 
+	"CZ", "CZE",	null,	"203",	"OA", 
 		{ "en":"Czech Republic (the)" },
 		{ "en":"the Czech Republic" } ],
 
