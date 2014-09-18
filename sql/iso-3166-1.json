@@ -19,19 +19,64 @@
 			"long":		{ "en":"The Principality of Andorra" } 
 		}
 	},
-	[ "AE", "ARE",	null,	"784",	"OA", 
-		{ "en":"United Arab Emirates (the)" },
-		{ "en":"The United Arab Emirates" } ],
-	[ "AF", "AFG",	null,	"004",	"OA", 
-		{ "en":"Afghanistan" },
-		{ "en":"The Islamic Republic of Afghanistan" } ],
-	[ "AG", "ATG",	null,	"028",	"OA", 
-		{ "en":"Antigua and Barbuda" } ],
-	[ "AH", null,	null,	null,	"UN" ],
-	[ "AI", "AIA",	null,	"660",	"OA", 
-		{ "en":"Anguilla" } ],
-	[ "AI", "AFI",	"AIDJ",	null,	"FU", 
-		{ "en":"French Affars and Issas" } ],
+	"AE": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3": "ARE",	
+			"num":	784
+		},
+		"names":	{
+			"short":	{ "en":"United Arab Emirates (the)" },
+			"long":		{ "en":"The United Arab Emirates" }
+		}
+	},
+	"AF": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"AFG",	
+			"num":	4 
+		}, 
+		"names":	{
+			"short":	{ "en":"Afghanistan" },
+			"long":		{ "en":"The Islamic Republic of Afghanistan" } 
+		}
+	},
+	"AG": {
+		"status":	{ "code":"OA" }
+		"codes":	{
+			"iso3":	"ATG",	
+			"num":	28 
+		}, 
+		"names":	{ 
+			"short":	{ "en":"Antigua and Barbuda" }
+		}
+	},
+	"AH": {
+		"status":	{ "code":"UN" }
+	},
+	"AI": {
+		"status": 	{ "code":"OA" }, 
+		"codes":	{
+			"iso3":	"AIA",	
+			"num":	660
+		},
+		"names":	{ 
+			"short":	{ "en":"Anguilla" } 
+		}
+		"history":	{
+			"1":	{
+				"status":	{ "code":"FU" },
+				"codes":	{
+					"iso2":	"AI", 
+					"iso3":	"AFI",	
+					"iso4":	"AIDJ"
+				}, 
+				"names":	{
+					"short":	{ "en":"French Affars and Issas" } 
+				}
+			}
+		}
+	},
 	[ "AJ", null,	null,	null,	"UN" ],
 	[ "AK", null,	null,	null,	"UN" ],
 	[ "AL", "ALB",	null,	"008",	"OA", 
