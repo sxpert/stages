@@ -16,7 +16,7 @@
 	[ "AH", null,	null,	null,	"UN" ],
 	[ "AI", "AIA",	null,	"660",	"OA", 
 		{ "en":"Anguilla" } ],
-	[ "AI", "AFI",	"AIDJ",	null,	"FU", // DI
+	[ "AI", "AFI",	"AIDJ",	null,	"FU", 
 		{ "en":"French Affars and Issas" } ],
 	[ "AJ", null,	null,	null,	"UN" ],
 	[ "AK", null,	null,	null,	"UN" ],
@@ -26,7 +26,7 @@
 	[ "AM", "ARM",	null,	"051",	"OA", 
 		{ "en":"Armenia" },
 		{ "en":"the Republic of Armenia" } ],
-	[ "AN", "ANT",	"ANHH",	"530",	"TR/2010-12/2060-12", // BQ CW SX
+	[ "AN", "ANT",	"ANHH",	"530",	"TR/2010-12/2060-12", 
 		{ "en":"Netherlands Antilles" } ],
 	[ "AO", "AGO",	null,	"024",	"OA", 
 		{ "en":"Angola" },
