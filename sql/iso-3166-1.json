@@ -6,9 +6,17 @@
 		"status": 	{ "code":"ER", "reason":"UPU" }, 
 		"names":	{ "en":"Ascension Island" } 
 	},
-	[ "AD",	"AND",	null,	"020",	"OA", 
-		{ "en":"Andorra" },
-		{ "en":"The Principality of Andorra" } ],
+	"AD": {	
+		"status":	{ "code":"OA" }, 
+		"codes":	{
+			"iso3":	"AND",
+			"num":	20
+		},
+		"names":	{
+			{ "en":"Andorra" },
+			{ "en":"The Principality of Andorra" } 
+		}
+	},
 	[ "AE", "ARE",	null,	"784",	"OA", 
 		{ "en":"United Arab Emirates (the)" },
 		{ "en":"The United Arab Emirates" } ],
