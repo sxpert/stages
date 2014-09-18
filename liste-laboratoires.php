@@ -28,8 +28,8 @@ if (($admin===true)||(is_numeric($admin))) {
 	/* boucler dans les laboratoires */
 	$sql = 'select type_unite, id, sigle, description, '.
 		'( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville, '.
-		'country '.
-		'from laboratoires order by id;';
+		'name as country '.
+		'from laboratoires left join countries on laboratoires.country=countries.iso2 order by id;';
 	$labos = pg_query($db, $sql);
 	echo '<div class="header">';
 	echo '<span class="unit-id">numéro</span>';

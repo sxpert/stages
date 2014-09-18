@@ -63,6 +63,7 @@ if ($admin===true) {
 			$post_addr = $row->post_addr;
 			$post_code = $row->post_code;
 			$city = $row->city;
+			$country = $row->country;
 			break;
 		case "new-labo" :
 			$type_unite 	= '';
@@ -73,6 +74,7 @@ if ($admin===true) {
 			$post_addr		= '';
 			$post_code		= '';
 			$city			= '';
+			$country		= '';
 			break;
 		case "create-labo" :
 		case "modify-labo" :
@@ -88,6 +90,7 @@ if ($admin===true) {
 			$post_addr = 	stc_get_variable ($_POST, 'post_addr');
 			$post_code = 	stc_get_variable ($_POST, 'post_code');
 			$city =			stc_get_variable ($_POST, 'city');
+			$country =		stc_get_variable ($_POST, 'country');
 
 			// error check
 			
@@ -102,7 +105,8 @@ if ($admin===true) {
 				$univ_city, 
 				$post_addr, 
 				$post_code, 
-				$city);
+				$city,
+				$country);
 
 			if (strcmp($action, 'create-labo')==0) {
 				// we get an insult if we attempt to create a lab with duplicate id
@@ -115,8 +119,9 @@ if ($admin===true) {
 				$sql .= 'univ_city, ';
 				$sql .= 'post_addr, ';
 				$sql .= 'post_code, ';
-				$sql .= 'city) ';
-				$sql .= 'values ($1,$2,$3,$4,$5,$6,$7,$8,$9);';
+				$sql .= 'city, ';
+				$sql .= 'country) ';
+				$sql .= 'values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10);';
 			} else {
 				array_push ($val, $oldid);
 				$sql = 'update laboratoires set ';
@@ -128,8 +133,9 @@ if ($admin===true) {
 				$sql .= 'univ_city=$6, ';
 				$sql .= 'post_addr=$7, ';
 				$sql .= 'post_code=$8, ';
-				$sql .= 'city=$9 ';
-				$sql .= 'where id=$10;';
+				$sql .= 'city=$9, ';
+				$sql .= 'country=$10 ';
+				$sql .= 'where id=$11;';
 			}
 			$dba = db_connect_adm ();
 			pg_send_query_params ($dba, $sql, $val); 
@@ -181,6 +187,7 @@ if ($admin===true) {
 		stc_form_text ($form, "Adresse postale", "post_addr", $post_addr);
 		stc_form_text ($form, "Code postal", "post_code", $post_code);
 		stc_form_text ($form, "Ville", "city", $city);
+		stc_form_select ($form, "Pays", "country", $country, "liste_pays" ); 
 		stc_form_button ($form, $new_button, $new_action);
 		stc_form_end ();
 	
@@ -193,7 +200,7 @@ if ($admin===true) {
 	 */
 	
 	// obtention des données sur le laboratoire
-	$lab = pg_query_params ($db, 'select * from laboratoires where id=$1', [$id] );
+	$lab = pg_query_params ($db, 'select * from laboratoires left join countries on laboratoires.country=countries.iso2 where id=$1 ;', [$id] );
 	$row = pg_fetch_object ($lab);
 	
 	$caption=$row->description;
@@ -204,7 +211,7 @@ if ($admin===true) {
 	echo "<div id=\"univ-city\"><label>Ville universitaire</label><span>".$row->univ_city."</span></div>\n";		
 	
 	// prépares l'adresse postale pour affichage
-	$pa = trim($row->post_addr)."<br/>".trim($row->post_code)." ".trim($row->city);
+	$pa = trim($row->post_addr)."<br/>".trim($row->post_code)." ".trim($row->city)."<br/>".$row->name;
 	echo "<div id=\"address\"><label>Adresse postale</label><span>".$pa."</span></div>\n";		
 	echo "<br/>";
 
