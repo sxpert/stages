@@ -17,8 +17,8 @@ do $$
 			grant select on countries to stagesweb;
 
 			-- insert some countries
-		
-			insert into countries ( iso2, names ) values
+				
+			insert into countries ( iso2, name ) values
 				('CH', 'Suisse' ),
 				('CL', 'Chili' ),
 				('DE', 'Allemagne' ),
