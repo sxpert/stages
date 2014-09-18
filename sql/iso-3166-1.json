@@ -77,105 +77,432 @@
 			}
 		}
 	},
-	[ "AJ", null,	null,	null,	"UN" ],
-	[ "AK", null,	null,	null,	"UN" ],
-	[ "AL", "ALB",	null,	"008",	"OA", 
-		{ "en":"Albania" },
-		{ "en":"the Republic of Albania" } ],
-	[ "AM", "ARM",	null,	"051",	"OA", 
-		{ "en":"Armenia" },
-		{ "en":"the Republic of Armenia" } ],
-	[ "AN", "ANT",	"ANHH",	"530",	"TR/2010-12/2060-12", 
-		{ "en":"Netherlands Antilles" } ],
-	[ "AO", "AGO",	null,	"024",	"OA", 
-		{ "en":"Angola" },
-		{ "en":"the Republic of Angola" } ],
-	[ "AP", null,	null,	null	"IR/WIPO" ],
-	[ "AQ", "ATA",	null,	"010",	"OA", 
-		{ "en":"Antarctica" } ],
-	[ "AR", "ARG",	null,	"032",	"OA", 
-		{ "en":"Argentina" },
-		{ "en";"the Argentine Republic" } ],
-	[ "AS", "ASM",	null,	"016",	"OA", 
-		{ "en":"American Samoa" } ],
-	[ "AT", "AUT",	null,	"040",	"OA", 
-		{ "en":"Austria" },
-		{ "en":"the Republic of Austria" } ],
-	[ "AU", "AUS",	null,	"036",	"OA", 
-		{ "en":"Australia" } ],
-	[ "AV", null,	null,	null,	"UN" ],
-	[ "AW", "ABW",	null,	"533",	"OA", 
-		{ "en":"Aruba" } ],
-	[ "AX", "ALA",	null,	"248",	"OA", 
-		{ "en":"Åland Islands" } ],
-	[ "AY", null,	null,	null,	"UN" ],
-	[ "AZ", "AZE",	null,	"031",	"OA", 
-		{ "en":"Azerbaijan" },
-		{ "en":"the Republic of Azerbaijan" } ],
+	"AJ": {
+		"status":	{ "code":"UN" }
+	},
+	"AK": {
+		"status":	{ "code":"UN" }
+	},
+	"AL": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"ALB",
+			"num":	8
+		},
+		"names": 	{
+			"short":	{ "en":"Albania" },
+			"long":		{ "en":"the Republic of Albania" } 
+		}
+	},
+	"AM": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"ARM",	
+			"num":	51 
+		},
+		"names":	{
+			"short":	{ "en":"Armenia" },
+			"long":		{ "en":"the Republic of Armenia" } 
+		}
+	},
+	"AN": { 
+		"status":	{
+			"code":			"TR",
+			"start-date":	"2010-12",
+			"end-date":		"2060-12"
+		},
+		"codes":	{
+			"iso3":	"ANT",	
+			"iso4":	"ANHH",	
+			"num":	530
+		}, 
+		"names":	{
+			"short":	{ "en":"Netherlands Antilles" } 
+		}
+	},
+	"AO": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"AGO",	
+			"num":	24
+		},
+		"names":	{
+			"short":	{ "en":"Angola" },
+			"long":		{ "en":"the Republic of Angola" }
+		}
+	},
+	"AP": { 
+		"status":	{
+			"code":		"IR",
+			"agency":	"WIPO"
+		}
+	},
+	"AQ": { 
+		"status":	{ "code":"OA"},
+		"codes":	{
+			"iso3":	"ATA",	
+			"num":	10 
+		},
+		"names":	{
+			"short":	{ "en":"Antarctica" }
+		}
+	},
+	"AR": {
+		"status":	{ "code":"OA" }, 
+		"codes":	{
+			"iso3":	"ARG",	
+			"num":	32
+		},
+		"names":	{
+			"short":	{ "en":"Argentina" },
+			"long":		{ "en":"the Argentine Republic" }
+		}
+	},
+	"AS": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"ASM",
+			"num":	16
+		}, 
+		"names":	{
+			"short":	{ "en":"American Samoa" }
+		}
+	},
+	"AT": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"AUT",
+			"num":	40
+		},
+		"names":	{
+			"short":	{ "en":"Austria" },
+			"long":		{ "en":"the Republic of Austria" } 
+		}
+	},
+	"AU": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"AUS",
+			"num":	36 
+		},
+		"names":	{
+			"short":	{ "en":"Australia" } 
+		}
+	},
+	"AV": {
+		"status":	{ "code":"UN" }
+	},
+	"AW": { 
+		"status":	{ "code":"OA" },
+		"codes":	{ 
+			"iso3":	"ABW",	
+			"num":	533
+		},
+		"names":	{
+			"short":	{ "en":"Aruba" } 
+		}
+	},
+	"AX": { 	
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"ALA",
+			"num":	248 
+		}, 
+		"names":	{
+			"short":	{ "en":"Åland Islands" }
+		}
+	},
+	"AY": { 
+		"status":	{ "code":"UN" }
+	},
+	"AZ": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"AZE",
+			"num":	31
+		},
+		"names": {
+			"short":	{ "en":"Azerbaijan" },
+			"long":		{ "en":"the Republic of Azerbaijan" }
+		}
+	},
 
-	[ "BA", "BIH",	null,	"070",	"OA", 
-		{ "en":"Bosnia and Herzegovina" } ],
-	[ "BB", "BRB",	null,	"052",	"OA", 
-		{ "en":"Barbados" } ],
-	[ "BC", null,	null,	null,	"UN" ],
-	[ "BD", "BGD",	null,	"050",	"OA", 
-		{ "en":"Bangladesh" } ],
-	[ "BE", "BEL",	null,	"056",	"OA", 
-		{ "en":"Belgium" },
-		{ "en":"the Kingdom of Belgium" } ],
-	[ "BF", "BFA",	null,	"854",	"OA", 
-		{ "en":"Burkina Faso" } ],
-	[ "BG", "BGR",	null,	"100",	"OA", 
-		{ "en":"Bulgaria" },
-		{ "en":"the Republic of Bulgaria" } ],
-	[ "BH", "BHR",	null,	"048",	"OA", 
-		{ "en":"Bahrain" },
-		{ "en":"the Kingdom of Bahrain" } ],
-	[ "BI", "BDI",	null,	"108",	"OA", 
-		{ "en":"Burundi" },
-		{ "en":"the Republic of Burundi" } ],
-	[ "BJ", "BEN",	null,	"204",	"OA", 
-		{ "en":"Benin" },
-		{ "en":"the Republic of Benin" } ],
-	[ "BK", null,	null,	null,	"UN" ],
-	[ "BL", "BLM",	null,	"652",	"OA", 
-		{ "en":"Saint Barthélemy" } ],
-	[ "BM", "BMU",	null,	"060",	"OA", 
-		{ "en":"Bermuda" } ],
-	[ "BN", "BRN",	null,	"096",	"OA", 
-		{ "en":"Brunei Darussalam" } ],
-	[ "BO", "BOL",	null,	"068",	"OA", 
-		{ "en":"Bolivia, Plurinational State of" },
-		{ "en":"the Plurinational State of Bolivia" } ],
-	[ "BP", null,	null,	null,	"UN" ],
-	[ "BQ", "ATB",	"BQAQ",	null,	"FU", 
-		{ "en":"British Antarctic Territory" } ],
-	[ "BQ", "BES",	null,	"535",	"OA", 
-		{ "en":"Bonaire, Sint Eustatius and Saba" } ],
-	[ "BR", "BRA",	null,	"076",	"OA", 
-		{ "en":"Brazil" },
-		{ "en":"the Federative Republic of Brazil" } ],
-	[ "BS", "BHS",	null,	"044",	"OA", 
-		{ "en":"Bahamas (the)" },
-		{ "en":"the Commonwealth of the Bahamas" } ],
-	[ "BT", "BTN",	null,	"064",	"OA", 
-		{ "en":"Bhutan" },
-		{ "en":"the Kingdom of Bhutan" } ],
-	[ "BU", "BUR",	"BUMM",	"104",	"TR/1989-12/2039-12", 
-		{ "en":"Burma" } ],
-	[ "BV", "BVT",	null,	"074",	"OA", 
-		{ "en":"Bouvet Island" } ],
-	[ "BW", "BWA",	null,	"074",	"OA", 
-		{ "en":"Botswana" },
-		{ "en":"the Republic of Botswana" } ],
-	[ "BX", null,	null,	null,	"IR/WIPO" ],
-	[ "BY", "BYS",	"BYAA",	"112",	"FU", 
-		{ "en":"Byelorussian SSR" } ],
-	[ "BY", "BLR",	null,	"112",	"OA", 
-		{ "en":"Belarus" },
-		{ "en":"the Republic of Belarus" } ],
-	[ "BZ", "BLZ",	null,	"084",	"OA", 
-		{ "en":"Belize" } ],
+	"BA":{
+		"status":	{ "code":"OA" },
+		"codes": 	{
+			"iso3":	"BIH",	
+			"num":	70 
+		},
+		"names":	{
+			"short":	{ "en":"Bosnia and Herzegovina" } 
+		}
+	},
+	"BB": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BRB",	
+			"num":	52
+		},
+		"names":	{
+			"short":	{ "en":"Barbados" } 
+		}
+	},
+	"BC": {
+		 "status":	{ "code":"UN" }
+	},
+	"BD": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BGD",
+			"num":	50
+		}, 
+		"names":	{
+			"short":	{ "en":"Bangladesh" }
+		}
+	},
+	"BE": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BEL",	
+			"num":	56 
+		},
+		"names":	{
+			"short":	{ "en":"Belgium" },
+			"long":		{ "en":"the Kingdom of Belgium" } 
+		}
+	},
+	"BF": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BFA",	
+			"num":	854
+		}, 
+		"names":	{
+			"short":	{ "en":"Burkina Faso" } 
+		}
+	},
+	"BG": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BGR",
+			"num":	100
+		},
+		"names":	{
+			"short":	{ "en":"Bulgaria" },
+			"long":		{ "en":"the Republic of Bulgaria" }
+		}
+	},
+	"BH": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BHR",	
+			"num":	48
+		}, 
+		"names":	{
+			"short":	{ "en":"Bahrain" },
+			"long":		{ "en":"the Kingdom of Bahrain" } 
+		}
+	},
+	"BI": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BDI",	
+			"num":	108
+		},
+		"names":	{
+			"short":	{ "en":"Burundi" },
+			"long":		{ "en":"the Republic of Burundi" } 
+		}
+	},
+	"BJ": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BEN",	
+			"num":	204
+		}, 
+		"names":	{
+			"short":	{ "en":"Benin" },
+			"long":		{ "en":"the Republic of Benin" } 
+		}
+	},
+	"BK": {
+		 "status":	{ "code":"UN" }
+	},
+	"BL": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BLM",	
+			"num":	652
+		}, 
+		"names":	{
+			"short":	{ "en":"Saint Barthélemy" }
+		}
+	},
+	"BM": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BMU",
+			"num":	60
+		},
+		"names":	{
+			"short":	{ "en":"Bermuda" }
+		}
+	},
+	"BN": {
+		"status":	{ "code":"OA" },	
+		"codes":	{
+			"iso3":	"BRN",	
+			"num":	96
+		},	 
+		"names":	{
+			"short":	{ "en":"Brunei Darussalam" } 
+		}
+	},
+	"BO": {
+		"status":	{ "code":"OA" },
+		"codes": {
+			"iso3":	"BOL",
+			"num":	68 
+		},
+		"names":	{
+			"short":	{ "en":"Bolivia, Plurinational State of" },
+			"long":		{ "en":"the Plurinational State of Bolivia" } 
+		}
+	},
+	"BP": {
+		"status":	{ "code":"UN" }
+	},
+	"BQ": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BES",
+			"num":	535
+		},
+		"names":	{
+			"short": { "en":"Bonaire, Sint Eustatius and Saba" }
+		},
+		"history": {
+			"1":	{ 
+				"status":	{ "code":"FU" },
+				"codes":	{
+					"iso3":	"ATB",	
+					"iso4":	"BQAQ"
+				},
+				"names":	{
+					"short":	{ "en":"British Antarctic Territory" }
+				}
+			}
+		}
+	},
+	"BR": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BRA",
+			"num":	76
+		}, 
+		"names":	{
+			"short":	{ "en":"Brazil" },
+			"long":		{ "en":"the Federative Republic of Brazil" } 
+		}
+	},
+	"BS": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BHS",
+			"num":	44
+		}, 
+		"names":	{
+		 	"short":	{ "en":"Bahamas (the)" },
+			"long":		{ "en":"the Commonwealth of the Bahamas" } 
+		}
+	},
+	"BT": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BTN",
+			"num":	6
+		},
+		"names":	{
+			"short":	{ "en":"Bhutan" },
+			"long":		{ "en":"the Kingdom of Bhutan" } 
+		}
+	},
+	"BU": {
+		"state":	{
+			"code":	"TR",
+			"start-date":	"1989-12",
+			"end-date": 	"2039-12"
+		},
+		"codes":	{
+			"iso3":	"BUR",	
+			"iso4":	"BUMM",	
+			"num":	104
+		},
+		"names":	{
+			"short":	{ "en":"Burma" } 
+		}
+	},
+	"BV": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BVT",
+			"num":	74
+		}, 
+		"names":	{
+			"short":	{ "en":"Bouvet Island" } 
+		}
+	},
+	"BW": { 
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BWA",	
+			"num":	74
+		}, 
+		"names":	{
+			"short":	{ "en":"Botswana" },
+			"long":		{ "en":"the Republic of Botswana" } 
+		}
+	},
+	"BX": {
+		 "status":	{
+			"code":		"IR",
+			"agency":	"WIPO" 
+		}
+	},
+	"BY": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BLR",
+			"num":	112
+		},
+		"names":	{
+			"short":	{ "en":"Belarus" },
+			"long":		{ "en":"the Republic of Belarus" }
+		},
+		"history":	{
+			"1":	{
+				"status":	{ "code":"FU" },
+				"codes": {
+					"iso3":	"BYS",
+					"iso4":	"BYAA",	
+					"num":	112
+				},
+				"names":	{
+					"short":	{ "en":"Byelorussian SSR" } 
+				}
+			}
+		}
+	},
+	"BZ": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"BLZ",	
+			"num":	84
+		}, 
+		"names":	{
+			"short":	{ "en":"Belize" } 
+		}
+	},
 	
 	[ "CA", "CAN",	null,	"124",	"OA", 
 		{ "en":"Canada" } ],
