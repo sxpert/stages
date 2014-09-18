@@ -42,7 +42,7 @@
 		}
 	},
 	"AG": {
-		"status":	{ "code":"OA" }
+		"status":	{ "code":"OA" },
 		"codes":	{
 			"iso3":	"ATG",	
 			"num":	28 
