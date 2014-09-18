@@ -27,5 +27,9 @@ do $$
 				('GB', 'Grande Bretagne' ),
 				('IT', 'Italie' );
 		end if;
+		create or replace view liste_pays as
+			select iso2 as key, name as value from countries order by value;
+
+		grant select on liste_pays to stagesweb;
 	end;
 $$;
