@@ -4,7 +4,9 @@
 	},
 	"AC": { 
 		"status": 	{ "code":"ER", "reason":"UPU" }, 
-		"names":	{ "en":"Ascension Island" } 
+		"names":	{ 
+			"short":	{ "en":"Ascension Island" }
+		} 
 	},
 	"AD": {	
 		"status":	{ "code":"OA" }, 
@@ -13,8 +15,8 @@
 			"num":	20
 		},
 		"names":	{
-			{ "en":"Andorra" },
-			{ "en":"The Principality of Andorra" } 
+			"short":	{ "en":"Andorra" },
+			"long":		{ "en":"The Principality of Andorra" } 
 		}
 	},
 	[ "AE", "ARE",	null,	"784",	"OA", 
