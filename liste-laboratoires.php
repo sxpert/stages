@@ -30,7 +30,9 @@ if (($admin===true)||(is_numeric($admin))) {
 	$sql = 'select type_unite, id, sigle, description, '.
 		'( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville, '.
 		'name as country, visible '.
-		'from laboratoires left join countries on laboratoires.country=countries.iso2 order by id;';
+		'from laboratoires left join countries on laboratoires.country=countries.iso2 ';
+	if (is_numeric($admin)) $sql.='where visible=true ';
+	$sql.= 'order by id;';
 	$labos = pg_query($db, $sql);
 	echo '<div class="header">';
 	echo '<span class="unit-id">numéro</span>';
