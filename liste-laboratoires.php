@@ -39,7 +39,7 @@ if (($admin===true)||(is_numeric($admin))) {
 	echo '<span class="city">ville universitaire</span>';
 	echo '<span class="country">pays</span>';
 	echo '<span class="type-unite">type</span>';
-	echo '<span class="visible">visible</span>';
+	if ($admin===true) echo '<span class="visible">visible</span>';
 	echo "</div>\n";
 	$ctr = 0;
 	while (True) {
@@ -54,8 +54,10 @@ if (($admin===true)||(is_numeric($admin))) {
 			echo '<span class="city">'.$labo['ville'].'</span>';
 			echo '<span class="country">'.$labo['country'].'</span>';
 			echo '<span class="type-unite">'.$labo['type_unite'].'</span>';
-			echo '<span class="visible"><input class="visible-checkbox" type="checkbox" value="'.$labo['id'].'" '.
-				((array_key_exists('visible',$labo)&&(strcmp($labo['visible'],'t')==0))?'checked':'').'/></span>';
+			if ($admin===true) {
+				echo '<span class="visible"><input class="visible-checkbox" type="checkbox" value="'.$labo['id'].'" '.
+					((array_key_exists('visible',$labo)&&(strcmp($labo['visible'],'t')==0))?'checked':'').'/></span>';
+			}
 			echo "</div>\n";
 		} else break;
 	}
