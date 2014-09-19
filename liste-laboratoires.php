@@ -35,19 +35,23 @@ if (($admin===true)||(is_numeric($admin))) {
 	$sql.= 'order by id;';
 	$labos = pg_query($db, $sql);
 	echo '<div class="header">';
+	if ($admin===true) echo '<span class="visible">visible</span>';
 	echo '<span class="unit-id">numéro</span>';
 	echo '<span class="sigle">sigle</span>';
 	echo '<span class="desc">nom</span>';
 	echo '<span class="city">ville universitaire</span>';
 	echo '<span class="country">pays</span>';
 	echo '<span class="type-unite">type</span>';
-	if ($admin===true) echo '<span class="visible">visible</span>';
 	echo "</div>\n";
 	$ctr = 0;
 	while (True) {
 		$labo = pg_fetch_assoc ($labos);
 		if ($labo) {
 			echo '<div class="labo'.($ctr++%2==1?' odd':'').'">';
+			if ($admin===true) {
+				echo '<span class="visible"><input class="visible-checkbox" type="checkbox" value="'.$labo['id'].'" '.
+					((array_key_exists('visible',$labo)&&(strcmp($labo['visible'],'t')==0))?'checked':'').'/></span>';
+			}
 			if ($admin===true) echo '<a href="detail-laboratoire.php?id='.$labo['id'].'">';
 			echo '<span class="unit-id">'.$labo['id'].'</span>';
 			if ($admin===true) echo '</a>';
@@ -56,10 +60,6 @@ if (($admin===true)||(is_numeric($admin))) {
 			echo '<span class="city">'.$labo['ville'].'</span>';
 			echo '<span class="country">'.$labo['country'].'</span>';
 			echo '<span class="type-unite">'.$labo['type_unite'].'</span>';
-			if ($admin===true) {
-				echo '<span class="visible"><input class="visible-checkbox" type="checkbox" value="'.$labo['id'].'" '.
-					((array_key_exists('visible',$labo)&&(strcmp($labo['visible'],'t')==0))?'checked':'').'/></span>';
-			}
 			echo "</div>\n";
 		} else break;
 	}
