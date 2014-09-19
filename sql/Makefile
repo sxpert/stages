@@ -6,14 +6,11 @@
 #*
 #******************************************************************************/
 
-PSQL = `which psql`
-
-default:
-	@echo "select all or upgrade"
+PSQL := $(shell which psql )
+DATABASE := $(shell php -r 'include ("../lib/db_config.php"); echo $$DB_NAME;')
 
 upgrade:
-	@echo "upgrade not implemented yet"
-	upgrade_one.sh
+	$(PSQL) -f build-db.sql $(DATABASE)
 
 all:
 	$(PSQL) template1 < 000-base.sql

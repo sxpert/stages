@@ -16,6 +16,7 @@ require_once('lib/stc.php');
 $user = stc_user_id();
 
 stc_style_add("/css/liste-laboratoires.css");
+stc_script_add("/js/liste-laboratoires.js",-1);
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
@@ -28,7 +29,7 @@ if (($admin===true)||(is_numeric($admin))) {
 	/* boucler dans les laboratoires */
 	$sql = 'select type_unite, id, sigle, description, '.
 		'( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville, '.
-		'name as country '.
+		'name as country, visible '.
 		'from laboratoires left join countries on laboratoires.country=countries.iso2 order by id;';
 	$labos = pg_query($db, $sql);
 	echo '<div class="header">';
@@ -38,6 +39,7 @@ if (($admin===true)||(is_numeric($admin))) {
 	echo '<span class="city">ville universitaire</span>';
 	echo '<span class="country">pays</span>';
 	echo '<span class="type-unite">type</span>';
+	echo '<span class="visible">visible</span>';
 	echo "</div>\n";
 	$ctr = 0;
 	while (True) {
@@ -52,6 +54,8 @@ if (($admin===true)||(is_numeric($admin))) {
 			echo '<span class="city">'.$labo['ville'].'</span>';
 			echo '<span class="country">'.$labo['country'].'</span>';
 			echo '<span class="type-unite">'.$labo['type_unite'].'</span>';
+			echo '<span class="visible"><input class="visible-checkbox" type="checkbox" value="'.$labo['id'].'" '.
+				((array_key_exists('visible',$labo)&&(strcmp($labo['visible'],'t')==0))?'checked':'').'/></span>';
 			echo "</div>\n";
 		} else break;
 	}
