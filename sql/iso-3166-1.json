@@ -715,20 +715,33 @@
 			}
 		}
 	},
-	"CU", "CUB",	null,	"192",	"OA", 
-		{ "en":"Cuba" },
-		{ "en":"the Republic of Cuba" } ],
-	"CV", "CPV",	null,	"132",	"OA", 
+	"CU": {
+		"status":	{ "code":"OA" },
+		"codes":	{
+			"iso3":	"CUB",	
+			"num":	192 
+		},
+		"names":	{
+			"short":	{ "en":"Cuba" },
+			"long":		{ "en":"the Republic of Cuba" } 
+		}
+	},
+	"CV": { 
+		"CPV",	null,	"132",	"OA", 
 		{ "en":"Cabo Verde" },
 		{ "en":"the Republic of Cabo Verde" } ],
-	"CW", "CUW",	null,	"531",	"OA", 
+	"CW": { 
+		"CUW",	null,	"531",	"OA", 
 		{ "en":"Curaçao" } ],
-	"CX", "CXR",	null,	"162",	"OA", 
+	"CX": {
+		"CXR",	null,	"162",	"OA", 
 		{ "en":"Christmas Island" } ],
-	"CY", "CYP",	null,	"196",	"OA", 
+	"CY": { 
+		"CYP",	null,	"196",	"OA", 
 		{ "en":"Cyprus" },
 		{ "en":"the Republic of Cyprus" } ],	
-	"CZ", "CZE",	null,	"203",	"OA", 
+	"CZ": { 
+		"CZE",	null,	"203",	"OA", 
 		{ "en":"Czech Republic (the)" },
 		{ "en":"the Czech Republic" } ],
 

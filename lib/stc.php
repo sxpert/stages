@@ -540,6 +540,7 @@ function stc_form_check_url($url,&$e) {
     return false; /* si on a pas de host, c'est compromis... */
   }
   /* timeout a 5 secondes */
+/*
   $r = http_head($url,$HTTP_OPTS,$info);
   error_log($r);  
   error_log(print_r($info,1));
@@ -547,6 +548,7 @@ function stc_form_check_url($url,&$e) {
     $e = 'Accès au document impossible';
     return false;
   }
+*/
   return true;
 }
 
