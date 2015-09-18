@@ -954,9 +954,21 @@ function stc_default_menu ($options=null) {
 			stc_menu_add_item($menu, 'Mes propositions de stage', 'search.php?type='.$row['code'].'&projmgr='.$user);
 			stc_menu_add_separator($menu);
 		} 
+		if ($logged) {
+			stc_menu_add_section ($menu, 'Archives :');
+			//stc_menu_add_item ($menu, stc_calc_year(), '');
+			/* lister toutes les années dans la bdd */
+			$sql='select distinct year_value from offres where year_value<>$1 order by year_value desc;';
+			pg_send_query_params ($db, $sql, [stc_calc_year()]);
+			$lr = pg_get_result ($db);
+			while ($row_year = pg_fetch_object($lr)) {
+				stc_menu_add_item ($menu, $row_year->year_value, 'search.php?type='.$row['code'].'&year='.$row_year->year_value);
+			}
+			stc_menu_add_separator ($menu);
+		}
 	}
 	pg_free_result ($r);
-  
+ 
 	/*
 	if (($logged)&&($admin)) {
 		stc_menu_add_section($menu, 'Options administratives');

@@ -31,6 +31,15 @@ if ($simulm2=='true') {
   }
 } else $simulm2=false;
 
+// mode archives
+$archives = False;
+$year = 0;
+if (array_key_exists('year', $_REQUEST)) {
+    $year = intval(stc_get_variable($_REQUEST, 'year'));
+    if (($year>1999) and ($year<2100)) {
+        $archives = True;
+    }
+}
 
 stc_style_add("/css/search.css");
 stc_top();
@@ -79,14 +88,16 @@ if (($user==0)||($simulm2)) {
     $tables = array("offres","users_view","laboratoires");
     $where  ="offres.deleted=false and offres.year_value=$1 and ".
       "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
-    $arr    = array(stc_calc_year());
+	if ($archives) $arr = array($year);
+	else $arr = array(stc_calc_year());
   } else {
 		// il s'agit d'un utilisateur enregistré, on affiche donc uniquement ses propositions
     $select = array("offres.id","offres.sujet","offres.pers_found");
     $tables = array("offres");
     $where  = "offres.deleted=false and offres.year_value=$1 and offres.id_project_mgr = $2";
 		// on limite aux propositions de l'utilisateur
-    $arr    = array(stc_calc_year(), $user);
+	if ($archives) $arr = array ($year, $user);
+    else $arr = array(stc_calc_year(), $user);
   }
 }
  
