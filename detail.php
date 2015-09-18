@@ -79,7 +79,7 @@ function stc_affiche_offre($id, $multi=false) {
   $offre = pg_fetch_assoc($r);
   pg_free_result ($r);
   
-  if ((intval($offre['id_project_mgr'])==intval($user)&&(!$multi))||(is_bool($admin)&&$admin)) {
+  if (((intval($offre['id_project_mgr'])==intval($user)&&(!$multi)&&(intval($offre['year_value'])==stc_calc_year()))||(is_bool($admin)&&$admin))) {
     echo "<div class=\"link\">";
     echo "<a href=\"delete-offer.php?offreid=".$offre['id']."\">";
     echo "Supprimer la proposition";
