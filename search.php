@@ -325,7 +325,11 @@ while ($row = pg_fetch_assoc($r)) {
 	$current_offer=$row['id'];
   echo "<a href=\"/detail.php?offreid=".$current_offer."\"";
   echo ">";
-  echo "<span class=\"sujet\">".$row['sujet']."</span>";
+  $sujet = $row['sujet'];
+  #escape quelques caracteres a l'affichage
+  $sujet = str_replace('<', '&lt;', $sujet);
+  $sujet = str_replace('>', '&gt;', $sujet);
+  echo "<span class=\"sujet\">".$sujet."</span>";
   if (array_key_exists('labo', $row))
     echo "<span class=\"labo\">".$row['labo']."</span>";
   if (array_key_exists('ville', $row))
