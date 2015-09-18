@@ -107,7 +107,11 @@ function stc_affiche_offre($id, $multi=false) {
   /* description du stage */
   
   stc_detail_subsection ("Sujet du stage");
-  stc_detail_display ($offre['sujet']);
+  $sujet = $offre['sujet'];
+  #escape quelques caracteres a l'affichage
+  $sujet = str_replace('<', '&lt;', $sujet);
+  $sujet = str_replace('>', '&gt;', $sujet);
+  stc_detail_display ($sujet);
   stc_detail_subsection ("Description");
   $desc = add_br($offre['description']);
   stc_detail_display ($desc);
