@@ -849,7 +849,7 @@ function _append_scripts($scripts=null) {
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
-  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2014<br/>\n";
+  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2015<br/>\n";
   echo "<a href=\"http://ipag.obs.ujf-grenoble.fr/?lang=fr\">";
   echo "<img src=\"/images/logo-ipag-small.png\"/>";
   echo "</a><br/>\n";
@@ -955,14 +955,14 @@ function stc_default_menu ($options=null) {
 			stc_menu_add_separator($menu);
 		} 
 		if ($logged) {
-			stc_menu_add_section ($menu, 'Archives :');
+			stc_menu_add_section ($menu, 'Archives années antérieures :');
 			//stc_menu_add_item ($menu, stc_calc_year(), '');
 			/* lister toutes les années dans la bdd */
 			$sql='select distinct year_value from offres where year_value<>$1 order by year_value desc;';
 			pg_send_query_params ($db, $sql, [stc_calc_year()]);
 			$lr = pg_get_result ($db);
 			while ($row_year = pg_fetch_object($lr)) {
-				stc_menu_add_item ($menu, $row_year->year_value, 'search.php?type='.$row['code'].'&year='.$row_year->year_value);
+				stc_menu_add_item ($menu, ($row_year->year_value-1), 'search.php?type='.$row['code'].'&year='.$row_year->year_value);
 			}
 			stc_menu_add_separator ($menu);
 		}
@@ -1724,12 +1724,14 @@ function stc_set_m2_provenance ($from) {
  * Fonctions utilitaires
  */
 
+$FIRST_MONTH = 9;
+
 function stc_calc_year () {
   date_default_timezone_set('Europe/Paris');
   $d = getdate();
   $y = $d['year'];
   $m = $d['mon'];
-  if ($m>=9) $y++;
+  if ($m>=$FIRST_MONTH) $y++;
   return $y;
 }
 
