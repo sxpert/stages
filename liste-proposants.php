@@ -23,8 +23,10 @@ stc_menu($menu);
 $admin=stc_is_admin();
 if ($admin===true||is_numeric($admin)) {
 	echo "<h2>Liste des emails des proposants dont un stage au moins a été validé pour votre filière</h2>\n";
-	/* boucler dans les proposants */
-	$sql = "select distinct o.id, u.email from users as u, offres as o, offres_m2 as om2 where u.id = o.id_project_mgr ";
+	/* boucler dans les proposants 
+	  uniquement pour l'année en cours
+	*/
+	$sql = "select distinct u.email from users as u, offres as o, offres_m2 as om2 where u.id = o.id_project_mgr and o.year_value = ".stc_calc_year()." ";
 	if (is_numeric($admin)) 
 		$sql.='and o.id = om2.id_offre and om2.id_m2='.$admin;
 	$sql.=';';
