@@ -75,30 +75,66 @@ if (stc_is_logged()) {
       "Chaque stage apparaîtra alors sur une feuille séparée.</p>"; 
   } else {
 ?>
-<h2>Bienvenue sur la base de données des stages de M2R en Astronomie et 
-Astrophysique de France</h2>
 
-<p>Afin de déposer ou consulter une offre de stage de M2R, il faut au préalable 
-s'inscrire dans la base de données en choisissant un nom d'utilisateur et un mot 
-de passe. Il suffit de le faire une seule fois. Pour cela, cliquer sur le menu
-"Créer un compte" à gauche, et suivre la procédure.</p>
+<h2>Bienvenue sur la base de données des stages de M2R en Astronomie et Astrophysique de France</h2>
 
-<p>La base envoie ensuite un email de confirmation à l'adresse que vous aurez 
-fourni. L'inscription ne sera effective qu'après validation, faite en cliquant 
-sur le lien inclus dans l'email. Le dépôt d'une proposition de stage ainsi que 
-la consultation et/ou modification ultérieure seront alors disponibles après 
-connexion.</p>
+<p>Ce serveur national est le moyen privilégié pour déposer vos propositions de stage à l’attention 
+des formations de niveau Master 2 en Astrophysique et Planétologie de France. Ces propositions 
+seront ensuite diffusées aux étudiants suivant les modalités de chacune des formations. A noter 
+que certaines d’entre elles accueillent également des élèves-ingénieurs et qu’il est donc possible 
+de proposer des stages à dominante plus appliquée et instrumentale susceptibles de les intéresser.</p>
+   
+<p><strong>Les propositions doivent être déposées au plus tôt sur le serveur, pour une diffusion à 
+partir du 20 octobre dans chacun des Masters.</strong> Après cette date, le serveur restera ouvert 
+et accessible aux étudiants, mais les sujets ne seront validés par les responsables de formation 
+qu'une fois par semaine (et l’impact auprès des étudiants sera moindre).</p>
 
-<!--<p>Si vous avez oublié votre mot de passe, cliquer ici (BOUTON).</p>-->
+<p>Afin de déposer ou de consulter une offre de stage de M2, il faut au préalable s’inscrire dans 
+la base de données en choisissant un nom d'utilisateur et un mot de passe. Il suffit de le faire 
+une seule fois. Pour cela, cliquer sur le menu « Créer un compte » à gauche, et suivre la procédure. 
+La base envoie ensuite un email de confirmation à l'adresse que vous aurez fourni. L'inscription ne 
+sera effective qu'après validation, faite en cliquant sur le lien inclus dans l'email. Le dépôt 
+d'une proposition de stage ainsi que la consultation et/ou modification ultérieure deviendront 
+alors possibles après connexion.</p>
 
-<p>Les stages sont ensuite validés par les divers responsables de filières en 
-Astrophysique de France. Avec le menu "Consulter", vous aurez la liste des M2R 
-qui auront validé votre stage. Celui-ci sera dès lors accessible aux étudiants 
-via la page web de ces M2R.  A noter que toute modification du stage nécessite 
-une nouvelle validation. Seuls les stages validés sont proposés aux étudiants.</p>
+<p>Les propositions de stage sont ensuite validées par les divers responsables de filières en 
+Astrophysique de France. Avec le menu "Consulter", vous aurez la liste des formations qui auront 
+validé votre stage. Celui-ci sera dès lors accessible aux étudiants via la page web individuelle 
+de chacune des formations. A noter que toute modification du stage nécessite une nouvelle validation. 
+Seuls les stages validés seront proposés aux étudiants.</p>
 
-<p>Pour toute question concernant la validation de vos stages, prière de vous 
-adresser directement au(x) responsable(s) du M2R concerné.</p>
+<p>Pour toute question concernant la validation de vos stages, prière de vous adresser directement 
+au(x) responsable(s) des formations concernées.</p>
+
+<p><strong>Liste des formations concernées :</strong></p>
+
+<ul>
+	<li>Bordeaux: parcours Astrophysique du M2 de Physique de l’Université de Bordeaux</li>
+	<li>Grenoble: M2 A2P (Astrophysique, Plasmas et Planètes) de l’Université Joseph Fourier</li>
+	<li>Ile de France:
+		<ul>
+			<li>M2 AAIS (Astronomie Astrophysique et Ingénierie Spatiale, parcours Astrophysique + 
+				parcours Dynamique des Systèmes Gravitationnels) de l’Observatoire de Paris, 
+				Université Pierre et Marie Curie, Université Denis Diderot, Université Paris-Sud et 
+				Ecole Normale Supérieure</li>
+			<li>M2 du parcours Planétologie Ile de France</li>
+			<li>M2 PSL-ITI du Master de l’Institut de Technologie et d’Innovation de Paris Sciences 
+				et Lettres</li>
+		</ul>
+	</li>
+	<li>Lyon: parcours Astrophysique commun au M2 des Sciences de la Matière de l’École Normale 
+		Supérieure de Lyon et au M2 de Physique de l’Université Claude Bernard</li>
+	<li>Marseille: parcours Astrophysique du M2 M3TPMA (Physique Theorique et Mathematique, Physique 
+		des Particules et Astrophysique) de l’Université Aix-Marseille</li>
+	<li>Montpellier: M2 CCP  (parcours Cosmos, Champs et Particules) du Master Physique et Ingénierie 
+		de l’Université Montpellier 2</li>
+	<li>Nice: spécialité IMAG2E (Imagerie et Modélisation Astrophysique Geophysique Espace et 
+		Environnement) du Master de Physique Appliquée de l’Université Nice Sophia Antipolis</li>
+	<li>Orléans: M2 SAE (Sciences de l’Atmosphère et de l’Espace) de l’Université d’Orléans</li>
+	<li>Strasbourg: spécialité Astrophysique du M2R de Physique de l’Université de Strasbourg</li>
+	<li>Toulouse: M2 ASEP (Astrophysique, Sciences de l’Espace, Planétologie) de l’Université Paul 
+		Sabatier</li>
+</ul>
 <?php
   }
 }
