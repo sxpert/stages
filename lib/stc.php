@@ -1727,6 +1727,7 @@ function stc_set_m2_provenance ($from) {
 $FIRST_MONTH = 9;
 
 function stc_calc_year () {
+  global $FIRST_MONTH;
   date_default_timezone_set('Europe/Paris');
   $d = getdate();
   $y = $d['year'];

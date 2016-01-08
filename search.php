@@ -96,9 +96,12 @@ if (($user==0)||($simulm2)) {
     $tables = array("offres");
     $where  = "offres.deleted=false and offres.year_value=$1 and offres.id_project_mgr = $2";
 		// on limite aux propositions de l'utilisateur
-	if ($archives) $arr = array ($year, $user);
-    else $arr = array(stc_calc_year(), $user);
+    if ($archives) 
+	$arr = array ($year, $user);
+    else 
+	$arr = array (stc_calc_year(), $user);
   }
+#  error_log (print_r($arr,1));
 }
  
 /****
