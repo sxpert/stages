@@ -1,0 +1,80 @@
+---
+#
+#
+# installes les dépendances nécessaires pour l'application stages
+#
+#
+
+- name: "ajoutes le repo jessie-backports"
+  apt_repository:
+    repo: "deb http://ftp.debian.org/debian jessie-backports main"
+    state: "present"
+  become: "yes"
+
+- name: "installe les paquets nécessaires"
+  apt:
+    name: "{{item}}"
+    default_release: "jessie-backports"
+    state: "latest"
+  become: "yes"
+  with_items:
+    - "postgresql"
+    - "python-psycopg2"
+    - "apache2"
+    - "php5"
+    - "php5-pgsql"
+    - "php5-pecl-http"
+#    - "python-certbot-apache"
+    - "git"
+
+#- name: "créer le répertoire de configuration letsencrypt"
+#  file:
+#    path: "/etc/letsencrypt"
+#    state: "directory"
+#  become: "yes"
+
+#- name: "installation de la template de configuration de certbot"
+#  template:
+#    src: "certbot.cfg"
+#    dest: "/etc/letsencrypt/cli.ini"
+#  become: "yes"
+#  register: "certbot_conf"
+
+#- name: "lances certbot"
+#  command: "certbot -n --apache --agree-tos"
+#  become: "yes"
+#  when: "certbot_conf.changed == True"
+
+- name: "créer le repertoire www"
+  file:
+    path: "/srv/www"
+    owner: "sysjmmc"
+    state: "directory"
+  become: "yes"
+
+# RjIKHmZE47IrOSW3159NJGikXj2eYBB0
+- name: "ajout de l'utilisateur backuper"
+  user:
+    name: "backuper"
+    password: "$6$mmT7F1s1BkOiEUs$eKtAxjE.r/FuALfHqowSq4sAcHINHphjCrKTw/Mz/7EqjiTwM2HhLy5awT3jdDjW3ZSzc2J8vWJGHTEGQC5w20"
+    shell: "/bin/bash"
+    generate_ssh_key: "yes"
+    ssh_key_type: "ed25519"
+    state: "present"
+  become: "yes"
+
+- name: "ajout d'une clé dans authorized_keys"
+  authorized_key:
+    user: "backuper"
+    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIqxFaljhfvpg9xmEk7S9TvprrGjIzcLs8blGbHs+q6/ root@ipag-12"
+    state: "present"
+  become: "yes"
+
+- name: "injection des 4 comptes dans postgresql"
+  postgresql_user:
+    name: "{{item.key}}"
+    password: "{{item.value}}"
+    state: "present"
+  become: "yes"
+  become_user: "postgres"
+  with_dict: "{{db_users}}"

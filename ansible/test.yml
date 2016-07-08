@@ -1,0 +1,63 @@
+---
+#
+#
+# Deploys the test version of the system
+# 
+#
+
+- hosts: "test"
+  vars_files:
+    - "logins.yml"
+  roles:
+    - "stages-server"
+  tasks:
+
+    - name: "clone l'appli stages dans le repertoire test"
+      git:
+        repo: "https://github.com/sxpert/stages.git"
+        clone: "yes"
+        version: "2.0"
+        dest: "/srv/www/test-stages"
+
+    - name: "obtenir le nom du dernier fichier de backup de la base de prod"
+      find:
+        age: "-24h"
+        paths: 
+          - "/srv/oldbackups/"
+      register: "backup"
+      become: "yes"
+      failed_when: "backup.matched != 1"
+  
+    - name: "supprimer la bdd de test pour debug"
+      postgresql_db:
+        name: "{{bdd_name}}"
+        state: "absent"
+      become: "yes"
+      become_user: "postgres"
+      when: "debug"
+
+    - name: "créer la bdd de test"
+      postgresql_db:
+        name: "{{bdd_name}}"
+        owner: "{{bdd_owner}}"
+        encoding: "utf-8"
+        state: "present"
+      become: "yes"
+      become_user: "postgres"
+      register: "bdd_created"
+
+    - debug: "var=backup.files.0.path"
+
+    - name: "charger la bdd de test"
+      shell: 
+        "zcat {{backup.files.0.path}} | psql -f - {{bdd_name}}"
+      become: "yes"
+      become_user: "postgres"
+      when: "bdd_created.changed"
+
+    - debug: "var=inventory_hostname"
+
+# generate configuration of the app from template
+    
+
+
