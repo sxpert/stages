@@ -1,4 +1,6 @@
 ---
 debug: "True"
+mail_sender: "stages_test"
 bdd_name: "stages_test"
 bdd_owner: "testadm"
+bdd_user: "testweb"

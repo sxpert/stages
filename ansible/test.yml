@@ -16,7 +16,7 @@
       git:
         repo: "https://github.com/sxpert/stages.git"
         clone: "yes"
-        version: "2.0"
+        version: "master"
         dest: "/srv/webs/stages/{{group_names.0}}"
 
     - name: "obtenir le nom du dernier fichier de backup de la base de prod"
@@ -50,7 +50,7 @@
 
     - name: "charger la bdd de test"
       shell: 
-        "zcat {{backup.files.0.path}} | psql -f - {{bdd_name}}"
+        "zcat {{backup.files.0.path}} | sed -e 's/stagesadm/{{bdd_owner}}/g' -e 's/stagesweb/{{bdd_user}}/g' | psql -f - {{bdd_name}}"
       become: "yes"
       become_user: "postgres"
       when: "bdd_created.changed"
@@ -77,8 +77,15 @@
         state: "link"
       become: "yes"
 
-
-# generate configuration of the app from template
+    - name: "génération du fichier de configuration de l'appli"
+      template:
+        src: "db_config.php"
+        dest: "/srv/webs/stages/{{group_names.0}}/lib/db_config.php"
+      become: "yes"
     
-
+    - name: "redémarrage du service apache"
+      service:
+        name: "apache2"
+        state: "restarted"
+      become: "yes"
 
