@@ -17,7 +17,7 @@
         repo: "https://github.com/sxpert/stages.git"
         clone: "yes"
         version: "2.0"
-        dest: "/srv/www/test-stages"
+        dest: "/srv/webs/stages/{{group_names.0}}"
 
     - name: "obtenir le nom du dernier fichier de backup de la base de prod"
       find:
@@ -56,6 +56,27 @@
       when: "bdd_created.changed"
 
     - debug: "var=inventory_hostname"
+    - debug: "var=group_names.0"
+
+    - name: "génération de la conf apache pour le serveur"
+      template:
+        src: "apache2.conf"
+        dest: "/etc/apache2/sites-available/001-stages-{{group_names.0}}.conf"
+      become: "yes"
+
+    - name: "supprimes le lien symbolique inutile"
+      file: 
+        path: "/etc/apache2/sites-enabled/000-default.conf"
+        state: "absent"
+      become: "yes"
+
+    - name: "création du lien symbolique"
+      file: 
+        src: "/etc/apache2/sites-available/001-stages-{{group_names.0}}.conf"
+        dest: "/etc/apache2/sites-enabled/001-stages-{{group_names.0}}.conf"
+        state: "link"
+      become: "yes"
+
 
 # generate configuration of the app from template
     

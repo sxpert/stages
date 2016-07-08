@@ -45,9 +45,9 @@
 #  become: "yes"
 #  when: "certbot_conf.changed == True"
 
-- name: "créer le repertoire www"
+- name: "créer le repertoire webs"
   file:
-    path: "/srv/www"
+    path: "/srv/webs"
     owner: "sysjmmc"
     state: "directory"
   become: "yes"
