@@ -1,0 +1,57 @@
+#!/bin/bash
+MODE=$( basename $0 )
+DEBUG=$*
+PREFIX="stages"
+CONTROLLER="controller"
+
+#
+# obtains variable from ansible inventory or system variables
+#
+function ansible_get_var () { 
+    _var=${1}
+    _inventory="${PREFIX}-${MODE}.inventory"
+    _v=$( ANSIBLE_CONFIG="ansible_bash.cfg" ansible ${CONTROLLER} -i ${_inventory} -m debug -a "var=${_var}" )
+    _v=$( echo "${_v}" | sed -e "s/^[^=]*=> \(.*\)$/\1/" )
+python - "${_var}" "${_v}" << END
+import sys, json
+v = json.loads(sys.argv[2])
+print(v[sys.argv[1]])
+END
+}
+
+#
+# runs an ansible playbook locally
+#
+function self () {
+    script=$1
+    shift 1
+    other=$*
+    ansible-playbook -u ansible -i ${PREFIX}-${MODE}.inventory ${DEBUG} ${other} ${script} 
+    RET=$?
+    if [ "${RET}" == "1" ]
+    then
+        exit
+    fi
+}
+
+#
+# runs an ansible playbook on a remote box
+#
+function remote () {
+    inventory="${PREFIX}-${MODE}.control.inventory"
+    script=$1
+    shift 1
+    other=$*
+    echo $DEBUG
+    host=$( ansible_get_var ansible_host )
+    echo "REMOTE HOST : ${host}"
+    user=$( ansible_get_var ansible_ssh_user )
+    echo "REMOTE USER : ${user}"
+    ssh ${user}@${host} "cd jmmc ; ansible-playbook ${DEBUG} -u ${user} -i ${inventory} ${other} ${script}"
+    RET=$?
+    if [ "${RET}" == "1" ]
+    then
+        exit
+    fi
+}
+

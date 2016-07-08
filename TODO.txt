@@ -1,0 +1,16 @@
+=======
+# stages #
+
+*   Liste des M2 :
+    *   bouton pour ajouter
+*   page d'information sur le M2 :
+    *   bouton supprimer
+    *   modifier le contenu du M2
+    *   upload d'un logo
+    *   lister les responsables
+*   liste des utilisateurs 
+    *   ajouter et trier par nom / prénom
+        *   nom
+        *   prénom
+        *   email
+        *   labo

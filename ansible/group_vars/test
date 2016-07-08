@@ -1,0 +1,4 @@
+---
+debug: "True"
+bdd_name: "stages_test"
+bdd_owner: "testadm"
