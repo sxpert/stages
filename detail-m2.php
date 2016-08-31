@@ -98,8 +98,19 @@ if (isset($action)) {
 	echo "<h2>".$row['description'].' ('.$row['short_desc'].")</h2>\n";
 	echo "<div id=\"ville\"><label>Ville :</label><span>".$row['ville']."</span></div>\n";
 	echo "<div id=\"from\"><label>From :</label><span>".$row['from_value']."</span></div>\n";
-	echo "<div id=\"logo\"><label>Logo :</label><div><div>".$row['url_logo']."</div>\n";
-	echo "<div><img src=\"".$row['url_logo']."\"/></div></div></div>\n";
+
+	$url_logo = $row['url_logo'];
+	$show_logo = True;
+	if (strlen($url_logo)==0) {
+		$url_logo = "<a href=\"m2-add-logo.php\"><em>Aucun logo, cliquer pour en ajouter un</em></a>";
+		$show_logo = False;
+	}
+	echo "<div id=\"logo\"><label>Logo :</label><div><div>".$url_logo."</div>\n";
+	if ($show_logo) {
+		echo "<div><img src=\"".$url_logo."\"/></div>";
+	}
+
+	echo "</div></div>\n";
 	echo "<div id=\"active\"><label>Activé :</label><span>".($row['active']=='t'?'oui':'non')."</span></div>\n";
 
 }
