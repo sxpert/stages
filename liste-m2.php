@@ -25,6 +25,9 @@ if ($admin!==true) {
 $sql = "select * from m2 order by ville, short_desc;";
 $res = pg_query ($db, $sql); 
 
+echo "<h2>Liste des formations M2";
+echo '<a id="add-m2" href="detail-m2.php?action=new-m2">+</a>';
+echo "</h2>\n";
 echo "<p>Les formations actives sont en gras</p>\n";
 
 // liste des m2
@@ -41,7 +44,7 @@ while ($row = pg_fetch_assoc($res)) {
   if ($odd) echo " odd";
   if ($row['active']=='t') echo " active";
   echo "\">";
-  echo "<a href=\"details-m2.php?id=".$row['id']."\">";
+  echo "<a href=\"detail-m2.php?id=".$row['id']."\">";
   echo "<span class=\"short\">".$row['short_desc']."</span>";
   echo "<span class=\"desc\">".$row['description']."</span>";
   echo "<span class=\"ville\">".$row['ville']."</span>";
