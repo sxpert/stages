@@ -102,7 +102,7 @@ if (isset($action)) {
 	$url_logo = $row['url_logo'];
 	$show_logo = True;
 	if (strlen($url_logo)==0) {
-		$url_logo = "<a href=\"m2-add-logo.php\"><em>Aucun logo, cliquer pour en ajouter un</em></a>";
+		$url_logo = "<a href=\"m2-update-logo.php?id=".$m2."\"><em>Aucun logo, cliquer pour en ajouter un</em></a>";
 		$show_logo = False;
 	}
 	echo "<div id=\"logo\"><label>Logo :</label><div><div>".$url_logo."</div>\n";
