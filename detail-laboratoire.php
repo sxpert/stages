@@ -149,6 +149,7 @@ if ($admin===true) {
 				}
 			} else {
 				header('Location: liste-laboratoires.php');
+				exit(0);
 			}
 		
 			break;
