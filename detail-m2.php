@@ -32,9 +32,6 @@ if (isset($action)) {
 	
 	$errors = array();
 	
-	if ($action=='new-m2') {
-	}
-
 	$short_desc = stc_get_variable($_POST, 'short_desc');
 	$description = stc_get_variable($_POST, 'description');
 	$ville = stc_get_variable($_POST, 'ville');
@@ -57,22 +54,49 @@ if (isset($action)) {
 			header("Location: liste-m2.php");
 			exit(0);
 		}
-		break;
-	}
-	
-	switch ($action) {
-	case 'new-m2':
+		# stuff for form
+		$caption = "Ajout d'un nouveau M2";
 		$new_button = "Créer le M2";
 		$new_action = "create-m2";
 		break;
-	}
+	case "edit-m2":
+		$id = stc_get_variable ($_REQUEST, 'id');
+		$id = intval($id);
 
+		$dba = db_connect_adm();
+		$res = pg_query_params ($dba, "select * from m2 where id=$1", array($id));
+		$row = pg_fetch_assoc($res);
+		$short_desc = $row['short_desc'];
+		$description = $row['description'];
+		$ville = $row['ville'];
+		$active = $row['active'];
+		# variables for form
+		$caption = "Modification du M2";
+		$new_button = "Modifier le M2";
+		$new_action = "modify-m2";
+		break;
+	case "modify-m2":
+		$id = stc_get_variable ($_REQUEST, 'id');
+		$id = intval($id);
+		$active = stc_get_variable ($_REQUEST, 'active');
+		
+		$dba = db_connect_adm();
+		$res = pg_query_params ($dba, "update m2 set short_desc=$1, description=$2, ville=$3, active=$4 where id=$5;",
+			array($short_desc, $description, $ville, $active, $id));
+		header ("Location: detail-m2.php?id=".$id);
+		exit (0);
+	}
+	
 	top ();
-	echo "<h2>Ajout d'un nouveau M2</h2>\n";
+	echo "<h2>".$caption."</h2>\n";
 	$form = stc_form ('post', 'detail-m2.php', $errors);
 	stc_form_text ($form, "Sigle", "short_desc", $short_desc);
 	stc_form_text ($form, "Nom complet", "description", $description);
 	stc_form_text ($form, "Ville", "ville", $ville);
+	if ($action=="edit-m2") {
+		stc_form_hidden ($form, "id", $id);
+		stc_form_select ($form, "Activé", "active", $active, array("t"=>"oui", "f"=>"non"));
+	}
 	stc_form_button ($form, $new_button, $new_action);
 	stc_form_end ();
 
@@ -95,17 +119,21 @@ if (isset($action)) {
 	$row = pg_fetch_assoc($res);
 	pg_free_result ($res);
 
-	echo "<h2>".$row['description'].' ('.$row['short_desc'].")</h2>\n";
+	echo "<h2>".$row['description'].' ('.$row['short_desc'].") ";
+	echo "<a id=\"mod-m2\" href=\"detail-m2.php?action=edit-m2&id=".$m2."\">modifier</a>";
+	echo "</h2>\n";
 	echo "<div id=\"ville\"><label>Ville :</label><span>".$row['ville']."</span></div>\n";
 	echo "<div id=\"from\"><label>From :</label><span>".$row['from_value']."</span></div>\n";
 
 	$url_logo = $row['url_logo'];
 	$show_logo = True;
 	if (strlen($url_logo)==0) {
-		$url_logo = "<a href=\"m2-update-logo.php?id=".$m2."\"><em>Aucun logo, cliquer pour en ajouter un</em></a>";
+		$text_logo = "<a href=\"m2-update-logo.php?id=".$m2."\"><em>Aucun logo, cliquer pour en ajouter un</em></a>";
 		$show_logo = False;
+	} else {
+		$text_logo = "<a href=\"m2-update-logo.php?id=".$m2."\">".$url_logo."</a>";
 	}
-	echo "<div id=\"logo\"><label>Logo :</label><div><div>".$url_logo."</div>\n";
+	echo "<div id=\"logo\"><label>Logo :</label><div><div>".$text_logo."</div>\n";
 	if ($show_logo) {
 		echo "<div><img src=\"".$url_logo."\"/></div>";
 	}
@@ -113,6 +141,16 @@ if (isset($action)) {
 	echo "</div></div>\n";
 	echo "<div id=\"active\"><label>Activé :</label><span>".($row['active']=='t'?'oui':'non')."</span></div>\n";
 
+	# liste des responsables
+	echo "<hr/>\n";
+	echo "<h3>Responsables</h3>\n";
+	$dba = db_connect_adm ();
+	$res = pg_query_params($dba,"select id, f_name, l_name from users where m2_admin=$1 order by l_name, f_name;", array($m2));
+	$nb = pg_num_rows($res);
+	#echo "<div>".$nb." rows</div>\n";
+	while ($row=pg_fetch_assoc($res)) {
+		echo "<a href=\"detail-user.php?id=".$row['id']."\">".$row["f_name"]." ".$row["l_name"]."</a><br/>\n";
+	}
 }
 
 stc_footer();

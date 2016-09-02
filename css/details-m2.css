@@ -10,3 +10,17 @@ label {
 #logo > div {
 	display: inline-block;
 }
+#mod-m2 {
+        border: 1px solid #ccc;
+        background-color: #ddd;
+        text-align: center;
+        vertical-align: middle;
+        display: inline-block;
+/*        width: 22pt;*/
+        height: 22pt;
+        text-decoration: none;
+        color: black;
+        line-height: 22pt;
+        border-radius: 3px;
+}
+
