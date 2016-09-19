@@ -54,6 +54,7 @@ if (isset($action)) {
 			header("Location: liste-m2.php");
 			exit(0);
 		}
+	case "new-m2":
 		# stuff for form
 		$caption = "Ajout d'un nouveau M2";
 		$new_button = "Créer le M2";
