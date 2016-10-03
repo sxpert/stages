@@ -106,8 +106,9 @@ Seuls les stages validés seront proposés aux étudiants.</p>
 <p>Pour toute question concernant la validation de vos stages, prière de vous adresser directement 
 au(x) responsable(s) des formations concernées.</p>
 
-<p><strong>Liste des formations concernées :</strong></p>
-
+<p><strong><a href="http://www.sf2a.eu/spip/spip.php?rubrique41" target="_">Liste des formations concernées</a></strong></p>
+<?php
+/*
 <ul>
 	<li>Bordeaux: parcours Astrophysique du M2 de Physique de l’Université de Bordeaux</li>
 	<li>Grenoble: M2 A2P (Astrophysique, Plasmas et Planètes) de l’Université Joseph Fourier</li>
@@ -136,6 +137,7 @@ au(x) responsable(s) des formations concernées.</p>
 		Sabatier</li>
 </ul>
 <?php
+*/
   }
 }
 
