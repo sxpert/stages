@@ -225,6 +225,9 @@ if (((!$projmgr)&&($notvalid!=1))||($simulm2)) {
   stc_script_add("init_hidden('searchfilter');","window.onload");   
   echo "<h2>Options de recherche</h2>\n";
   $form = stc_form("POST", "search.php", null, "searchfilter", "display: none;");
+  if ($year!=0) {
+    stc_form_hidden($form, 'year', $year);
+  }
   stc_form_hidden($form, 'projmgr', $projmgr);
   stc_form_select ($form, "Catégories", "categories", $categories, "liste_categories",
 		   array("multi" => true, "width" => $width, 
