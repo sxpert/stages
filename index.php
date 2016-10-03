@@ -40,7 +40,7 @@ if (stc_is_logged()) {
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
 		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
-			"lundi 21 octobre 2013".
+			"20 octobre de l'année courante".
 			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
   } else {
     $nom = stc_get_user_name(stc_user_id());
@@ -56,7 +56,7 @@ if (stc_is_logged()) {
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
 		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
-			"lundi 21 octobre 2013".
+			"20 octobre de l'année courante".
 			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
 	}
 } else {
