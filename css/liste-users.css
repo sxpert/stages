@@ -1,0 +1,54 @@
+.user-row {
+  display: block;
+  flex-flow: column;
+  text-decoration: none;
+  color: black;
+  vertical-align: middle;
+}
+.user-row:nth-child(odd) {
+  background-color: #eee;
+}
+.user-row:hover {
+  background-color: #ccf !important;
+}
+.user-row span {
+  display: inline-block;
+  padding: 5pt;  
+  overflow-x: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; 
+}
+.login {
+  width: 10em;
+}
+.lname {
+  width: 10em;
+}
+.fname {
+  width: 10em;
+}
+.email {
+  width: 30em;
+}
+.labo {
+  width: 30em;
+}
+.alert {
+  color: blue;
+  font-weight: bold;
+  width: 5em;
+  text-align: center;
+}
+.warn {
+  color: orange;
+  font-weight: bold;
+  width: 5em;
+  text-align: center;
+}
+.locked {
+  color: red;
+  font-weight: bold;
+  width: 5em;
+  text-align: center;
+}
+

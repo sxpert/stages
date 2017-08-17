@@ -32,9 +32,18 @@ if ($admin===true) {
 	while (True) {
 		$user = pg_fetch_assoc ($users);
 		if ($user) {
-			echo '<div><a href="detail-user.php?id='.$user['id'].'">';
+			echo '<a class="user-row" href="detail-user.php?id='.$user['id'].'">';
 			echo '<span class="login">'.$user['login'].'</span>';
-			echo "</div>\n";
+			echo '<span class="lname">'.$user['l_name'].'</span>';
+			echo '<span class="fname">'.$user['f_name'].'</span>';
+			echo '<span class="email">'.$user['email'].'</span>';
+			echo '<span class="labo">'.$user['id_laboratoire'].'</span>';
+			switch ($user['login_fails']) {
+                        case 1: echo '<span class="alert">Oubli ?</span>'; break;
+                        case 2: echo '<span class="warn">Attention</span>'; break;
+                        case 3: echo '<span class="locked">Bloqué</span>'; break;
+			}
+			echo "</a>\n";
 		} else break;
 	}
 } else {

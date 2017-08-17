@@ -978,6 +978,7 @@ function stc_default_menu ($options=null) {
 	*/ 
 	if ($logged) { 
 		//stc_menu_add_item ($menu, 'Liste des Responsables', 'liste-responsables.php');
+		stc_menu_add_item ($menu, 'Mon compte', 'account-details.php');
 		stc_menu_add_item ($menu, 'Contacts', 'liste-contacts.php');
 		stc_menu_add_item ($menu, 'Déconnexion', 'logout.php');
 	} else {
