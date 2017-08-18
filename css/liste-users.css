@@ -1,3 +1,15 @@
+.header {
+  display: block;
+  flex-flow: column;
+  color: black;
+  font-weight: bold;
+  vertical-align: middle;
+  background-color: #ccc;
+}
+.header span {
+  display: inline-block;
+  padding: 5pt;
+}
 .user-row {
   display: block;
   flex-flow: column;
@@ -19,6 +31,9 @@
   text-overflow: ellipsis; 
 }
 .login {
+  width: 10em;
+}
+.admin {
   width: 10em;
 }
 .lname {
@@ -51,4 +66,6 @@
   width: 5em;
   text-align: center;
 }
-
+.unlock {
+  display: inline;
+}
