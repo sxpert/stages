@@ -50,13 +50,23 @@ if ($admin===true) {
 			echo '<span class="login">'.$user->login.'</span>';
 			echo '<span class="admin">';
 			if (strcmp($user->super, 't')==0) echo "Super";
-			elseif ($user->m2_admin) echo $user->m2_admin;
-			else echo '-';
+			elseif ($user->m2_admin) {
+				$sql_m2 = "select * from liste_m2 where key=$1;";
+			 	$r_m2 = pg_query_params($dba, $sql_m2, array($user->m2_admin));
+				$m2 = pg_fetch_object($r_m2);
+				pg_free_result($r_m2);
+				echo $m2->value;
+			} else echo '-';
 			echo '</span>';
 			echo '<span class="lname">'.$user->l_name.'</span>';
 			echo '<span class="fname">'.$user->f_name.'</span>';
 			echo '<span class="email">'.$user->email.'</span>';
-			echo '<span class="labo">'.$user->id_laboratoire.'</span>';
+			/* obtenir le nom du laboratoire */
+			$sql_labo = "select * from liste_labos where key=$1;";
+			$r_labo = pg_query_params($dba, $sql_labo, array($user->id_laboratoire));
+			$labo = pg_fetch_object($r_labo);
+			pg_free_result($r_labo);
+			echo '<span class="labo">'.$labo->value.'</span>';
 			switch ($user->login_fails) {
                         case 1: echo '<span class="alert">Oubli ?</span>'; break;
                         case 2: echo '<span class="warn">Attention</span>'; break;
