@@ -18,6 +18,8 @@
     height: 16pt;
     line-height: 14pt;
     text-decoration: none;
+    padding-top: 2pt;
+    padding-botton: 2pt;
 }
 .list > a > span {
     line-height: 16pt;
@@ -86,4 +88,11 @@
         line-height: 22pt;
         border-radius: 3px;
 }
-
+.button {
+    margin-left: 3pt;
+    height: 22px;
+    width: 22px;
+    background-color: #ddd !important;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+}

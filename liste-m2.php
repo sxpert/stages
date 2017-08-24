@@ -12,6 +12,8 @@ require_once ('lib/stc.php');
 $admin = stc_is_admin();
 
 stc_style_add("/css/liste-m2.css");
+stc_style_add("https://fonts.googleapis.com/icon?family=Material+Icons");
+stc_script_add('/js/liste-m2.js',-1);
 stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
@@ -48,6 +50,9 @@ while ($row = pg_fetch_assoc($res)) {
   echo "<span class=\"short\">".$row['short_desc']."</span>";
   echo "<span class=\"desc\">".$row['description']."</span>";
   echo "<span class=\"ville\">".$row['ville']."</span>";
+  if ($row['active'] == 't') {
+    echo '<span class="button material-icons" data-id="'.$row['id'].'" data-name="'.$row['description'].'">delete</span>';
+  }
   echo "</a>";
   echo "</div>\n";
   $odd = ($odd+1)%2;
