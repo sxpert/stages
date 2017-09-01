@@ -40,22 +40,17 @@ echo "<span class=\"desc\">Nom complet</span>";
 echo "<span class=\"ville\">Ville</span>";
 echo "</div>\n";
 
-$odd = 1;
 while ($row = pg_fetch_assoc($res)) {
-  echo "<div class=\"list";
-  if ($odd) echo " odd";
+  echo "<a class=\"list";
   if ($row['active']=='t') echo " active";
-  echo "\">";
-  echo "<a href=\"detail-m2.php?id=".$row['id']."\">";
+  echo "\" href=\"detail-m2.php?id=".$row['id']."\">";
   echo "<span class=\"short\">".$row['short_desc']."</span>";
   echo "<span class=\"desc\">".$row['description']."</span>";
   echo "<span class=\"ville\">".$row['ville']."</span>";
   if ($row['active'] == 't') {
-    echo '<span class="button material-icons" data-id="'.$row['id'].'" data-name="'.$row['description'].'">delete</span>';
+    echo '<span class="actions"><span class="button material-icons" data-id="'.$row['id'].'" data-name="'.$row['description'].'">delete</span></span>';
   }
   echo "</a>";
-  echo "</div>\n";
-  $odd = ($odd+1)%2;
 }
 
 // bouton "ajouter"

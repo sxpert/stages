@@ -29,15 +29,22 @@ if ($admin===true) {
 	/* boucler dans les laboratoires */
 	$sql = 'select * from users order by l_name, f_name;';
 	$users = pg_query($dba, $sql);
+
+	# nombre de personnes
+
+	echo '<div class="header">';
+	echo pg_num_rows($users).' utilisateurs enregistrés';
+	echo '</div>';
 	
 	# header
 	echo '<div class="header">';
-	echo '<span class="login">Login</span>';
-	echo '<span class="admin">Admin ?</span>';
 	echo '<span class="lname">Nom de Famille</span>';
 	echo '<span class="fname">Prénom</span>';
+	echo '<span class="login">Login</span>';
+	echo '<span class="admin">Admin ?</span>';
 	echo '<span class="email">Email</span>';
 	echo '<span class="labo">Laboratoire</span>';
+	echo '<span class="last-access">Dernier login</span>';
 	echo '<span class="status">État du compte</span>';
 	echo "</div>\n";
 
@@ -47,6 +54,8 @@ if ($admin===true) {
 		if ($user) {
 			#echo '<a class="user-row" href="detail-user.php?id='.$user['id'].'">';
 			echo '<a class="user-row" href="account-details.php?id='.$user->id.'">';
+			echo '<span class="lname">'.$user->l_name.'</span>';
+			echo '<span class="fname">'.$user->f_name.'</span>';
 			echo '<span class="login">'.$user->login.'</span>';
 			echo '<span class="admin">';
 			if (strcmp($user->super, 't')==0) echo "Super";
@@ -58,8 +67,6 @@ if ($admin===true) {
 				echo $m2->value;
 			} else echo '-';
 			echo '</span>';
-			echo '<span class="lname">'.$user->l_name.'</span>';
-			echo '<span class="fname">'.$user->f_name.'</span>';
 			echo '<span class="email">'.$user->email.'</span>';
 			/* obtenir le nom du laboratoire */
 			$sql_labo = "select * from liste_labos where key=$1;";
@@ -67,6 +74,17 @@ if ($admin===true) {
 			$labo = pg_fetch_object($r_labo);
 			pg_free_result($r_labo);
 			echo '<span class="labo">'.$labo->value.'</span>';
+			# last access
+			echo '<span class="last-access">';
+			$sql_last_access = "select date_trunc('second', max(date)) as last_login, login from logs where function='login' and login=$1 group by login order by last_login desc;";
+			$r_last_access = pg_query_params($dba, $sql_last_access, array($user->login));
+			if (pg_num_rows($r_last_access) > 0) {
+				$last_access = pg_fetch_object($r_last_access);
+				echo $last_access->last_login;
+			} else echo '-';
+			pg_free_result($r_last_access);
+			echo "</span>";
+			# account locking information
 			switch ($user->login_fails) {
                         case 1: echo '<span class="alert">Oubli ?</span>'; break;
                         case 2: echo '<span class="warn">Attention</span>'; break;

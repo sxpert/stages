@@ -70,6 +70,15 @@ if (strcmp($_SERVER['REQUEST_METHOD'],"POST")==0) {
 	if (!stc_form_check_password($pass1))
 	  stc_form_add_error($errors, 'pass1', "Le mot de passe est trop simple");
 
+      // check email
+      $email = trim($email);
+      $dba = db_connect_adm();
+      $sql_email = "select login, email from users where lower(email) = lower($1);";	
+      $r_email = pg_query_params($dba, $sql_email, array($email));
+      $nb_email = pg_numrows($r_email);
+      if ($nb_email > 0) 
+	stc_form_add_error($errors, 'email', "cet email a déjà été utilisé lors de la création d'un compte");
+
       if (count($errors)==0) {
 	$t_phone = stc_form_clean_phone ($phone);
 	// no errors detected, attempt account creation 

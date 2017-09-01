@@ -16,7 +16,7 @@ function disable_m2(event) {
       dataType: 'json',
       success: (data) => {
 	// find the div
-        row = target.parent().parent();
+        row = $(target.parents('a')[0]);
 	row.removeClass('active');
         target.remove();
       },

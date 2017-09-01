@@ -9,6 +9,7 @@
 .header span {
   display: inline-block;
   padding: 5pt;
+  font-family: sans-serif !important;
 }
 .user-row {
   display: block;
@@ -43,10 +44,14 @@
   width: 10em;
 }
 .email {
-  width: 30em;
+  width: 25em;
 }
 .labo {
   width: 30em;
+}
+.last-access {
+  width: 13em;
+  font-family: monospace;
 }
 .alert {
   color: blue;
