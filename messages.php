@@ -58,14 +58,22 @@ stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
+//-----------------------------------------------------------------------------
+// la date de coupure est spécifiée comme étant le 1er aout de l'année 
+//  
+$current_year = stc_calc_year();
+$hide_before = ($current_year-1)."-08-01";
+error_log ($hide_before);
+
+
 if (($user>0)&&($admin)) {
   /* afficher la liste des messages */
   if (($type=='admin')&&($admin===true)) {
-    $rlist = pg_query($db, 
-		      "select m.msgread, m.id, date_trunc('second', m.datepub) as datepub, ".
-		      "(u.f_name || ' ' || u.l_name || ' (' || l.sigle || ')') as sender, m.subject ".
-		      "from messages as m, users_view as u, laboratoires as l  where m.id_m2 is null and m.sender=u.id ".
-		      "and u.id_laboratoire = l.id order by datepub desc;");
+    $sql = "select m.msgread, m.id, date_trunc('second', m.datepub) as datepub, ".
+	   "(u.f_name || ' ' || u.l_name || ' (' || l.sigle || ')') as sender, m.subject ".
+           "from messages as m, users_view as u, laboratoires as l  where m.id_m2 is null and m.sender=u.id ".
+           "and u.id_laboratoire = l.id and m.datepub >= $1 order by datepub desc;";		
+    $rlist = pg_query_params($db, $sql, array($hide_before));
     $showm2 = false;
   } else {    
     $showm2name = true;
@@ -85,13 +93,17 @@ if (($user>0)&&($admin)) {
     if ($showm2) $sql.=", m2 ";
     $sql.=" where ";
     if ($showm2) $sql.="m.id_m2 is not null and m.id_m2 = m2.id ";
-    else $sql.="m.id_m2=$1 ";
-    $sql.="and m.sender=u.id and u.id_laboratoire = l.id order by ";
+    else $sql.="m.id_m2=$2 ";
+    $sql.="and m.sender=u.id and u.id_laboratoire = l.id ";
+    $sql.="and m.datepub >= $1 ";
+    $sql.="order by ";
     if ($showm2) $sql.="m2.short_desc, ";
     $sql.="datepub desc;";
-    //error_log ($sql);
-    if ($showm2) $rlist = pg_query ($db, $sql);
-    else $rlist = pg_query_params($db, $sql, array($m2));
+    error_log ($sql);
+    $args = array($hide_before);
+    if (!$showm2) array_push($args, $m2);
+    error_log (print_r($args,1));
+    $rlist = pg_query_params($db, $sql, $args);
   }
   /* titre du m2 */
   switch ($type) {

@@ -66,7 +66,7 @@ case 'modify_account':
   if (!stc_form_check_phone($phone))
     stc_form_add_error($errors, 'phone', "Le numéro de téléphone contient des caractères invalides");
   if (!stc_form_check_select($id_laboratoire, 'liste_labos'))
-    stc_form_add_error($errors, 'id_laboradoire', "Le laboratoire n'existe pas");
+    stc_form_add_error($errors, 'id_laboratoire', "Le laboratoire n'existe pas");
 
   if (count($errors)==0) {
     $t_phone = stc_form_clean_phone ($phone);
