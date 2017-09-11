@@ -36,7 +36,7 @@ if ($super and $admin) {
   $id = $user_id;
 }
 
-$sql = 'select login, f_name, l_name, email, phone, id_laboratoire, super, m2_admin, login_fails from users where id=$1';
+$sql = 'select login, f_name, l_name, email, phone, id_laboratoire, super, m2_admin, login_fails, account_valid from users where id=$1';
 $r = pg_query_params($dba, $sql, array($id)); 
 $row = pg_fetch_object($r);
 pg_free_result($r);
@@ -75,8 +75,9 @@ case 'modify_account':
       $super_admin = stc_form_clean_checkbox(stc_get_variable($_POST, 'super_admin'))?'t':'f';
       $m2_admin = stc_get_variable($_POST, 'm2_admin');
       $m2_admin = is_numeric($m2_admin)?intval($m2_admin):NULL;
-      $sql = 'update users set f_name = $1, l_name = $2, email = $3, phone = $4, id_laboratoire = $5, super = $6, m2_admin = $7 where id = $8;';
-      $vars = array($f_name, $l_name, $email, $phone, $id_laboratoire, $super_admin, $m2_admin, $id);
+      $active = stc_form_clean_checkbox(stc_get_variable($_POST, 'active'))?'t':'f';
+      $sql = 'update users set f_name = $1, l_name = $2, email = $3, phone = $4, id_laboratoire = $5, super = $6, m2_admin = $7, account_valid = $8 where id = $9;';
+      $vars = array($f_name, $l_name, $email, $phone, $id_laboratoire, $super_admin, $m2_admin, $active, $id);
       $r = pg_query_params($dba, $sql, $vars);
       if ($r !== false) {
 	header('Location: /liste-users.php');
@@ -109,6 +110,7 @@ default:
   $id_laboratoire = $row->id_laboratoire;
   $super_admin = (strcmp($row->super,'t')==0);
   $m2_admin = $row->m2_admin;
+  $active = (strcmp($row->account_valid, 't')==0);
 }
 
 stc_top();
@@ -121,9 +123,9 @@ $options['home']=false;
 $menu = stc_default_menu($options);
 stc_menu($menu);
 
-echo "<h2>Détails du compte '".$login."'</h2>";
-
 $form = stc_form("post", "account-details.php", $errors, 'update');
+echo "<h2>Détails du compte '".$login."'</h2>\n";
+
 if ($admin and $super and $row->login_fails==3){
   stc_form_button($form, '<span class="locked-account">Débloquer le compte</span>', "unlock_account");
 }
@@ -136,8 +138,10 @@ if ($super and $admin) {
   stc_form_hidden ($form, 'id', $id);
   stc_form_checkbox ($form, "SuperAdmin", 'super_admin', $super_admin);
   stc_form_select ($form, "Administrateur M2", 'm2_admin', $m2_admin, 'liste_m2');
+  stc_form_checkbox ($form, "Compte actif", 'active', $active);
 }
 stc_form_button($form, "modifier le compte", "modify_account");
+
 stc_form_end();
 
 stc_footer();

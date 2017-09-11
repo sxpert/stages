@@ -26,14 +26,23 @@ if ($admin===true) {
 	echo "<h2>Liste des utilisateurs ";
 	echo '<a id="add-user" href="detail-user.php?action=new-user">+</a>';
 	echo "</h2>\n";
-	/* boucler dans les laboratoires */
-	$sql = 'select * from users order by l_name, f_name;';
+
+	// obtenir les nombres de gens
+	$sql = 'select count(id) as nombre, account_valid from users group by account_valid order by account_valid desc;';
+	$nombres = pg_query($dba, $sql);
+	$active = pg_fetch_object($nombres)->nombre;
+ 	$inactive = pg_fetch_object($nombres)->nombre;
+	pg_free_result($nombres);		
+
+	// sélectionner tous les utilisateurs
+	$sql = 'select * from users order by account_valid desc, l_name, f_name;';
 	$users = pg_query($dba, $sql);
 
-	# nombre de personnes
+	// nombre de personnes
+	// indique le nombre total, 
 
 	echo '<div class="header">';
-	echo pg_num_rows($users).' utilisateurs enregistrés';
+	echo $active." utilisateurs actifs<br/>\n".$inactive." utilisateurs inactifs";
 	echo '</div>';
 	
 	# header
@@ -53,7 +62,10 @@ if ($admin===true) {
 		$user = pg_fetch_object ($users);
 		if ($user) {
 			#echo '<a class="user-row" href="detail-user.php?id='.$user['id'].'">';
-			echo '<a class="user-row" href="account-details.php?id='.$user->id.'">';
+			echo '<a class="user-row ';
+			if ($user->account_valid=='f') 
+				echo "inactive";
+			echo '" href="account-details.php?id='.$user->id.'">';
 			echo '<span class="lname">'.$user->l_name.'</span>';
 			echo '<span class="fname">'.$user->f_name.'</span>';
 			echo '<span class="login">'.$user->login.'</span>';
