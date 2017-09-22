@@ -46,6 +46,14 @@
 .fname {
   width: 10em;
 }
+.header .state {
+font-size: 10pt;
+}
+.state {
+  width: 25pt;
+  vertical-align: top;
+  font-size: 18px;
+}
 .email {
   width: 25em;
 }

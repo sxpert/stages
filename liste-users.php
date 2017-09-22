@@ -15,6 +15,7 @@ require_once('lib/stc.php');
 
 $user = stc_user_id();
 
+stc_style_add("https://fonts.googleapis.com/icon?family=Material+Icons");
 stc_style_add("/css/liste-users.css");
 stc_top();
 $menu = stc_default_menu();
@@ -24,7 +25,7 @@ $admin=stc_is_admin();
 if ($admin===true) {
 	$dba = db_connect_adm();
 	echo "<h2>Liste des utilisateurs ";
-	echo '<a id="add-user" href="detail-user.php?action=new-user">+</a>';
+	//echo '<a id="add-user" href="detail-user.php?action=new-user">+</a>';
 	echo "</h2>\n";
 
 	// obtenir les nombres de gens
@@ -35,7 +36,7 @@ if ($admin===true) {
 	pg_free_result($nombres);		
 
 	// sélectionner tous les utilisateurs
-	$sql = 'select * from users order by account_valid desc, l_name, f_name;';
+	$sql = 'select * from users order by lower(l_name), lower(f_name);';
 	$users = pg_query($dba, $sql);
 
 	// nombre de personnes
@@ -49,6 +50,7 @@ if ($admin===true) {
 	echo '<div class="header">';
 	echo '<span class="lname">Nom de Famille</span>';
 	echo '<span class="fname">Prénom</span>';
+	echo '<span class="state">État</span>';
 	echo '<span class="login">Login</span>';
 	echo '<span class="admin">Admin ?</span>';
 	echo '<span class="email">Email</span>';
@@ -68,6 +70,10 @@ if ($admin===true) {
 			echo '" href="account-details.php?id='.$user->id.'">';
 			echo '<span class="lname">'.$user->l_name.'</span>';
 			echo '<span class="fname">'.$user->f_name.'</span>';
+			echo '<span class="state material-icons">';
+			if ($user->account_valid=='f')
+				echo 'thumb_down';
+			echo '</span>';
 			echo '<span class="login">'.$user->login.'</span>';
 			echo '<span class="admin">';
 			if (strcmp($user->super, 't')==0) echo "Super";
