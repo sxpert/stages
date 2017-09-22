@@ -43,11 +43,22 @@ case 'change_password':
 
   if (count($errors) == 0) {
     # on peut procéder au changement de mot de passe
-    $sql = "update users set passwd = hash_password($1, generate_salt()), login_fails = 0 where id = $2;";
-    $r = pg_query_params($dba, $sql, array($passwd1, $user_id));
-    if (is_bool($r) and $r == FALSE)
+    $sql = "update users set passwd = hash_password($1, generate_salt()), login_fails = 0 where id = $2 returning login;";
+    pg_send_query_params($dba, $sql, array($passwd1, $user_id));
+    $r = pg_get_result($dba);
+    $status = pg_result_status($r, PGSQL_STATUS_LONG);
+    if ($status != PGSQL_TUPLES_OK) {
+      error_log("changing password for user : $user_id");
+      error_log("request resource : $r");
+      error_log("query result: $status");
+      $sqlstate = pg_result_error_field($r, PGSQL_DIAG_SQLSTATE);
+      error_log("SQLSTATE: $sqlstate");
       stc_fail(500, "Erreur lors du changement de mot de passe");
+    }
+    
     # all is well...
+    $user_login = pg_fetch_object($r)->login;
+    stc_append_log ('change_passwd','password for user \''.$login.'\' changed successfully');
     stc_fail(200, "Mot de passe changé avec succes");
   }
 
