@@ -85,7 +85,7 @@ que certaines d’entre elles accueillent également des élèves-ingénieurs et
 de proposer des stages à dominante plus appliquée et instrumentale susceptibles de les intéresser.</p>
    
 <p><strong>Les propositions doivent être déposées au plus tôt sur le serveur, pour une diffusion à 
-partir du 20 octobre dans chacun des Masters.</strong> Après cette date, le serveur restera ouvert 
+partir de la mi-octobre dans chacun des Masters.</strong> Après cette date, le serveur restera ouvert 
 et accessible aux étudiants, mais les sujets ne seront validés par les responsables de formation 
 qu'une fois par semaine (et l’impact auprès des étudiants sera moindre).</p>
 

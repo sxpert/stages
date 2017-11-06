@@ -207,6 +207,8 @@ if ($notvalid==1) {
 }
 
 // étudiant dans la période de blackout
+// il faudra trouver autre chose
+/*
 if (!$date_valid) {
 	$months = array("Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre");
 	echo "<p>Les stages seront visibles à partir du ".$BLACKOUT_DATE[1]." ".
@@ -214,6 +216,7 @@ if (!$date_valid) {
 	stc_footer();
 	exit (0);
 }
+*/
 
 /****
  * Options de recherche
