@@ -118,7 +118,7 @@ echo "<hr/>\n";
 //
 //
 
-echo "<p>Pour tout autre probleme, envoyez un mail à raphael [point] jacquot [@] obs [point] ujf-grenoble [point] fr</p>\n";
+echo "<p>Pour tout autre probleme, envoyez un mail à stages-masters-astro [@] osug [point] fr</p>\n";
 
 stc_footer();
 
