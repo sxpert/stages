@@ -849,7 +849,7 @@ function _append_scripts($scripts=null) {
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
-  echo "</div></div>\n<div id=\"footer\">Conception Raphaël Jacquot 2011-2017<br/>\n";
+  echo "</div></div>\n<div id=\"footer\"> R. Jacquot, G. Mella 2011-2018<br/>\n";
   echo "<a href=\"http://ipag.obs.ujf-grenoble.fr/?lang=fr\">";
   echo "<img src=\"/images/logo-ipag-small.png\"/>";
   echo "</a><br/>\n";
@@ -962,7 +962,8 @@ function stc_default_menu ($options=null) {
 			pg_send_query_params ($db, $sql, [stc_calc_year()]);
 			$lr = pg_get_result ($db);
 			while ($row_year = pg_fetch_object($lr)) {
-				stc_menu_add_item ($menu, ($row_year->year_value-1), 'search.php?type='.$row['code'].'&year='.$row_year->year_value);
+				$year = $row_year->year_value;
+				stc_menu_add_item ($menu, ($year-1).'-'.$year, 'search.php?type='.$row['code'].'&year='.$year);
 			}
 			stc_menu_add_separator ($menu);
 		}
