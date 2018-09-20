@@ -1,0 +1,90 @@
+/*******************************************************************************
+ *
+ * Gestion des offres de stage de M2 en Astro
+ * (c) Raphaël Jacquot 2011
+ * Fichier sous licence GPL-3
+ *
+ ******************************************************************************/
+.header > span  {
+    font-size: 12pt;
+    padding-bottom: 18pt;
+    font-weight: bold;
+    vertical-align: top;
+    display: table-cell;
+}
+.list {
+    display: flex;
+    flex-flow: row;
+    color: black;
+    text-decoration: none;
+    width: 800pt;
+    align-items: center;
+    height: 24pt;
+}
+.list:nth-child(even) {
+    background-color: #eee;
+}
+.active {
+    font-weight: bold;
+}
+.key {
+    width: 120pt;
+}
+.type {
+    width: 80pt;
+}
+.desc {
+    width: 250pt;
+}
+.value {
+    width: 200pt;
+}
+.last-mod {
+    width: 150pt;
+}
+.actions {
+    text-align: right;
+    width: 50pt;
+}
+#list {
+    display: block;
+    padding-bottom: 6pt;
+}
+.header {
+    display: block;
+}
+#mail {
+    text-decoration: none;
+}
+#subject {
+    padding-top: 12pt;
+    font-weight: bold;
+    width: 600pt;
+}
+#message {
+    padding-top: 12pt;
+    width: 600pt;
+}
+#empty {
+    font-style: italic;
+}
+#add-config {
+        border: 1px solid #ccc;
+        background-color: #ddd;
+        text-align: center;
+        vertical-align: middle;
+        display: inline-block;
+        width: 22pt;
+        height: 22pt;
+        text-decoration: none;
+        color: black;
+        line-height: 22pt;
+        border-radius: 3px;
+}
+.button {
+    height: 24px;
+    width: 24px;
+    background-color: #ddd !important;
+    border: 1px solid #aaa;
+    border-radius: 3px;
+}

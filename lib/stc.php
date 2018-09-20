@@ -916,6 +916,7 @@ function stc_default_menu ($options=null) {
 		stc_menu_add_item ($menu, 'Messages pour l\'administrateur', 'messages.php?type=admin');
 		stc_menu_add_item ($menu, 'Liste des M2', 'liste-m2.php');
 		stc_menu_add_item ($menu, 'Liste des Utilisateurs', 'liste-users.php');
+		stc_menu_add_item ($menu, 'Variables config', 'liste-configs.php');
 		stc_menu_add_separator ($menu);
 	}
 
@@ -1721,6 +1722,38 @@ function stc_set_m2_provenance ($from) {
     // can't happen ;-)
     error_log ('can\'t happen case for from = \''.$from.'\'');
   }
+}
+
+/*******************************************************************************
+ * Gestion de la table config
+ */
+
+function stc_config_get ($key, $default=null) {
+	GLOBAL $db;
+	$sql = 'select value from config where key=$1 order by version_date desc limit 1;';
+	$r = pg_query_params ($db, $sql, array($key));
+	$n = pg_num_rows($r);
+	$value = $default;
+	switch ($n) {
+	case False:
+		error_log ('stc_config_get: sql request failure for key \''.$key.'\' - not found');
+		error_log ('returning \''.$value.'\'');
+		break;
+	case 1:
+		// should convert to the proper type
+		$row = pg_fetch_row($r);
+		pg_free_result($r);
+		$value = $row[0];
+		break;
+	default:
+		error_log ('stc_config_get: sql request failure for key \''.$key.'\' - should have 1, got '.$n);
+	}	
+	return $value;	
+}
+
+function stc_config_set ($key, $value) {
+	GLOBAL $db;
+	
 }
 
 /*******************************************************************************

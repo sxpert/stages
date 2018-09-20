@@ -21,6 +21,12 @@ stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
+$bo = date_parse_from_format('Y-m-d', stc_config_get('DATE_OUVERTURE'));
+$loc = setlocale(LC_ALL, stc_config_get('LOCALE', 'nl_NL.UTF-8'));
+error_log("found locale $loc");
+$bo_str = strftime('%A %e %B %Y', mktime(0, 0, 0, $bo['month'], $bo['day'], $bo['year']));
+error_log($bo_str);
+
 // contenu
 if (stc_is_logged()) {
   if (stc_is_admin()) {
@@ -39,9 +45,9 @@ if (stc_is_logged()) {
       "alors mise en attente de validation. Vous pouvez à tout moment la modifier via ".
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
-		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir de ".
-			"la mi-octobre de l'année courante".
-			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
+    echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
+      "<span class=\"open-date\">".$bo_str."</span>".
+      ". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
   } else {
     $nom = stc_get_user_name(stc_user_id());
     echo "<h2>Bienvenue $nom</h2>\n";
@@ -55,9 +61,9 @@ if (stc_is_logged()) {
       "alors mise en attente de validation. Vous pouvez à tout moment la modifier via ".
       "le menu \"Mes propositions de stage\". Toute modification nécessitera une ".
       "nouvelle validation.</p>";
-		echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir de ".
-			"la mi-octobre de l'année courante".
-			". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
+    echo "<p>Les stages ne seront accessibles aux étudiants qu'à partir du ".
+      "<span class=\"open-date\">".$bo_str."</span>".
+      ". Tout stage déposé après cette date sera validé puis affiché au fil de l'eau.</p>";
 	}
 } else {
   if (stc_from()>0) {

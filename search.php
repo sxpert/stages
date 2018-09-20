@@ -68,8 +68,12 @@ if (($user==0)||($simulm2)) {
 		$d = getdate();
 		$m = $d['mon'];
 		$d = $d['mday'];
+		$bo = date_parse_from_format('Y-m-d', stc_config_get('DATE_OUVERTURE'));
+		$bo_m = $bo['month'];
+		$bo_d = $bo['day'];
 		//error_log($m.' '.$d.' '.($m>=$BLACKOUT_DATE[0]?"true":"false")." ".($d>=$BLACKOUT_DATE[1]?"true":"false"));
-		$date_valid = (($m<9)||(($m==$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1]))||($m>$BLACKOUT_DATE[0]));
+		//$date_valid = (($m<9)||(($m==$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1]))||($m>$BLACKOUT_DATE[0]));
+		$date_valid = (($m<9)||(($m==$bo_m)&&($d>=$bo_d))||($m>$bo_m));
 
     $select = array("offres.id","offres.sujet","laboratoires.sigle as labo",
 			"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville",

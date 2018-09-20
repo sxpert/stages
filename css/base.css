@@ -193,6 +193,7 @@
     .symbol {
 	font-family: OpenSymbol;
     }
+    .open-date,
     .dot {
 	color: red;
     }
