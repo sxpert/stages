@@ -850,6 +850,10 @@ function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
   echo "</div></div>\n<div id=\"footer\"> R. Jacquot, G. Mella 2011-2018<br/>\n";
+  echo "<br/>\n";
+  echo "<a href=\"http://www.osug.fr/\">";
+  echo "<img src=\"/images/logo-osug-small.jpg\" height=\"48\"/>";
+  echo "</a>\n";
   echo "<a href=\"http://ipag.obs.ujf-grenoble.fr/?lang=fr\">";
   echo "<img src=\"/images/logo-ipag-small.png\"/>";
   echo "</a><br/>\n";
