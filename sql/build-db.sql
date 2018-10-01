@@ -26,7 +26,9 @@ do $$
 				('ES', 'Espagne' ),
 				('FR', 'France' ),
 				('GB', 'Grande Bretagne' ),
-				('IT', 'Italie' );
+				('IT', 'Italie' ),
+				('PT', 'Portugal' ),
+				('US', 'États Unis d''Amérique');
 		end if;
 	end;
 $$;
