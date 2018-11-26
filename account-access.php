@@ -52,7 +52,7 @@ case 'lost_password':
   }
   if (($email=='')&&($lost_email!='')) {
     // find if email exists
-    $sql = 'select login from users_view where email=$1;';
+    $sql = 'select login from users_view where lower(email)=lower($1);';
     $res = pg_query_params ($db, $sql, array(trim($lost_email)));
     if (pg_num_rows($res) == 1) {
       $email = trim($lost_email);

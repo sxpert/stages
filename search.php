@@ -60,7 +60,7 @@ if (($user==0)||($simulm2)) {
     echo "Affichage non autorisé";
     stc_footer();
     exit(0);
-  } else {
+  	} else {
 		// étudiant ou simulation de M2
 
 		// entre le yyyy-09-01 et le yyyy-10-20, blackout pour les étudiants
@@ -74,15 +74,18 @@ if (($user==0)||($simulm2)) {
 		//error_log($m.' '.$d.' '.($m>=$BLACKOUT_DATE[0]?"true":"false")." ".($d>=$BLACKOUT_DATE[1]?"true":"false"));
 		//$date_valid = (($m<9)||(($m==$BLACKOUT_DATE[0])&&($d>=$BLACKOUT_DATE[1]))||($m>$BLACKOUT_DATE[0]));
 		$date_valid = (($m<9)||(($m==$bo_m)&&($d>=$bo_d))||($m>$bo_m));
+		
+		$loc = setlocale(LC_ALL, stc_config_get('LOCALE', 'nl_NL.UTF-8'));
+		$bo_str = strftime('%A %e %B %Y', mktime(0, 0, 0, $bo['month'], $bo['day'], $bo['year']));
 
-    $select = array("offres.id","offres.sujet","laboratoires.sigle as labo",
-			"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville",
-		    "(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
-    $tables = array("offres","offres_m2","users_view","laboratoires");
-    $where  = "offres.deleted=false and offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
-      "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
-    $arr    = array(stc_calc_year(), $from);
-  }
+		$select = array("offres.id","offres.sujet","laboratoires.sigle as labo",
+				"( case when laboratoires.univ_city is null then laboratoires.city else laboratoires.univ_city end) as ville",
+		    		"(users_view.f_name || ' ' || users_view.l_name) as user","offres.pers_found");
+    		$tables = array("offres","offres_m2","users_view","laboratoires");
+    		$where  = "offres.deleted=false and offres.year_value=$1 and offres.id = offres_m2.id_offre and id_m2=$2 and ".
+      			  "offres.id_project_mgr = users_view.id and users_view.id_laboratoire = laboratoires.id";
+    		$arr    = array(stc_calc_year(), $from);
+  	}
 } else {
   if ($admin&&(!$projmgr)) {
 		// l'administrateur de site voit tout
@@ -212,15 +215,14 @@ if ($notvalid==1) {
 
 // étudiant dans la période de blackout
 // il faudra trouver autre chose
-/*
+
 if (!$date_valid) {
 	$months = array("Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre");
-	echo "<p>Les stages seront visibles à partir du ".$BLACKOUT_DATE[1]." ".
-		$months[$BLACKOUT_DATE[0]-1]." de l'année en cours</p>\n";
+	echo "<p>Les stages seront visibles à partir du ".$bo_str."</p>\n";
 	stc_footer();
 	exit (0);
 }
-*/
+
 
 /****
  * Options de recherche

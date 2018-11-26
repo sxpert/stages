@@ -23,9 +23,7 @@ stc_menu($menu);
 
 $bo = date_parse_from_format('Y-m-d', stc_config_get('DATE_OUVERTURE'));
 $loc = setlocale(LC_ALL, stc_config_get('LOCALE', 'nl_NL.UTF-8'));
-error_log("found locale $loc");
 $bo_str = strftime('%A %e %B %Y', mktime(0, 0, 0, $bo['month'], $bo['day'], $bo['year']));
-error_log($bo_str);
 
 // contenu
 if (stc_is_logged()) {
