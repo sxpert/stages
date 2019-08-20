@@ -384,6 +384,8 @@ if (!$projmgr) {
   echo "<button id=\"select\">Tout sélectionner</button>";
   echo "<button id=\"deselect\">Tout désélectionner</button>";
   echo "</span>";
+  if ($admin) # fonctionne pour superadmin et admin de M2
+    echo "<span style=\"float:right;\"><button id=\"validate\" name=\"action\" value=\"validate\">Valider les offres selectionnées</button></span>";
   echo "<span style=\"float:right;\"><button id=\"print\" name=\"action\" value=\"print\">Impression</button></span>";
   echo "</div>";
   stc_form_end();

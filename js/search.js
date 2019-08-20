@@ -35,14 +35,22 @@ function count() {
 function print(event) {
     if (count()==0) {
         alert('Vous devez sélectionner au moins une offre à imprimer');
-	return false;
+		return false;
     }
+}
+
+function validate(event) {
+	if (count()==0) {
+		alert('vous devez sélectionner au moins une offre a valider');
+		return false;
+	}
 }
 
 function search_init() {
     $('#select').click(select_all);
     $('#deselect').click(deselect_all);
-    $('#print').click(print);
+	$('#print').click(print);
+	$('#validate').click(validate);
 }
 
 $(".m2-checkbox").click( function (event) {

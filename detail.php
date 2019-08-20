@@ -80,7 +80,7 @@ function stc_affiche_offre($id, $multi=false) {
   pg_free_result ($r);
   
   if (((intval($offre['id_project_mgr'])==intval($user)&&(!$multi)&&(intval($offre['year_value'])==stc_calc_year()))||(is_bool($admin)&&$admin))) {
-    echo "<div class=\"link\">";
+    echo "<div class=\"link\">";  
     echo "<a href=\"delete-offer.php?offreid=".$offre['id']."\">";
     echo "Supprimer la proposition";
     echo "</a> | ";
@@ -203,6 +203,7 @@ $from = stc_from();
 
 $offre_id = intval(stc_get_variable ($_GET,'offreid'));
 $multisel = stc_get_variable ($_REQUEST,'multisel');
+$action = stc_get_variable($_REQUEST, 'action');
 $mode = stc_get_variable ($_REQUEST,'mode');
 
 stc_style_add("/css/detail.css");
@@ -210,12 +211,17 @@ stc_top();
 $menu = stc_default_menu();
 stc_menu($menu);
 
-if (is_array($multisel)) {
-  for ($i=0; $i < count($multisel); $i++) {
-    stc_affiche_offre($multisel[$i], true);
-    if (($i+1)< count($multisel)) echo "<hr/><div class=\"pagebreak\"></div>\n";
-  }
 
+if (is_array($multisel)) {
+  if ($action=='validate') {
+    echo "<p><tt>".$action."</tt></p>";
+    print_r($multisel);
+  }
+  for ($i=0; $i < count($multisel); $i++) 
+    if ($action=='print') {
+      stc_affiche_offre($multisel[$i], true);
+      if (($i+1)< count($multisel)) echo "<hr/><div class=\"pagebreak\"></div>\n";
+    }
 } else {
   if ($mode == "new") echo "<p>La proposition de stage suivante a bien été enregistrée.</p>\n";
   if ($mode == "update") echo "<p>La proposition de stage suivante a bien été mise à jour.</p>\n";
