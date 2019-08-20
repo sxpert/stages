@@ -26,11 +26,15 @@ create type config_var_type as enum (
 	'text',
 	'timezone');
 
+create or replace view liste_config_var_type as
+	SELECT pg_enum.enumlabel as key ,  pg_enum.enumlabel AS value FROM pg_type, pg_enum where pg_type.typname = 'config_var_type' and pg_enum.enumtypid = pg_type.oid;
+
 create table config_vars (
 	key    		text primary key,
 	description	text,
 	var_type	config_var_type
 );
+grant select, insert, delete, update on config_vars to stagesweb;
 grant select, insert, delete, update on config_vars to stagesweb;
 
 insert into config_vars values
