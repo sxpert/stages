@@ -1774,15 +1774,21 @@ function stc_config_set ($key, $value) {
  * Fonctions utilitaires
  */
 
-$FIRST_MONTH = 9;
-
 function stc_calc_year () {
-  global $FIRST_MONTH;
   date_default_timezone_set('Europe/Paris');
-  $d = getdate();
-  $y = $d['year'];
-  $m = $d['mon'];
-  if ($m>=$FIRST_MONTH) $y++;
+  $date = getdate();
+  $y = $date['year'];
+  $m = $date['mon'];
+  $d = $date['mday'];
+  $cd_m = 9;
+  $cd_d = 1;
+  $cutoff_date = stc_config_get('DATE_ARCHIVAGE', '09-01');
+  preg_match('/^(\d{2})-(\d{2})$/', $cutoff_date, $matches);
+  if (count($matches) == 3) {
+    $cd_m = intval($matches[1]);
+    $cd_d = intval($matches[2]);
+  } 
+  if ($m>=$cd_m && $d >= $cd_d) $y++;
   return $y;
 }
 
