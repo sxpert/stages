@@ -733,6 +733,11 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
     $sql = "select key, value from ".$values.";";
     pg_send_query ($db, $sql);
     $r = pg_get_result ($db);
+    $err = pg_result_error_field ($r, PGSQL_DIAG_SQLSTATE);
+    if (!is_null($err)) {
+      $errmsg = pg_result_error($r);
+      error_log ("stc_form_select 1 :".$err." - ".$errmsg);
+    }
     $_val = array();
     while ($row = pg_fetch_assoc ($r)) array_push($_val, array($row['key'],$row['value']));
     stc_script_add("var ".$variable." = new Array();","_begin");
@@ -757,7 +762,12 @@ function stc_form_select ($form, $label, $variable, $value="", $values=null, $op
 	$sql = "select key, value from ".$values.";";
 	pg_send_query($db,$sql);
 	$r = pg_get_result($db);
-	while ($row = pg_fetch_assoc($r)) {
+  $err = pg_result_error_field ($r, PGSQL_DIAG_SQLSTATE);
+  if (!is_null($err)) {
+    $errmsg = pg_result_error($r);
+    error_log ("stc_form_select 2 :".$err." - ".$errmsg);
+  }
+  while ($row = pg_fetch_assoc($r)) {
 	  echo "<option value=\"".stc_form_escape_value($row['key'])."\"";
 	  if (strcmp($row['key'],$value)==0) echo " selected=\"1\"";
 	  echo ">".$row['value']."</option>\n";
