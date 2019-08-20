@@ -28,6 +28,8 @@ create type config_var_type as enum (
 
 create or replace view liste_config_var_type as
 	SELECT pg_enum.enumlabel as key ,  pg_enum.enumlabel AS value FROM pg_type, pg_enum where pg_type.typname = 'config_var_type' and pg_enum.enumtypid = pg_type.oid;
+grant select on liste_config_var_type to stagesweb;
+
 
 create table config_vars (
 	key    		text primary key,
