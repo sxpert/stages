@@ -1787,6 +1787,8 @@ function stc_calc_year () {
   if (count($matches) == 3) {
     $cd_m = intval($matches[1]);
     $cd_d = intval($matches[2]);
+  } else {
+    error_log("stc_calc_year: invalid value for DATE_ARCHIVAGE, expected '%02d-%02d' format, got '".$cutoff_date."'");
   } 
   if ($m>=$cd_m && $d >= $cd_d) $y++;
   return $y;
