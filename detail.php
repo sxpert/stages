@@ -213,6 +213,12 @@ stc_menu($menu);
 
 
 if (is_array($multisel)) {
+  /****************************************************************************
+   * 
+   * impression et validation de multiples offres
+   *
+   */
+
   if ($action=='validate') {
     echo "<p><tt>".$action."</tt></p>";
     print_r($multisel);
@@ -223,6 +229,12 @@ if (is_array($multisel)) {
       if (($i+1)< count($multisel)) echo "<hr/><div class=\"pagebreak\"></div>\n";
     }
 } else {
+  /****************************************************************************
+   * 
+   * détails pour une seule offre
+   *
+   */
+
   if ($mode == "new") echo "<p>La proposition de stage suivante a bien été enregistrée.</p>\n";
   if ($mode == "update") echo "<p>La proposition de stage suivante a bien été mise à jour.</p>\n";
   
