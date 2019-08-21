@@ -238,8 +238,11 @@ if (is_array($multisel)) {
   if ($mode == "new") echo "<p>La proposition de stage suivante a bien été enregistrée.</p>\n";
   if ($mode == "update") echo "<p>La proposition de stage suivante a bien été mise à jour.</p>\n";
   
-
-  if (!stc_affiche_offre($offre_id)) exit(0);
+  if (is_null($offre_id) || ($offre_id==0) || !stc_affiche_offre($offre_id)) {
+    echo "<p>Aucune offre spécifiée dans la requête</p>\n";
+    stc_footer();
+    exit(0);
+  }
 
   /****
    * bouton de validation de l'offre
@@ -251,64 +254,64 @@ if (is_array($multisel)) {
     if (is_bool($admin)) {
       echo "superadmin version of validate<br/>";
       $sql = "select m2.id, m2.short_desc, m2.ville ".
-	"from m2 ".
-	"where m2.id not in ( ".
-	  "select om2.id_m2 ".
-	  "from offres as o, offres_m2 as om2, m2 ".
-	  "where o.id=om2.id_offre and om2.id_m2 = m2.id and o.id=$1 ) ".
-	"order by m2.ville, m2.short_desc;";
+              "from m2 ".
+              "where m2.id not in ( ".
+                "select om2.id_m2 ".
+                "from offres as o, offres_m2 as om2, m2 ".
+                "where o.id=om2.id_offre and om2.id_m2 = m2.id and o.id=$1 ) ".
+              "order by m2.ville, m2.short_desc;";
       $res = pg_query_params ($db, $sql, array($offre_id));
       if ($res) {
-	if (pg_num_rows($res)>0) {
-	  echo pg_num_rows($res)." validations disponibles";
-	  echo "<form method=\"post\" action=\"validate-offre.php\">";
-	  echo "<input type=\"hidden\" name=\"offreid\" value=\"".$offre_id."\"/>";
-	  echo "<select name=\"m2\">";
-	  while ($r = pg_fetch_assoc($res)) 
-	    echo "<option value=\"".$r['id']."\">".$r['short_desc']." - ".$r['ville']."</option>";
-	  echo "</select>";
-	  echo "<button name=\"action\" value=\"validate\">Valider l'offre</button>";
-	  echo "</form>";
-	} else echo "Aucune validation possible";
-	pg_free_result ($res);
+        if (pg_num_rows($res)>0) {
+          echo pg_num_rows($res)." validations disponibles";
+          echo "<form method=\"post\" action=\"validate-offre.php\">";
+          echo "<input type=\"hidden\" name=\"offreid\" value=\"".$offre_id."\"/>";
+          echo "<select name=\"m2\">";
+          while ($r = pg_fetch_assoc($res)) 
+            echo "<option value=\"".$r['id']."\">".$r['short_desc']." - ".$r['ville']."</option>";
+          echo "</select>";
+          echo "<button name=\"action\" value=\"validate\">Valider l'offre</button>";
+          echo "</form>";
+        } else echo "Aucune validation possible";
+        pg_free_result ($res);
       }
     } else {
       $r = pg_query_params($db, 
-			   "select id_offre, id_m2, description ".
-			   "from offres_m2, m2 ".
-			   "where id_m2=id and id_offre=$1 and id_m2=$2",
-			   array($offre_id, $admin));
+                          "select id_offre, id_m2, description ".
+                          "from offres_m2, m2 ".
+                          "where id_m2=id and id_offre=$1 and id_m2=$2",
+                          array($offre_id, $admin));
       if (pg_num_rows($r)==1) {
-	$row= pg_fetch_assoc($r);
-	echo "<span>Offre déjà validée pour le M2R '".$row['description']."'</span>";
+        $row= pg_fetch_assoc($r);
+        echo "<span>Offre déjà validée pour le M2R '".$row['description']."'</span>";
       } else {
-	pg_free_result($r);
-	$r = pg_query_params($db, "select id_project_mgr from offres where id=$1", array($offre_id));
-	if (pg_num_rows($r)==0) {
-	  error_log("detail.php impossible de trouver id_project_mgr pour l'offre ".$offre_id);
-	} else {
-	  $row = pg_fetch_assoc($r);
-	  $projmgr = intval($row['id_project_mgr']);
-	  $r = pg_query_params($db, "select id from users_view where m2_admin=$1;",array($admin));
-	  $nb=pg_num_rows($r);
-	  if ($projmgr==intval($user)&&($nb>1)) {
-	    echo "<span>Vous ne pouvez valider les offres dont vous êtes l'auteur</span>";
-	  } else {
-	    $r = pg_query_params($db,
-				 "select short_desc, ville from m2 where id=$1",
-				 array($admin));
-	    if (pg_num_rows($r)==1) {
-	      $row = pg_fetch_assoc($r);
-	      echo "<form method=\"post\" action=\"validate-offre.php\">";
-	      echo "<input type=\"hidden\" name=\"offreid\" value=\"".$offre_id."\"/>";
-	      echo "<button name=\"action\" value=\"validate\">Valider l'offre pour le M2R<br/>";
-	      echo $row['short_desc']." - ".$row['ville']."</button>";
-	      echo "</form>";
-	    } else {
-	      error_log("Impossible de trouver le M2R correspondant a l'indice ".$admin);
-	    }
-	  }
-	}
+        pg_free_result($r);
+        $r = pg_query_params($db, "select id_project_mgr from offres where id=$1", array($offre_id));
+        if (pg_num_rows($r)==0) {
+          error_log("detail.php impossible de trouver id_project_mgr pour l'offre ".$offre_id);
+        } else {
+          $row = pg_fetch_assoc($r);
+          $projmgr = intval($row['id_project_mgr']);
+          $r = pg_query_params($db, "select id from users_view where m2_admin=$1;",array($admin));
+          $nb=pg_num_rows($r);
+          if ($projmgr==intval($user)&&($nb>1)) {
+            echo "<span>Vous ne pouvez valider les offres dont vous êtes l'auteur</span>";
+          } else {
+            $r = pg_query_params($db,
+                                "select short_desc, ville from m2 where id=$1",
+                                array($admin));
+            if (pg_num_rows($r)==1) {
+              $row = pg_fetch_assoc($r);
+              echo "<form method=\"post\" action=\"validate-offre.php\">";
+              echo "<input type=\"hidden\" name=\"offreid\" value=\"".$offre_id."\"/>";
+              echo "<button name=\"action\" value=\"validate\">Valider l'offre pour le M2R<br/>";
+              echo $row['short_desc']." - ".$row['ville']."</button>";
+              echo "</form>";
+            } else {
+              error_log("Impossible de trouver le M2R correspondant a l'indice ".$admin);
+            }
+          }
+        }
       }
       pg_free_result($r);
     }
