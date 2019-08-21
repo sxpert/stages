@@ -220,14 +220,54 @@ if (is_array($multisel)) {
    */
 
   if ($action=='validate') {
+    if (!$admin) {
+      # output an error message and exits
+    }
     echo "<p><tt>".$action."</tt></p>";
     print_r($multisel);
   }
-  for ($i=0; $i < count($multisel); $i++) 
+  for ($i=0; $i < count($multisel); $i++) {
+    error_log($action.' - id: '.$id);
     if ($action=='print') {
       stc_affiche_offre($multisel[$i], true);
       if (($i+1)< count($multisel)) echo "<hr/><div class=\"pagebreak\"></div>\n";
     }
+    if ($action=='validate') {
+      
+      # récupérer les infos de l'offre
+      $sql = "select * from offres where id=$1";
+      error_log(print_r($multisel,1).' - '.$i);
+      $id = $multisel[$i];
+      $r = pg_query_params($db, $sql, array($id));
+      if (pg_num_rows($r)==0) {
+        /* l'offre a disparue ??? */
+      }
+      $offre = pg_fetch_assoc($r);
+      pg_free_result ($r);
+      # récuperer la liste des m2
+      $m2 = array();
+      $rh=pg_query($db, "select id, short_desc, ville from m2 where active=true order by id;");
+      while ($row = pg_fetch_assoc($rh)) {
+        array_push($m2, intval($row['id']));
+      }
+      pg_free_result($rh);
+    
+      # en fonction du type d'admin:
+      #   * superadmin: vérifier si l'offre n'est pas validé pour un des m2
+      #   * admin de m2: vérifier si l'offre n'est pas validée pour le m2 de l'utilisateur
+      $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($id));
+      # afficher une ligne pour l'offre
+      echo "<div>".$id."-";
+      $cur = 0;
+      for($i_m2=0;$i_m2<count($m2);$i_m2++) {   
+        if ($cur==0) {
+          $r_valid = pg_fetch_assoc($rm2);
+          print_r($r_valid);
+        }
+      }
+      echo "</div>";
+    }
+  }
 } else {
   /****************************************************************************
    * 
