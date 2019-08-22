@@ -225,7 +225,22 @@ if (is_array($multisel)) {
     }
     echo "<p><tt>".$action."</tt></p>";
     print_r($multisel);
+    #
+    # récuperer la liste des m2
+    #
+    $m2 = array();
+    $rh=pg_query($db, "select id, short_desc, ville from m2 where active=true order by id;");
+    while ($row = pg_fetch_assoc($rh)) {
+      array_push($m2, intval($row['id']));
+    }
+    pg_free_result($rh);
+    stc_form("POST", "detail.php", null, "list");
   }
+
+  #
+  # boucler sur les offres dans la liste des selections
+  #
+  $odd = FALSE;
   for ($i=0; $i < count($multisel); $i++) {
     error_log($action.' - id: '.$id);
     if ($action=='print') {
@@ -244,21 +259,21 @@ if (is_array($multisel)) {
       }
       $offre = pg_fetch_assoc($r);
       pg_free_result ($r);
-      # récuperer la liste des m2
-      $m2 = array();
-      $rh=pg_query($db, "select id, short_desc, ville from m2 where active=true order by id;");
-      while ($row = pg_fetch_assoc($rh)) {
-        array_push($m2, intval($row['id']));
-      }
-      pg_free_result($rh);
     
       # en fonction du type d'admin:
       #   * superadmin: vérifier si l'offre n'est pas validé pour un des m2
       #   * admin de m2: vérifier si l'offre n'est pas validée pour le m2 de l'utilisateur
       $rm2 = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2", array($id));
       # afficher une ligne pour l'offre
-      echo "<div>".$id."-";
+      echo "<div>";
+      echo "<span class=\"print checkbox";
+      if ($odd) echo " odd";
+      echo "\"><input type=\"checkbox\" name=\"multisel[]\" ";
+      echo "value=\"".$id."\"></span>"; 
+      echo "<a href=\"/detail.php?offreid=".$id."\"";
+      echo ">".$offre['sujet']."</a>";
       $cur = 0;
+      print_r($m2);
       for($i_m2=0;$i_m2<count($m2);$i_m2++) {   
         if ($cur==0) {
           $r_valid = pg_fetch_assoc($rm2);
