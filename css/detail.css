@@ -7,6 +7,7 @@
  ******************************************************************************/
 
 @media screen {
+	/* affichage des offres */
     h1 {
 	font-size: 14pt; 
 	font-weight: bold;
@@ -59,8 +60,29 @@
 	border: 1px solid #ccc;
 	border-radius: 3px;
 	margin: 0;
-    }
+	}
+	
+	/* tableau de validation des offres */
 
+	.validate-line {
+		display: flex;
+		flex-direction: row;
+		font-size: 10pt;
+		line-height: 1.2;
+		vertical-align: middle;
+	}
+	.validate-line:nth-child(odd) {
+		background-color: #e7e7e7;
+	}
+	.validate-checkbox {
+		width: 18pt;
+	}
+	.validate-title {
+		flex: auto;
+	}
+	.validate-button {
+		margin-top: 5pt;
+	}
 }
 @media print {
     h1 {
