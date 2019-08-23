@@ -238,7 +238,7 @@ if (is_array($multisel)) {
       array_push($m2, intval($row['id']));
     }
     pg_free_result($rh);
-    stc_form("POST", "force-validate.php", null, "list");
+    stc_form("POST", "batch-validate.php", null, "list");
   }
 
   #
@@ -286,7 +286,7 @@ if (is_array($multisel)) {
     }
   }
   echo "<div class=\"validate-button\">";
-  echo "<button class=\"validate-button\" name=\"action\" value=\"do-validate\">Valider les offres selectionnées";
+  echo "<button class=\"validate-button\" name=\"action\" value=\"batch-validate\">Valider les offres selectionnées";
   if ($admin==TRUE) echo " pour tous les M2";
   echo "</button></div>\n";
 } else {
