@@ -226,8 +226,9 @@ if (is_array($multisel)) {
       stc_footer();
       exit(0);
     }
-    echo "<p><tt>".$action."</tt></p>";
-    print_r($multisel);
+    // echo "<p><tt>".$action."</tt></p>";
+    // print_r($multisel);
+    echo "<h1>Valider des offres en bloc</h1>\n";
     #
     # récuperer la liste des m2
     #
