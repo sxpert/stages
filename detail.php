@@ -239,6 +239,7 @@ if (is_array($multisel)) {
     }
     pg_free_result($rh);
     stc_form("POST", "batch-validate.php", null, "list");
+    stc_form_hidden($form, "return_to", $_SERVER['HTTP_REFERER']);
   }
 
   #
