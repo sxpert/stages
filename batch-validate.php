@@ -88,7 +88,7 @@ foreach($multisel as $offer) {
     }
     if ($debug) echo "\n";
 }
-
+    
 if ($debug) {
     echo "</pre>";
     stc_footer();

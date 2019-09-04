@@ -61,29 +61,42 @@ if ($user>0) {
     if ($action == 'send_message') {
       /* check if $m2 exists */
       if ($type=='admin') 
-	$m2 = null;
+	      $m2 = null;
       if ($type=='m2') {
-	$res = pg_query_params($db,"select id from m2 where id=$1",array($m2));
-	if (pg_num_rows($res)!=1) {
-	  pg_free_result ($res);
-	  _error_msg();
-	  stc_footer();
-	  exit(0);
-	}
-	pg_free_result ($res);
+        $res = pg_query_params($db,"select id from m2 where id=$1",array($m2));
+        if (pg_num_rows($res)!=1) {
+          pg_free_result ($res);
+          _error_msg();
+          stc_footer();
+          exit(0);
+        }
+        pg_free_result ($res);
       }
+
       $subject = trim($subject);
       if (strlen($subject)==0)
-	stc_form_add_error($errors, 'subject', 'Il faut un contenu au sujet');
-      
+      	stc_form_add_error($errors, 'subject', 'Il faut un contenu au sujet');
+
       if (count($errors)==0) {
-	$sql = "insert into messages (id_m2, sender, subject, message) values ($1,$2,$3,$4);";
-	$res = pg_query_params($db, $sql, array($m2, $user, $subject, $message));
-	pg_free_result ($res);
-	echo "<h1>Le message a été envoyé</h1>\n";
-	echo "<div><a href=\"/\">retour à l'accueil</a></div>\n";
-	stc_footer();
-	exit(0);
+
+        #
+        # post message to database
+        #
+
+        $sql = "insert into messages (id_m2, sender, subject, message) values ($1,$2,$3,$4);";
+        $res = pg_query_params($db, $sql, array($m2, $user, $subject, $message));
+        pg_free_result ($res);
+        echo "<h1>Le message a été envoyé</h1>\n";
+        echo "<div><a href=\"/\">retour à l'accueil</a></div>\n";
+        stc_footer();
+
+        #
+        # send emails
+        #
+
+        
+
+        exit(0);
       }
     }
     
