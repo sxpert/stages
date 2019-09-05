@@ -48,10 +48,13 @@ $menu = stc_default_menu();
 stc_menu($menu);
 
 if ($user>0) {
+  # trouve des détails supplémentaires sur le m2
+  # TODO: devrait tester si le m2 est actif
   if ($type=='m2') {
     $sql = "select id, short_desc, description, ville from m2 where id=$1;";
     $m2s = pg_query_params($db, $sql, array($m2));
   }
+  # si on a bien trouvé un m2
   if (($type=='admin')||(($type=='m2')&&(pg_num_rows($m2s)==1))) {
     $subject = stc_get_variable($_POST, 'subject');
     $message = stc_get_variable($_POST, 'message');
@@ -80,7 +83,7 @@ if ($user>0) {
       if (count($errors)==0) {
 
         #
-        # post message to database
+        # mettre le message dans la base de données
         #
 
         $sql = "insert into messages (id_m2, sender, subject, message) values ($1,$2,$3,$4);";
@@ -91,10 +94,43 @@ if ($user>0) {
         stc_footer();
 
         #
-        # send emails
+        # envoi des emails
         #
 
-        
+        # 1. récupérer la liste des emails des responsables
+        # select email from users where m2_admin=$1 order by email;
+        $mails = array();
+        if ($type=='m2') {
+          $dba = db_connect_adm();
+          $res = pg_query_params($dba, "select email from users where m2_admin=$1 order by email;", array($m2));
+          $nb_rows = pg_num_rows($res);
+          error_log("contact DEBUG: ".$nb_rows." emails found for m2 ".$m2);
+          if ($nb_rows > 0) {
+            $rows = pg_fetch_all($res);
+            foreach($rows as $mail_row) {
+              $mail = $mail_row['email'];
+              error_log($mail);
+              array_push($mails, $mail);
+            }
+          }
+        }
+        if ($type=='admin') {
+          $mail = stc_config_get ('ADMIN_EMAIL', $default=null);
+          if (!is_null($mail))
+            array_push($mails, $mail);  
+        }
+
+        # 2. pour chaque responsable, envoyer un mail
+        if (count($mails) == 0)
+          error_log("WARNING: try to send message to m2 ".$m2." no managers found");
+        else {
+          # envoyer le mail
+          foreach($mails as $mail) {
+            error_log($mail);
+            stc_send_email ($mail, $subject, $message);
+          }
+        }
+
 
         exit(0);
       }
