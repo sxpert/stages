@@ -245,6 +245,7 @@ if (is_array($multisel)) {
   #
   # boucler sur les offres dans la liste des selections
   #
+  $current_year = stc_calc_year();
   for ($i=0; $i < count($multisel); $i++) {
     if ($action=='print') {
       stc_affiche_offre($multisel[$i], true);
@@ -276,12 +277,18 @@ if (is_array($multisel)) {
         if (!in_array($valid_m2, $m2)) $all_valid = FALSE;
       }
       echo "<span class=\"validate-checkbox\">";
-      # ne montrer la checkbox que s'il reste des m2 a valider
-      if (!$all_valid) echo "<input type=\"checkbox\" name=\"multisel[]\" value=\"".$id."\">";
+      # ne montrer la checkbox que :
+      # si on est dans l'année en cours
+      # si il reste des M2 pour lesquels valider
+      $is_current_year = ($offre['year_value'] == $current_year);
+      if ($is_current_year && !$all_valid) echo "<input type=\"checkbox\" name=\"multisel[]\" value=\"".$id."\">";
       echo "</span>"; 
       echo "<a href=\"/detail.php?offreid=".$id."\" class=\"validate-title\">".$offre['sujet']."</a>";
       echo "<span class=\"validate-message\">";
-      if ($all_valid) echo "Tous les M2 ont déjà validé cette offre";
+      if ($is_current_year) {
+        if ($all_valid) echo "Tous les M2 ont déjà validé cette offre";
+      } else
+        echo "Impossible de valider hors de l'année en cours (".$current_year.")";
       echo "</span>";
       echo "</div>\n";
     }
