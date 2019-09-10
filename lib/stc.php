@@ -1247,8 +1247,10 @@ function stc_send_email ($email, $title, $message, $from=null) {
   # generate email source line
   if (is_null($from)) $from = 'Serveur Stages M2 <'.$SERVER_EMAIL.'>';
   $from_line = 'From: '.$from."\r\n";
+  $encoding = "Content-Type: text/plain; charset=UTF-8\r\n";
+  $headers = $from_line.$encoding;
 
-	mail ($email, $title, $message, $from_line);
+	mail ($email, $title, $message, $headers);
 }
 
 function stc_send_check_email($email, $hash) {

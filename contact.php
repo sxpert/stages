@@ -100,6 +100,7 @@ if ($user>0) {
         # 1. récupérer la liste des emails des responsables
         # select email from users where m2_admin=$1 order by email;
         $mails = array();
+        $source = null;
         if ($type=='m2') {
           $dba = db_connect_adm();
           $res = pg_query_params($dba, "select email from users where m2_admin=$1 order by email;", array($m2));
@@ -113,8 +114,18 @@ if ($user>0) {
               array_push($mails, $mail);
             }
           }
+          pg_close($dba);
         }
         if ($type=='admin') {
+          # obtenir l'email de l'utilisateur
+          $dba = db_connect_adm();
+          $res = pg_query_params($dba, "select f_name, l_name, email from users where id=$1;", array($user));
+          $row = pg_fetch_assoc($res);
+          pg_close($dba);
+          error_log(print_r($row,1));
+          $source = $row['f_name'].' '.$row['l_name'].' <'.$row['email'].'>';
+          $message = "Message envoyé par : ".$source."\r\n\r\n----\r\n".$message."\r\n----\r\n";
+          # obtenir l'email des admins
           $mail = stc_config_get ('ADMIN_EMAIL', $default=null);
           if (!is_null($mail))
             array_push($mails, $mail);  
