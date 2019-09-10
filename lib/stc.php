@@ -1237,13 +1237,18 @@ function stc_user_account_create ($f_name, $l_name, $email, $phone, $status, $la
   return $r;
 }
 
-function stc_send_email ($email, $title, $message) {
+function stc_send_email ($email, $title, $message, $from=null) {
 	GLOBAL $SERVER_EMAIL, $TZ;
 
 	error_log ('sending email '.$SERVER_EMAIL.' '.$TZ);
 	date_default_timezone_set ($TZ);
-	error_log('sending email to '.$email);
-	mail ($email, $title, $message, 'From: Serveur Stages M2 <'.$SERVER_EMAIL.">\r\n");
+  error_log('sending email to '.$email);
+  
+  # generate email source line
+  if (is_null($from)) $from = 'Serveur Stages M2 <'.$SERVER_EMAIL.'>';
+  $from_line = 'From: '.$from."\r\n";
+
+	mail ($email, $title, $message, $from_line);
 }
 
 function stc_send_check_email($email, $hash) {
