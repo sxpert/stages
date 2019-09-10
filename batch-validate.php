@@ -56,7 +56,7 @@ if($debug) {
 
 # first, obtain which m2 we have to validate for
 $m2_list = array();
-if ($admin==TRUE) {
+if (is_bool($admin)&&$admin) {
     # we are superadmin, validate everything
     $res = pg_query($db, "select id from m2 where active='t' order by id;");
     $list = pg_fetch_all($res);
@@ -64,6 +64,7 @@ if ($admin==TRUE) {
         array_push($m2_list, $m2['id']);
 } else {
     # only one m2: the one we're the admin for
+    error_log("block validate for m2 ".$admin); 
     array_push($m2_list, $admin);
 }
 if ($debug) print_r($m2_list);
@@ -75,13 +76,18 @@ foreach($multisel as $offer) {
         print_r($offer);
         echo ": ";
     }
-
+ 
+    # générer la liste des m2 pour lesquels ont est validé
     $res = pg_query_params($db, "select id_m2 from offres_m2 where id_offre=$1 order by id_m2;", array($offer));
     $list = pg_fetch_all($res);
     $validated = array();
     foreach($list as $m2)
         array_push($validated, $m2['id_m2']);
+
+    # génerer la liste de m2 a valider (difference entre la liste des m2 deja valides et celles des m2 a valider)
     $validate_list = array_diff($m2_list, $validated);
+
+    # validation des m2 dans la liste a valider
     foreach($validate_list as $m2) {
         $res = pg_query_params($db, "insert into offres_m2 (id_offre, id_m2) values ($1, $2);", array($offer, $m2));
         if ($debug) echo "$m2 ";

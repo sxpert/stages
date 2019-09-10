@@ -295,7 +295,7 @@ if (is_array($multisel)) {
   }
   echo "<div class=\"validate-button\">";
   echo "<button class=\"validate-button\" name=\"action\" value=\"batch-validate\">Valider les offres selectionnées";
-  if ($admin==TRUE) echo " pour tous les M2";
+  if (is_bool($admin)&&$admin) echo " pour tous les M2";
   echo "</button></div>\n";
 } else {
   /****************************************************************************
