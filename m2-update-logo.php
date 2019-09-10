@@ -96,7 +96,8 @@ if (!is_null($error)) {
 }
 
 echo "<form method=\"post\" enctype=\"multipart/form-data\">\n";
-echo "<p>Envoyer un autre logo.<br/>Les images doivent avoir une hauteur de <strong>86 pixels</strong> pour s'intégrer correctement dans le site</p>\n";
+echo "<p>Envoyer un autre logo.<br/>Les images doivent avoir une hauteur de <strong>86 pixels</strong> ";
+echo "et une largeur maximale de <strong>780 pixels</strong> pour s'intégrer correctement dans le site</p>\n";
 echo "<p><input name=\"new-logo\" type=\"file\"/></p>\n";
 echo "<p><button name=\"action\" value=\"update-logo\">envoyer le logo</button></p>\n";
 echo "</form>\n";
