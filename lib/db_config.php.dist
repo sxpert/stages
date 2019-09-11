@@ -26,6 +26,8 @@ $JQUERY_VER="1.11.1";
 $JQUERYUI_VER="1.11.1";
 $JQUERYUI_THEME="smoothness";
 
+$JQUERY_MIGRATE_VER="1.4.1";
+
 // mois / jour
 $BLACKOUT_DATE= [10,21];
 

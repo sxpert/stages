@@ -30,6 +30,13 @@ if (strcmp($_SERVER['REQUEST_METHOD'],'POST')==0) {
     break;
   case -1: 
     $_SESSION['loginerr']="Compte bloqué"; 
+    # envoi de mails
+    $dba = db_connect_adm();
+    $res = pg_query_params($dba, "select f_name, l_name, email from users where login=$1;", array($login));
+    $row = pg_fetch_assoc($res);
+    pg_close($dba);
+    error_log("ACCOUNT LOCKED ".print_r($row));
+
     break;
   case  0: 
     $_SESSION['loginerr']="Nom d'utilisateur ou mot de passse erroné";
