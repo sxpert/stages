@@ -159,9 +159,9 @@ function stc_style_add($style) {
 }
 
 function stc_add_jquery() {
-  GLOBAL $JQUERY_VER;
-  stc_script_add ("/lib/jquery/core/".$JQUERY_VER.".min.js", -2);
+  GLOBAL $JQUERY_VER, $JQUERY_MIGRATE_VER;
   stc_script_add ("/lib/jquery/migrate/".$JQUERY_MIGRATE_VER."/jquery-migrate.js", -2);
+  stc_script_add ("/lib/jquery/core/".$JQUERY_VER.".min.js", -2);
 }
 
 function stc_add_jqueryui() {
