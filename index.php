@@ -79,8 +79,10 @@ if (stc_is_logged()) {
       "Chaque stage apparaîtra alors sur une feuille séparée.</p>"; 
   } else {
 ?>
-
 <h2>Bienvenue sur la base de données des stages de M2R en Astronomie et Astrophysique de France</h2>
+<?php
+/*
+// version avant le 2019-09-13
 
 <p>Ce serveur national est le moyen privilégié pour déposer vos propositions de stage à l’attention 
 des formations de niveau Master 2 en Astrophysique et Planétologie de France. Ces propositions 
@@ -109,6 +111,56 @@ Seuls les stages validés seront proposés aux étudiants.</p>
 
 <p>Pour toute question concernant la validation de vos stages, prière de vous adresser directement 
 au(x) responsable(s) des formations concernées.</p>
+*/
+
+// version du 2019-09-13
+
+?>
+
+<p>Ce serveur national est l’unique moyen pour déposer des propositions
+de stage de niveau Master 2 à l’attention des formations en
+Astrophysique et Planétologie de France. Certaines de ces formations
+accueillent des élèves-ingénieurs et il est donc possible de proposer
+des stages à dominante plus appliquée et instrumentale susceptibles
+de les intéresser.</p>
+
+<h2>Utilisation du serveur par les chercheurs:</h2>
+
+<p>Afin de déposer une offre de stage, il faut s’inscrire au préalable
+dans la base de données en choisissant un nom d'utilisateur et un mot
+de passe. Il suffit de le faire une seule fois. Pour cela, cliquer
+sur le menu « Créer un compte » à gauche, et suivre la procédure. Si
+vous ne trouvez pas votre laboratoire dans la liste proposée, envoyez
+un email à stages-masters-astro [@] osug [point] fr.</p>
+
+<p>La base envoie ensuite un email de confirmation à l'adresse que vous
+aurez fourni. L'inscription ne sera effective qu'après validation,
+faite en cliquant sur le lien inclus dans l'email. Le dépôt d'une
+proposition de stage ainsi que la consultation et/ou modification
+ultérieure deviendront alors possibles après connexion. Les
+propositions de stage sont ensuite validées par les divers
+responsables des filières en Astrophysique de France. Avec le menu
+"Consulter", vous aurez la liste des formations qui auront validé
+votre stage. Toute modification du stage nécessite une nouvelle
+validation.</p>
+
+<p><strong>Les propositions doivent être déposées au plus tôt sur le serveur,
+pour une diffusion à partir du DATE_OUVERTURE dans chacun des
+Masters.</strong> Après cette date, le serveur restera ouvert et accessible,
+mais les sujets ne seront validés par les responsables de formation
+qu’une fois par semaine et l’impact auprès des étudiants sera
+moindre. Pour toute question concernant la validation de vos stages,
+prière de vous adresser directement au(x) responsable(s) des
+formations concernées.</p>
+
+<h2>Utilisation du serveur par les étudiants:</h2>
+
+<p>La consultation des propositions de stage par les étudiants
+s’effectue exclusivement à travers la page web de leur propre M2, où
+n’apparaitront que les propositions validées par les responsables de
+leur formation. Pour toute difficulté lors de la consultation des
+stages, prière de vous adresser à votre responsable de formation locale.</p>
+
 
 <p><strong><a href="http://sf2a.eu/spip/spip.php?rubrique41" target="_">Liste des formations concernées</a></strong></p>
 <?php
