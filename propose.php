@@ -104,6 +104,12 @@ if (($mode==INSERT)||($mode==UPDATE)) {
     /****
      * vérifications
      */
+
+    /* sujet */
+    $sujet = trim($sujet);
+    if (strlen($sujet) == 0) 
+      stc_form_add_error($errors, 'sujet', 'Le sujet ne peut etre vide');   
+
     /* TODO: à changer si on inclue autre chose que des stages de M2 */
     if ($type!='MR')
       stc_form_add_error($errors, 'type', 'Mauvais type d\'offre');
