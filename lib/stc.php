@@ -1805,36 +1805,44 @@ function stc_calc_year () {
 /*******************************************************************************
  * initialisation de la session
  */
-session_start();
 $db = stc_connect_db();
 
-$remote_addr = stc_get_remote_ip();
-if (!stc_ip_in_blocks($remote_addr,$DEBUG_IPS)&&
-    $EN_TRAVAUX) {
-  error_log("Travaux : ".$remote_addr);
-  stc_top();
-  $menu = stc_menu_init();
-  stc_menu_add_item($menu, "Accueil", "index.php");
-  stc_menu($menu);
-  echo "<h2>Site en travaux</h2>\n";
-  echo "<p>Le site revient bientôt, veuillez nous excuser pour le dérangement,</p>\n";
-  stc_footer();
-  exit(0);
-}
+/*****
+ * ne pas faire ca si on est en mode CLI
+ */
 
-$u = stc_user_id();
-if ($u!=0) {
-  $sql = "select id from users_view where id=$1";
-  $r = pg_query_params($db, $sql, array($u));
-  if (!is_bool($r)) {
-    $n = pg_num_rows($r);
-    if ($n != 1) {
-      stc_append_log('session','User '.$u.' has disappeared. session setup fail');
-      stc_close_session();
-      stc_redirect ('/');
-      exit();
+if (php_sapi_name() != 'cli') {
+  session_start();
+
+  $remote_addr = stc_get_remote_ip();
+  if (!stc_ip_in_blocks($remote_addr,$DEBUG_IPS)&&
+      $EN_TRAVAUX) {
+    error_log("Travaux : ".$remote_addr);
+    stc_top();
+    $menu = stc_menu_init();
+    stc_menu_add_item($menu, "Accueil", "index.php");
+    stc_menu($menu);
+    echo "<h2>Site en travaux</h2>\n";
+    echo "<p>Le site revient bientôt, veuillez nous excuser pour le dérangement,</p>\n";
+    stc_footer();
+    exit(0);
+  }
+
+  $u = stc_user_id();
+  if ($u!=0) {
+    $sql = "select id from users_view where id=$1";
+    $r = pg_query_params($db, $sql, array($u));
+    if (!is_bool($r)) {
+      $n = pg_num_rows($r);
+      if ($n != 1) {
+        stc_append_log('session','User '.$u.' has disappeared. session setup fail');
+        stc_close_session();
+        stc_redirect ('/');
+        exit();
+      }
+      pg_free_result($r);
     }
-    pg_free_result($r);
   }
 }
+
 ?>
