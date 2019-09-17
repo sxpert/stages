@@ -10,8 +10,9 @@
 require_once ('db.php');
 require_once('xhtml.php');
 
-define('DEBUG', false);
-
+if (!defined('DEBUG')) {
+  define('DEBUG', false);
+}
 
 /******************************************************************************
  *
