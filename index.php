@@ -145,7 +145,7 @@ votre stage. Toute modification du stage nécessite une nouvelle
 validation.</p>
 
 <p><strong>Les propositions doivent être déposées au plus tôt sur le serveur,
-pour une diffusion à partir du DATE_OUVERTURE dans chacun des
+pour une diffusion à partir du <?php echo $bo_str; ?> dans chacun des
 Masters.</strong> Après cette date, le serveur restera ouvert et accessible,
 mais les sujets ne seront validés par les responsables de formation
 qu’une fois par semaine et l’impact auprès des étudiants sera
