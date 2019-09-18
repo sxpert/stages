@@ -861,7 +861,7 @@ function _append_scripts($scripts=null) {
 function stc_footer($scripts=null) {
   GLOBAL $_stc_scripts;
   stc_add_jquery ();
-  echo "</div></div>\n<div id=\"footer\"> R. Jacquot, G. Mella 2011-2019<br/>\n";
+  echo "</div></div>\n<div id=\"footer\"> R. Jacquot, G. Mella 2011-2019 (<a href=\"changes.php\">Changements</a>)<br/>\n";
   echo "<br/>\n";
   echo "<a href=\"http://www.osug.fr/\">";
   echo "<img src=\"/images/logo-osug-small.jpg\" height=\"48\"/>";
